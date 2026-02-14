@@ -1,0 +1,30 @@
+# Dependencies
+node_modules/
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+
+# Environment
+.env
+.env.local
+*.pem
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+dispatch.db
+*.sqlite
+
+# Temporary
+*.tmp
+.temp/

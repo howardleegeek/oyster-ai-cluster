@@ -1,0 +1,11 @@
+{
+  "nodes": [
+    {"name": "codex-node-1", "ssh_host": "codex-node-1", "slots": 8, "api_mode": "zai", "executor": "glm", "priority": 1, "daemon": true, "socket_path": "/tmp/agent-daemon.sock"},
+    {"name": "glm-node-2", "ssh_host": "glm-node-2", "slots": 8, "api_mode": "zai", "executor": "glm", "priority": 1, "daemon": true, "socket_path": "/tmp/agent-daemon.sock"},
+    {"name": "glm-node-3", "ssh_host": "glm-node-3", "slots": 8, "api_mode": "minimax", "executor": "glm", "priority": 1, "daemon": true, "socket_path": "/tmp/agent-daemon.sock"},
+    {"name": "glm-node-4", "ssh_host": "glm-node-4", "slots": 8, "api_mode": "minimax", "executor": "glm", "priority": 1, "daemon": true, "socket_path": "/tmp/agent-daemon.sock"},
+    {"name": "oci-paid-1", "ssh_host": "oci-paid-1", "slots": 32, "api_mode": "zai", "executor": "glm", "priority": 1, "daemon": true, "socket_path": "/tmp/agent-daemon.sock"},
+    {"name": "mac2", "ssh_host": "howard-mac2", "slots": 5, "api_mode": "zai", "executor": "glm", "priority": 1, "daemon": true, "socket_path": "/tmp/agent-daemon.sock"},
+    {"name": "mac1", "ssh_host": null, "slots": 0, "api_mode": "direct", "executor": "glm", "priority": 99, "daemon": false}
+  ]
+}
