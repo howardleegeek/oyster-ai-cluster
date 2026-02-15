@@ -20,11 +20,30 @@ __pycache__/
 .DS_Store
 Thumbs.db
 
-# Logs
+# Logs & DB
 *.log
 dispatch.db
+pipeline.db
 *.sqlite
+bridge.db
+
+# Secrets
+*.key
+*.pem
+.oyster-keys/
+*.csv
+
+# Reports (generated)
+*-report.md
+*_merge_report.json
+
+# PIDs
+*.pid
 
 # Temporary
 *.tmp
 .temp/
+stop_flags/
+output/
+git-sync-output/
+guardian_alerts/

@@ -1,0 +1,24 @@
+{
+  "interval_seconds": 300,
+  "max_fix_attempts": 2,
+  "backup_retention_days": 7,
+  "log_file": "~/Downloads/dispatch/infra-guardian.log",
+  "alert_dir": "~/Downloads/dispatch/guardian_alerts/",
+  "minimax_timeout": 30,
+  "minimax_fallback": "rules",
+  "checks": {
+    "db_schema": true,
+    "wrapper_version": true,
+    "ssh_connection": true,
+    "node_availability": true,
+    "task_watcher": false,
+    "code_sync": true,
+    "task_execution": true,
+    "param_alignment": true,
+    "task_stuck": false,
+    "process_dead": true,
+    "wrapper_crash": true,
+    "dag_stuck": true,
+    "node_overload": true
+  }
+}

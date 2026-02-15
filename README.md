@@ -70,6 +70,40 @@ dispatch status my-project
 | `dispatch/nodes.json` | 集群节点配置 |
 | `dispatch/projects.json` | 项目配置 (sync 模式、路径) |
 
+## Pipeline (CI/CD 管线)
+
+6 层自动化管线，从分析到部署：
+
+```
+L1 Analyze → L2 Implement → L3 Build → L4 Test → L5 Fix → L6 Deploy
+                                         ├── L4a API QA
+                                         ├── L4b Browser QA
+                                         ├── L4c UI Review
+                                         └── L4d Regression
+```
+
+| 文件 | 用途 |
+|------|------|
+| `pipeline/pipeline.py` | 管线主控 |
+| `pipeline/config.py` | 管线配置 |
+| `pipeline/db.py` | 管线状态 DB |
+| `pipeline/spec_engine.py` | Spec 自动生成引擎 |
+| `pipeline/qa_standards.py` | QA 标准定义 |
+| `pipeline/layers/` | 6 层 + 4 个 L4 子层 |
+| `pipeline/executors/` | 执行后端 (local / opencode / dispatch) |
+
+## Infra (集群运维)
+
+| 文件 | 用途 |
+|------|------|
+| `infra/guardian.py` | 节点健康守护 (自动重启、告警) |
+| `infra/monitor.py` | 集群监控 |
+| `infra/sync-infra.sh` | 批量同步基础设施到所有节点 |
+| `infra/install-agent-daemon.sh` | 安装 agent-daemon 到节点 |
+| `infra/snapshot_dispatch_db.py` | DB 快照备份 |
+| `infra/oci-arm-grab.sh` | OCI ARM 实例抢占脚本 |
+| `infra/*.service` | systemd 服务文件 |
+
 ## 环境变量
 
 dispatch.py 支持通过环境变量自定义路径（默认值适用于 Howard 本地）：
