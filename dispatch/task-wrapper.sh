@@ -50,8 +50,10 @@ if [[ -n "$REPO_URL" ]] && [[ -n "$BRANCH" ]]; then
     GIT_MODE=true
     WORKING_DIR="$REPO_DIR"
 else
+    # SCP mode: Use project root, not output dir
+    # This fixes the "external_directory" permission issue
     GIT_MODE=false
-    WORKING_DIR="$OUTPUT_DIR"
+    WORKING_DIR="$HOME/dispatch/$PROJECT"
 fi
 
 mkdir -p "$OUTPUT_DIR"
@@ -79,7 +81,7 @@ cd "$WORKING_DIR"
 # Goal: prevent watch / hung commands from eating critical path.
 # - TASK_TIMEOUT_SECS: max wall time for the LLM run (claude/codex)
 # - VERIFY_TIMEOUT_SECS: max wall time for wrapper verification tests
-TASK_TIMEOUT_SECS="${TASK_TIMEOUT_SECS:-3600}"
+TASK_TIMEOUT_SECS="${TASK_TIMEOUT_SECS:-7200}"
 TASK_TIMEOUT_KILL_SECS="${TASK_TIMEOUT_KILL_SECS:-30}"
 VERIFY_TIMEOUT_SECS="${VERIFY_TIMEOUT_SECS:-1200}"
 VERIFY_TIMEOUT_KILL_SECS="${VERIFY_TIMEOUT_KILL_SECS:-30}"
@@ -166,14 +168,14 @@ json_escape() {
 # === Rate limit fallback logic ===
 
 is_rate_limit_error() {
-    grep -qiE '429|rate_limit|overloaded|quota|too many requests|capacity' "$LOG_FILE" 2>/dev/null
+    grep -qiE '429|rate_limit|overloaded|quota|too many requests|capacity|permission requested|external_directory|authentication|auth token|invalid api|unauthorized' "$LOG_FILE" 2>/dev/null
 }
 
 get_fallback_mode() {
     case "$1" in
-        zai)     echo "minimax" ;;
         minimax) echo "direct" ;;
-        direct)  echo "zai" ;;
+        direct)  echo "minimax" ;;
+        zai)     echo "minimax" ;;
         *)       echo "" ;;
     esac
 }
@@ -241,20 +243,27 @@ while true; do
         break
     fi
 
-    # Check if rate limit
+    # Check if rate limit or API error (including permission denied)
     if is_rate_limit_error; then
         NEXT_MODE=$(get_fallback_mode "$CURRENT_MODE")
         if [[ -z "$NEXT_MODE" ]] || [[ $ATTEMPT -gt $MAX_RETRIES ]]; then
             echo "[$(get_timestamp)] FALLBACK EXHAUSTED after $ATTEMPT attempts" | tee -a "$LOG_FILE"
             break
         fi
-        echo "[$(get_timestamp)] RATE LIMIT on $CURRENT_MODE, fallback to $NEXT_MODE (wait 30s)" | tee -a "$LOG_FILE"
+        echo "[$(get_timestamp)] API ERROR on $CURRENT_MODE, fallback to $NEXT_MODE (wait 30s)" | tee -a "$LOG_FILE"
         sleep 30
         CURRENT_MODE="$NEXT_MODE"
-    else
-        # Non-rate-limit error, don't retry
-        echo "[$(get_timestamp)] FAILED (exit=$EXIT_CODE, non-rate-limit)" | tee -a "$LOG_FILE"
-        break
+    elif [[ $EXIT_CODE -ne 0 ]]; then
+        # Other errors - try fallback once
+        NEXT_MODE=$(get_fallback_mode "$CURRENT_MODE")
+        if [[ -n "$NEXT_MODE" ]] && [[ $ATTEMPT -eq 1 ]]; then
+            echo "[$(get_timestamp)] ERROR (exit=$EXIT_CODE), trying fallback to $NEXT_MODE (wait 10s)" | tee -a "$LOG_FILE"
+            sleep 10
+            CURRENT_MODE="$NEXT_MODE"
+        else
+            echo "[$(get_timestamp)] FAILED (exit=$EXIT_CODE, attempt=$ATTEMPT)" | tee -a "$LOG_FILE"
+            break
+        fi
     fi
 done
 set -e

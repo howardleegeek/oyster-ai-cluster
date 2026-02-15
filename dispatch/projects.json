@@ -1,0 +1,140 @@
+{
+  "clawmarketing": {
+    "sync_mode": "scp",
+    "repo_local": "~/Downloads/clawmarketing",
+    "specs_dir": "~/Downloads/specs/clawmarketing"
+  },
+  "gem-platform": {
+    "repo_url": "https://github.com/The-world-is-your-Oyster/gem-platform.git",
+    "repo_local": "~/Downloads/gem-platform",
+    "sync_mode": "git",
+    "main_branch": "main"
+  },
+  "dispatch-test": {
+    "sync_mode": "scp",
+    "specs_dir": "~/Downloads/specs/dispatch-test"
+  },
+  "clawphones": {
+    "sync_mode": "scp",
+    "repo_local": "~/.openclaw/workspace",
+    "specs_dir": "~/Downloads/specs/clawphones"
+  },
+  "oysterworld": {
+    "sync_mode": "scp",
+    "repo_local": "~/Downloads/claw-nation",
+    "specs_dir": "~/Downloads/specs/oysterworld"
+  },
+  "clawvision": {
+    "sync_mode": "scp",
+    "repo_local": "~/Downloads/clawvision-org",
+    "specs_dir": "~/Downloads/specs/clawvision"
+  },
+  "twitter-poster": {
+    "sync_mode": "scp",
+    "repo_local": "~/Downloads/twitter-poster",
+    "specs_dir": "~/Downloads/specs/twitter-poster"
+  },
+  "discord-admin": {
+    "sync_mode": "scp",
+    "repo_local": "~/Downloads/discord-admin",
+    "specs_dir": "~/Downloads/specs/discord-admin"
+  },
+  "article-pipeline": {
+    "sync_mode": "scp",
+    "repo_local": "~/Downloads/article_pipeline",
+    "specs_dir": "~/Downloads/specs/article-pipeline"
+  },
+  "lumina": {
+    "sync_mode": "scp",
+    "repo_local": "~/Downloads/lumina-source-code",
+    "specs_dir": "~/Downloads/specs/lumina"
+  },
+  "mcp-servers": {
+    "sync_mode": "scp",
+    "repo_local": "~/Downloads/mcp-servers",
+    "specs_dir": "~/Downloads/specs/mcp-servers"
+  },
+  "session-dashboard": {
+    "sync_mode": "scp",
+    "repo_local": "~/Downloads/session-dashboard",
+    "specs_dir": "~/Downloads/specs/session-dashboard"
+  },
+  "openclaw-proxy": {
+    "sync_mode": "scp",
+    "repo_local": "~/Downloads/openclaw-proxy",
+    "specs_dir": "~/Downloads/specs/openclaw-proxy"
+  },
+  "mcp-local": {
+    "sync_mode": "scp",
+    "repo_local": "~/Downloads/mcp-local",
+    "specs_dir": "~/Downloads/specs/mcp-local"
+  },
+  "browser-run": {
+    "sync_mode": "scp",
+    "repo_local": "~/Downloads/browser-run",
+    "specs_dir": "~/Downloads/specs/browser-run"
+  },
+  "infrastructure": {
+    "sync_mode": "scp",
+    "repo_local": "~/Downloads/infrastructure",
+    "specs_dir": "~/Downloads/specs/infrastructure"
+  },
+  "pipeline": {
+    "sync_mode": "scp",
+    "repo_local": "~/Downloads/dispatch",
+    "specs_dir": "~/Downloads/specs/pipeline"
+  },
+  "pipeline-v2": {
+    "sync_mode": "scp",
+    "repo_local": "~/Downloads/dispatch/pipeline",
+    "specs_dir": "~/Downloads/specs/pipeline-v2"
+  },
+  "bluesky-poster": {
+    "sync_mode": "scp",
+    "repo_local": "~/Downloads/bluesky-poster",
+    "specs_dir": "~/Downloads/specs/bluesky-poster"
+  },
+  "worldglasses-web": {
+    "sync_mode": "git",
+    "repo_local": "~/Downloads/worldglasses-web",
+    "repo_url": "https://github.com/clawglasses/worldglasses-web.git",
+    "main_branch": "main"
+  },
+  "backend": {
+    "sync_mode": "scp",
+    "repo_local": "~/Downloads/backend",
+    "specs_dir": "~/Downloads/specs/backend"
+  },
+  "frontend": {
+    "sync_mode": "scp",
+    "repo_local": "~/Downloads/frontend",
+    "specs_dir": "~/Downloads/specs/frontend"
+  },
+  "openclaw-mission-control": {
+    "sync_mode": "git",
+    "repo_local": "~/Downloads/openclaw-mission-control",
+    "repo_url": "https://github.com/openclaw/openclaw-mission-control.git",
+    "main_branch": "main"
+  },
+  "oyster-automation": {
+    "sync_mode": "git",
+    "repo_local": "~/Downloads/oyster-automation",
+    "repo_url": "https://github.com/oyster-labs/oyster-automation.git",
+    "main_branch": "main"
+  },
+  "oyster-org": {
+    "sync_mode": "scp",
+    "repo_local": "~/Downloads/oyster-org",
+    "specs_dir": "~/Downloads/specs/oyster-org"
+  },
+  "specs-generator": {
+    "sync_mode": "scp",
+    "repo_local": "~/Downloads/specs-generator",
+    "specs_dir": "~/Downloads/specs/specs-generator"
+  },
+  "agent-sdk": {
+    "sync_mode": "scp",
+    "repo_local": "~/Downloads/agent-sdk",
+    "specs_dir": "~/Downloads/specs/agent-sdk"
+  }
+}
