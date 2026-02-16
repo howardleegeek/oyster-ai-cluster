@@ -21,91 +21,14 @@ import os
 import signal
 import sys
 import yaml
-import fcntl
 from pathlib import Path
 from datetime import datetime, timedelta
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from contextlib import contextmanager
 from typing import Optional, Dict, List, Any
 
-# === Single Instance Lock ===
-# Prevent multiple dispatch processes from running simultaneously
-LOCK_FILE = "/tmp/dispatch.lock"
-lock_fd = None
-
-
-def acquire_lock():
-    """Acquire exclusive lock to prevent multiple dispatch instances"""
-    global lock_fd
-    lock_fd = open(LOCK_FILE, "w")
-    try:
-        fcntl.flock(lock_fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
-        # Write PID to lock file
-        lock_fd.write(str(os.getpid()))
-        lock_fd.flush()
-        return True
-    except BlockingIOError:
-        # Another instance is running
-        print(f"ERROR: Another dispatch instance is already running!")
-        print(f"Lock file: {LOCK_FILE}")
-        print(f"Run 'pkill -f dispatch.py start' to kill old instances")
-        lock_fd.close()
-        lock_fd = None
-        sys.exit(1)
-
-
-def release_lock():
-    """Release the lock"""
-    global lock_fd
-    if lock_fd:
-        try:
-            fcntl.flock(lock_fd, fcntl.LOCK_UN)
-            lock_fd.close()
-        except:
-            pass
-        lock_fd = None
-
-
-# Register cleanup on exit
-import atexit
-
-atexit.register(release_lock)
-
 # Global flag for graceful shutdown
 RUNNING = True
-
-
-def get_dispatch_dir():
-    """Get dispatch base directory. Respects DISPATCH_HOME env var.
-    Default: ~/Downloads/dispatch (Howard's layout)
-    Team: ~/dispatch (set DISPATCH_HOME=~/dispatch)
-    """
-    env = os.environ.get("DISPATCH_HOME")
-    if env:
-        return Path(env).expanduser()
-    return Path.home() / "Downloads" / "dispatch"
-
-
-def get_specs_dir():
-    """Get specs directory. Respects DISPATCH_SPECS env var.
-    Default: ~/Downloads/specs
-    Team: ~/specs (set DISPATCH_SPECS=~/specs)
-    """
-    env = os.environ.get("DISPATCH_SPECS")
-    if env:
-        return Path(env).expanduser()
-    return Path.home() / "Downloads" / "specs"
-
-
-def get_projects_dir():
-    """Get projects root directory. Respects DISPATCH_PROJECTS env var.
-    Default: ~/Downloads
-    Team: ~/projects (set DISPATCH_PROJECTS=~/projects)
-    """
-    env = os.environ.get("DISPATCH_PROJECTS")
-    if env:
-        return Path(env).expanduser()
-    return Path.home() / "Downloads"
 
 
 def log(msg):
@@ -195,11 +118,6 @@ def init_database(db_path):
             conn.execute("ALTER TABLE tasks ADD COLUMN collected_at TEXT")
         except sqlite3.OperationalError:
             pass  # column already exists
-        # Migration: add submitter column for team dispatch
-        try:
-            conn.execute("ALTER TABLE tasks ADD COLUMN submitter TEXT DEFAULT 'howard'")
-        except sqlite3.OperationalError:
-            pass  # column already exists
         conn.commit()
 
 
@@ -248,7 +166,8 @@ def parse_spec_metadata(spec_path):
 
 def scan_specs(project, specs_dir):
     """Scan spec files and return list of tasks"""
-    specs_path = Path(specs_dir) / project
+    # specs_dir already includes the project path, don't add project again
+    specs_path = Path(specs_dir)
     if not specs_path.exists():
         log(f"ERROR: Specs directory not found: {specs_path}")
         return []
@@ -265,6 +184,15 @@ def scan_specs(project, specs_dir):
         task_id = spec_file.stem
         spec_hash = compute_file_hash(spec_file)
         meta, _ = parse_spec_metadata(spec_file)
+
+        # 校验 modifies 必填（Best Practice: 文件锁机制基础）
+        modifies = meta.get("modifies", [])
+        if not modifies:
+            log(
+                f"ERROR: Spec {spec_file} has empty modifies - must list files to modify"
+            )
+            continue
+
         tasks.append(
             {
                 "id": meta.get("task_id", task_id),
@@ -272,7 +200,7 @@ def scan_specs(project, specs_dir):
                 "spec_file": str(spec_file),
                 "spec_hash": spec_hash,
                 "depends_on": json.dumps(meta.get("depends_on", [])),
-                "modifies": json.dumps(meta.get("modifies", [])),
+                "modifies": json.dumps(modifies),
                 "exclusive": 1 if meta.get("exclusive", False) else 0,
                 "priority": meta.get("priority", 2),
                 "executor": meta.get("executor", "glm"),
@@ -507,7 +435,12 @@ def collect_git(db_path, project):
 
 
 def collect_scp_outputs(db_path, project):
-    """Collect output files from completed tasks on remote nodes via SCP"""
+    """Collect output files from completed tasks on remote nodes via SCP
+
+    Collects:
+    - Task logs (task.log, status.json) from task directory
+    - Code files from project directory (rsync)
+    """
     from concurrent.futures import ThreadPoolExecutor, as_completed
 
     nodes_file = Path(__file__).parent / "nodes.json"
@@ -537,45 +470,20 @@ def collect_scp_outputs(db_path, project):
         ssh_host = node["ssh_host"]
 
         # Remote task directory
-        remote_dir = f"~/dispatch/{project}/tasks/{task_id}"
+        remote_task_dir = f"~/dispatch/{project}/tasks/{task_id}"
 
-        # Expand ~ to actual home directory for path matching
-        # SSH will expand ~, but we need the actual path for replacement
-        remote_home_prefix = f"/home/ubuntu/"  # Assume ubuntu user
-        remote_dir_expanded = remote_dir.replace("~", remote_home_prefix)
+        # Remote project directory (where code files are)
+        remote_project_dir = f"~/dispatch/{project}"
 
         # Local directory
         local_dir = Path(__file__).parent / "output" / project / task_id
         local_dir.mkdir(parents=True, exist_ok=True)
 
-        # Files to collect: logs + status + any Python files created by agent
+        # 1. Collect task log files
         files_to_collect = ["task.log", "result.json", "status.json"]
 
-        # Also collect any Python files created in the task's output directory
-        # The agent typically writes files to dispatch/pipeline/*.py or similar paths
-        scp_list_cmd = f"ssh {ssh_host} 'find {remote_dir}/output -name \"*.py\" -type f 2>/dev/null' 2>/dev/null"
-        list_result = subprocess.run(
-            scp_list_cmd, shell=True, capture_output=True, text=True, timeout=30
-        )
-
-        python_files = []
-        if list_result.returncode == 0 and list_result.stdout.strip():
-            # Parse full paths and extract relative paths from output dir
-            for full_path in list_result.stdout.strip().split("\n"):
-                if full_path.strip():
-                    # Extract relative path from the output directory
-                    # The remote path is like /home/ubuntu/dispatch/.../output/dispatch/pipeline/qa_standards.py
-                    # We want just dispatch/pipeline/qa_standards.py
-                    remote_output_dir = f"{remote_dir_expanded}/output/"
-                    if remote_output_dir in full_path.strip():
-                        rel_path = full_path.strip().replace(remote_output_dir, "")
-                    else:
-                        # Fallback: just use the filename
-                        rel_path = full_path.strip().split("/")[-1]
-                    python_files.append((full_path.strip(), rel_path))
-
         for filename in files_to_collect:
-            remote_path = f"{remote_dir}/{filename}"
+            remote_path = f"{remote_task_dir}/{filename}"
             local_path = local_dir / filename
 
             # Try to SCP each file
@@ -585,19 +493,38 @@ def collect_scp_outputs(db_path, project):
             if result.returncode == 0:
                 log(f"Collected {filename} for {task_id} from {node_name}")
 
-        # Collect Python files created by agent, preserving directory structure
-        for remote_py_path, rel_path in python_files:
-            try:
-                local_py = local_dir / rel_path
-                local_py.parent.mkdir(parents=True, exist_ok=True)
-                scp_py_cmd = f"scp -o ConnectTimeout=10 {ssh_host}:{remote_py_path} {local_py} 2>/dev/null"
-                py_result = subprocess.run(scp_py_cmd, shell=True, capture_output=True)
-                if py_result.returncode == 0:
-                    log(
-                        f"Collected Python file {rel_path} for {task_id} from {node_name}"
-                    )
-            except Exception as e:
-                log(f"Error collecting Python file {rel_path}: {e}")
+        # 2. Sync code files from project directory using rsync
+        # This catches all code created by the agent in the project root
+        local_project_dir = Path(__file__).parent / "output" / project / task_id
+        rsync_cmd = (
+            f"rsync -az --exclude='__pycache__' --exclude='.git' --exclude='*.pyc' "
+            f"--exclude='node_modules' --exclude='.venv' --exclude='.pytest_cache' "
+            f"-e 'ssh -o ConnectTimeout=10' {ssh_host}:{remote_project_dir}/ {local_project_dir}/"
+        )
+        rsync_result = subprocess.run(rsync_cmd, shell=True, capture_output=True)
+
+        if rsync_result.returncode == 0:
+            log(f"Synced code files for {task_id} from {node_name}")
+        else:
+            # Fallback: try scp for common file types if rsync fails
+            log(f"Rsync failed for {task_id}, trying scp fallback")
+            common_exts = [
+                "*.py",
+                "*.js",
+                "*.ts",
+                "*.tsx",
+                "*.json",
+                "*.yaml",
+                "*.yml",
+                "*.md",
+                "*.sh",
+            ]
+            for ext in common_exts:
+                scp_cmd = (
+                    f"scp -o ConnectTimeout=10 -r {ssh_host}:'{remote_project_dir}/{ext}' "
+                    f"{local_project_dir}/ 2>/dev/null"
+                )
+                subprocess.run(scp_cmd, shell=True, capture_output=True)
 
         return task_id
 
@@ -620,56 +547,8 @@ def collect_scp_outputs(db_path, project):
             except Exception as e:
                 log(f"Error collecting task: {e}")
 
-    # After collecting, copy Python files to actual project directory
-    if collected:
-        _copy_to_project_dir(project, collected)
-
     log(f"Collected {len(collected)} task outputs")
     return collected
-
-
-def _copy_to_project_dir(project: str, task_ids: list):
-    """Copy collected Python files to the actual project directory"""
-    import shutil
-
-    output_dir = Path(__file__).parent / "output" / project
-    project_config = load_project_config(project)
-
-    # Determine actual project directory
-    if project_config.get("sync_mode") == "git":
-        actual_project_dir = Path(project_config["repo_local"]).expanduser()
-    else:
-        actual_project_dir = get_projects_dir() / project
-
-    if not actual_project_dir.exists():
-        log(f"Project directory not found: {actual_project_dir}")
-        return
-
-    # Copy Python files from each collected task
-    for task_id in task_ids:
-        task_output_dir = output_dir / task_id
-        if not task_output_dir.exists():
-            continue
-
-        # Find all Python files in task output
-        for py_file in task_output_dir.rglob("*.py"):
-            # Calculate relative path from task output dir
-            rel_path = py_file.relative_to(task_output_dir)
-
-            # Target path in project directory
-            # Skip if it's in a test directory
-            if "test" in rel_path.parts:
-                continue
-
-            target_path = actual_project_dir / rel_path
-            target_path.parent.mkdir(parents=True, exist_ok=True)
-
-            # Copy file
-            try:
-                shutil.copy2(py_file, target_path)
-                log(f"Copied {rel_path} to {actual_project_dir}")
-            except Exception as e:
-                log(f"Failed to copy {rel_path}: {e}")
 
 
 def detect_project_type(project_dir: Path) -> str:
@@ -841,8 +720,8 @@ def build_enriched_spec(project, task_id, spec_content, node_name, db_path):
 
     # Layer 1: Project CLAUDE.md
     for p in [
-        get_projects_dir() / project / "CLAUDE.md",
-        get_specs_dir() / project / "CLAUDE.md",
+        Path.home() / "Downloads" / project / "CLAUDE.md",
+        Path.home() / "Downloads" / "specs" / project / "CLAUDE.md",
     ]:
         if p.exists():
             parts.append("## Project Instructions\n" + p.read_text()[:3000])
@@ -873,7 +752,7 @@ def build_enriched_spec(project, task_id, spec_content, node_name, db_path):
             pass
 
     # Layer 3: Intelligent SHARED_CONTEXT (extract relevant sections by keywords)
-    shared_path = get_specs_dir() / project / "SHARED_CONTEXT.md"
+    shared_path = Path.home() / "Downloads" / "specs" / project / "SHARED_CONTEXT.md"
     if shared_path.exists():
         text = shared_path.read_text()
         # Split by ## headings
@@ -1007,56 +886,11 @@ def check_remote_task_status(node, project, task_id):
     if status_out:
         try:
             status_data = json.loads(status_out)
-
-            # Even if status is running, check heartbeat to detect stuck tasks
-            if status_data.get("status") == "running":
-                heartbeat_cmd = (
-                    f"cat ~/dispatch/{project}/tasks/{task_id}/heartbeat 2>/dev/null"
-                )
-                heartbeat_out, heartbeat_err = run_ssh(node["ssh_host"], heartbeat_cmd)
-
-                if heartbeat_out:
-                    try:
-                        heartbeat_time = datetime.fromisoformat(heartbeat_out.strip())
-                        now = datetime.now()
-                        if (now - heartbeat_time).total_seconds() > 120:
-                            # Check if process still exists - use PID file
-                            pid_cmd = f"cat ~/dispatch/{project}/tasks/{task_id}/pid 2>/dev/null"
-                            pid_out, _ = run_ssh(node["ssh_host"], pid_cmd)
-                            if pid_out and pid_out.strip():
-                                pid = pid_out.strip()
-                                # Check if PID is alive AND is actually running our task
-                                check_pid_cmd = f"ps -p {pid} -o pid,ppid,cmd --no-headers 2>/dev/null | head -1"
-                                proc_out, _ = run_ssh(node["ssh_host"], check_pid_cmd)
-                                if proc_out and "task-wrapper" in proc_out:
-                                    # Process is alive and running our task - give it more time
-                                    pass
-                                elif proc_out:
-                                    # Process exists but not our task - it's a zombie
-                                    return {
-                                        "status": "failed",
-                                        "error": "Process zombie (heartbeat timeout)",
-                                    }, None
-                                else:
-                                    # Process is dead
-                                    return {
-                                        "status": "failed",
-                                        "error": "Process died (heartbeat timeout)",
-                                    }, None
-                            else:
-                                # No PID file - task might have been orphaned
-                                return {
-                                    "status": "failed",
-                                    "error": "No PID (heartbeat stale)",
-                                }, None
-                    except Exception:
-                        pass
-
             return status_data, None
         except json.JSONDecodeError:
             return None, "Invalid status JSON"
 
-    # Fallback: no status.json, check heartbeat only
+    # Read heartbeat
     heartbeat_cmd = f"cat ~/dispatch/{project}/tasks/{task_id}/heartbeat 2>/dev/null"
     heartbeat_out, heartbeat_err = run_ssh(node["ssh_host"], heartbeat_cmd)
 
@@ -1178,7 +1012,6 @@ def check_node_tasks(db_path, node, project):
                 updates.append(
                     {
                         "id": task["id"],
-                        "project": task["project"],  # Include project for validation
                         "status": "completed",
                         "completed_at": completed_at,
                         "duration": duration,
@@ -1211,10 +1044,8 @@ def apply_task_updates(db_path, updates, project):
     validation_results = {}
     for update in updates:
         if update["status"] == "completed" and "node" in update:
-            # Use project from update (not the dispatch's project)
-            task_project = update.get("project", project)
             validation_failed = validate_completed_task(
-                update["node"], task_project, update["id"], db_path
+                update["node"], project, update["id"], db_path
             )
             if validation_failed:
                 log(f"Task {update['id']} validation failed, created fix task")
@@ -1222,22 +1053,18 @@ def apply_task_updates(db_path, updates, project):
 
     with get_db(db_path) as conn:
         for update in updates:
-            # Use project from update to filter correctly
-            task_project = update.get("project", project)
-
             if update["status"] == "completed":
                 conn.execute(
                     """
                     UPDATE tasks
                     SET status = ?, completed_at = ?, duration_seconds = ?
-                    WHERE id = ? AND project = ?
+                    WHERE id = ?
                 """,
                     (
                         update["status"],
                         update["completed_at"],
                         update["duration"],
                         update["id"],
-                        task_project,
                     ),
                 )
                 release_file_locks(db_path, update["id"], conn=conn)
@@ -1246,14 +1073,13 @@ def apply_task_updates(db_path, updates, project):
                     """
                     UPDATE tasks
                     SET status = ?, completed_at = ?, error = ?
-                    WHERE id = ? AND project = ?
+                    WHERE id = ?
                 """,
                     (
                         update["status"],
                         update["completed_at"],
                         update["error"],
                         update["id"],
-                        task_project,
                     ),
                 )
                 release_file_locks(db_path, update["id"], conn=conn)
@@ -1299,51 +1125,6 @@ def update_node_running_counts(db_path):
             )
 
         conn.commit()
-
-
-def cleanup_ghost_tasks(db_path):
-    """Clean up tasks that are marked 'running' but don't exist on remote nodes
-    This fixes the issue where SSH background command returns success but task doesn't actually start
-    """
-    import subprocess
-
-    with get_db(db_path) as conn:
-        # Get all running tasks
-        running_tasks = conn.execute(
-            "SELECT id, project, node FROM tasks WHERE status = 'running'"
-        ).fetchall()
-
-    nodes = load_nodes_config(get_dispatch_dir() / "nodes.json")
-    node_hosts = {n["name"]: n["ssh_host"] for n in nodes if n.get("ssh_host")}
-
-    ghost_tasks = []
-    for task in running_tasks:
-        task_id, project, node_name = task["id"], task["project"], task["node"]
-        if not node_name or node_name not in node_hosts:
-            continue
-
-        ssh_host = node_hosts[node_name]
-        # Check if task directory exists on remote
-        check_cmd = f"test -d ~/dispatch/{project}/tasks/{task_id} && echo exists || echo missing"
-        try:
-            result = subprocess.run(
-                ["ssh", ssh_host, check_cmd], capture_output=True, text=True, timeout=10
-            )
-            if "missing" in result.stdout or result.returncode != 0:
-                ghost_tasks.append((task_id, project, node_name))
-        except Exception:
-            pass
-
-    # Reset ghost tasks
-    if ghost_tasks:
-        with get_db(db_path) as conn:
-            for task_id, project, node_name in ghost_tasks:
-                conn.execute(
-                    "UPDATE tasks SET status='pending', node=NULL, error='ghost_task_reset' WHERE id=? AND project=?",
-                    (task_id, project),
-                )
-            conn.commit()
-        log(f"Cleaned up {len(ghost_tasks)} ghost tasks")
 
 
 def deploy_task_to_node(db_path, node, project, task):
@@ -1448,53 +1229,15 @@ def deploy_task_to_node(db_path, node, project, task):
     # Remote execution
 
     # ====== P0 FIX: RSYNC CODE WITH RETRY ======
-    # Load project config
-    project_config = load_project_config(project)
-    project_local_path = get_projects_dir() / project
+    # Check if project code exists on remote, if not, rsync
+    project_local_path = Path.home() / "Downloads" / project
     project_remote_path = f"~/dispatch/{project}"
 
     # Check if remote project exists
     check_remote_cmd = f"test -d {project_remote_path} && echo exists || echo missing"
     remote_status, _ = run_ssh(node["ssh_host"], check_remote_cmd)
 
-    # Check if local specs are newer than remote (force sync if specs changed)
-    should_sync = False
-
-    # Get local spec files
-    local_specs_dir = Path(
-        project_config.get("specs_dir", f"~/Downloads/specs/{project}")
-    ).expanduser()
-    local_specs = (
-        list(local_specs_dir.glob("S*.md")) if local_specs_dir.exists() else []
-    )
-
-    # Get remote spec files
-    remote_check_cmd = f"ls -1 {project_remote_path}/specs/S*.md 2>/dev/null | wc -l"
-    remote_specs_count, _ = run_ssh(node["ssh_host"], remote_check_cmd)
-
-    # Force sync if:
-    # 1. Remote is missing, OR
-    # 2. Number of spec files differs, OR
-    # 3. Force sync flag is set (task starts with S0 or first run)
-    try:
-        remote_count = int((remote_specs_count or "").strip() or 0)
-    except:
-        remote_count = 0
-
     if "missing" in str(remote_status) or remote_status == "":
-        should_sync = True
-        log(f"Remote dir missing - will sync")
-    elif len(local_specs) != remote_count:
-        should_sync = True
-        log(
-            f"Spec count differs (local: {len(local_specs)}, remote: {remote_count}) - will sync"
-        )
-    elif task_id.startswith("S0") or task_id.startswith("S01") or "-":
-        # New task pattern suggests first run or new features
-        should_sync = True
-        log(f"New task pattern detected - will sync")
-
-    if should_sync:
         log(f"Syncing {project} code to {node['name']}...")
 
         # Retry rsync up to 3 times
@@ -1624,48 +1367,60 @@ def deploy_task_to_node(db_path, node, project, task):
     remote_status_path = f"~/dispatch/{project}/tasks/{task_id}/status.json"
     api_mode = node.get("api_mode", "direct")
 
-    # NOTE: Don't write initial status.json here - task-wrapper.sh will do it
+    # Write initial status.json (for hybrid mode / task-watcher)
+    status_json = json.dumps(
+        {
+            "status": "pending",
+            "task_id": task_id,
+            "project": project,
+            "node": node["name"],
+            "created_at": datetime.now().isoformat(),
+        }
+    )
 
-    # BUG FIX: Disable hybrid mode (task-watcher.py not deployed on nodes)
+    # Create temp status file
+    import tempfile
+
+    with tempfile.NamedTemporaryFile(
+        mode="w", suffix=".json", delete=False
+    ) as tmp_status:
+        tmp_status.write(status_json)
+        tmp_status_path = tmp_status.name
+
+    try:
+        # SCP status.json first
+        ok, err = scp_to_remote(node["ssh_host"], tmp_status_path, remote_status_path)
+        if not ok:
+            log(f"Warning: SCP status failed for {task_id}: {err}")
+    finally:
+        Path(tmp_status_path).unlink()
+
+    # Check if task-watcher is running on node (hybrid mode)
+    check_watcher_cmd = "pgrep -f '[t]ask-watcher.py' || echo not_running"
+    watcher_status, _ = run_ssh(node["ssh_host"], check_watcher_cmd)
+
+    if watcher_status and "not_running" not in watcher_status:
+        # Hybrid mode: task-watcher will pick up the task
+        log(f"Hybrid mode: task-watcher will execute {task_id} on {node['name']}")
+        # Just update DB as pending, watcher will update later
+        with get_db(db_path) as conn:
+            conn.execute(
+                "UPDATE tasks SET status = 'running', node = ?, started_at = ? WHERE id = ?",
+                (node["name"], datetime.now().isoformat(), task_id),
+            )
+            conn.commit()
+        return True
+
     # Original mode: SSH start wrapper directly
-    # The hybrid mode code below was causing tasks to be marked "running"
-    # but never actually executed because task-watcher.py is not installed
     if sync_mode == "git":
         start_cmd = f"API_MODE={api_mode} nohup bash ~/dispatch/task-wrapper.sh {project} {task_id} {remote_spec_path} {repo_url} {git_branch} > ~/dispatch/{project}/tasks/{task_id}/wrapper.log 2>&1 & echo $!"
     else:
         start_cmd = f"API_MODE={api_mode} nohup bash ~/dispatch/task-wrapper.sh {project} {task_id} {remote_spec_path} > ~/dispatch/{project}/tasks/{task_id}/wrapper.log 2>&1 & echo $!"
-
     pid_out, err = run_ssh(node["ssh_host"], start_cmd)
 
     if err:
         log(f"ERROR: Failed to start task {task_id}: {err}")
         return False
-
-    # BUG FIX: Verify task actually started by checking status.json
-    # The SSH background command may return success but task might not actually run
-    log(f"Verifying task {task_id} started...")
-    time.sleep(5)  # Give task time to write initial status
-
-    # Check if status.json exists and is "running"
-    verify_cmd = f"cat ~/dispatch/{project}/tasks/{task_id}/status.json 2>/dev/null"
-    verify_out, verify_err = run_ssh(node["ssh_host"], verify_cmd, timeout=10)
-
-    if not verify_out:
-        log(f"ERROR: Task {task_id} failed to start - no status.json found")
-        return False
-
-    try:
-        verify_data = json.loads(verify_out)
-        if verify_data.get("status") != "running":
-            log(
-                f"ERROR: Task {task_id} status is {verify_data.get('status')}, expected 'running'"
-            )
-            return False
-    except json.JSONDecodeError:
-        log(f"ERROR: Task {task_id} has invalid status.json")
-        return False
-
-    log(f"Task {task_id} verified running")
 
     # Update database
     with get_db(db_path) as conn:
@@ -1817,13 +1572,8 @@ def schedule_tasks(db_path, project):
         ]
 
     if not pending_tasks:
-        log(f"No pending tasks found for project {project}")
         return 0
 
-    log(
-        f"Found {len(nodes)} nodes with {sum(n['slots'] - n['running_count'] for n in nodes)} total slots"
-    )
-    log(f"Found {len(pending_tasks)} pending tasks for {project}")
     scheduled = 0
     for task in pending_tasks:
         if not nodes:
@@ -1839,16 +1589,7 @@ def schedule_tasks(db_path, project):
                 ).fetchall()
                 all_done = all(d["status"] == "completed" for d in dep_statuses)
                 if not all_done:
-                    # Check for failed dependencies
-                    any_failed = any(d["status"] == "failed" for d in dep_statuses)
-                    if any_failed:
-                        log(f"Task {task['id']}: dependency failed, marking as failed")
-                        with get_db(db_path) as conn2:
-                            conn2.execute(
-                                "UPDATE tasks SET status='failed', error='dependency_failed' WHERE id=?",
-                                (task["id"],),
-                            )
-                            conn2.commit()
+                    # Don't auto-fail on ghost/timeout - allow retry
                     continue  # Skip - dependencies not met
 
         # DAG: Check file conflicts (Best Practice: 所有任务都检查 modifies 冲突)
@@ -1960,46 +1701,25 @@ def schedule_tasks(db_path, project):
 
 
 def check_all_nodes(db_path, project):
-    """Check status of all running tasks on all nodes (not just current project)"""
-    # IMPORTANT: Check ALL projects on nodes, not just the current project
-    # This is needed because multiple projects can run on the same nodes
+    """Check status of all nodes in parallel"""
     with get_db(db_path) as conn:
         nodes = conn.execute("SELECT * FROM nodes WHERE enabled = 1").fetchall()
-        # Get all running tasks across all projects
-        all_running = conn.execute(
-            "SELECT id, project, node, status FROM tasks WHERE status = 'running'"
-        ).fetchall()
 
-        # Group by project
-        tasks_by_project = {}
-        for task in all_running:
-            proj = task["project"]
-            if proj not in tasks_by_project:
-                tasks_by_project[proj] = []
-            tasks_by_project[proj].append(dict(task))
-
-    # Check each project's tasks on each node
     all_updates = []
 
-    with ThreadPoolExecutor(max_workers=min(len(nodes) * 3, 20)) as executor:
-        futures = []
-        for node in nodes:
-            node_dict = dict(node)
-            # Check all projects on this node
-            for proj, tasks in tasks_by_project.items():
-                # Only check tasks on this node
-                node_tasks = [t for t in tasks if t.get("node") == node["name"]]
-                if node_tasks:
-                    futures.append(
-                        executor.submit(check_node_tasks, db_path, node_dict, proj)
-                    )
+    with ThreadPoolExecutor(max_workers=len(nodes)) as executor:
+        future_to_node = {
+            executor.submit(check_node_tasks, db_path, dict(node), project): node
+            for node in nodes
+        }
 
-        for future in as_completed(futures):
+        for future in as_completed(future_to_node):
+            node = future_to_node[future]
             try:
                 updates = future.result()
                 all_updates.extend(updates)
             except Exception as e:
-                log(f"Error checking node tasks: {e}")
+                log(f"Error checking node {node['name']}: {e}")
 
     if all_updates:
         apply_task_updates(db_path, all_updates, project)
@@ -2007,17 +1727,13 @@ def check_all_nodes(db_path, project):
     update_node_running_counts(db_path)
 
 
-def refresh_stuck_tasks(db_path, project, timeout_minutes=5):
+def refresh_stuck_tasks(db_path, project, timeout_minutes=15):
     """Auto-refresh tasks that are stuck (running too long without status update)"""
-    # Get max attempts from project config
-    project_config = load_project_config(project)
-    max_attempts = project_config.get("max_attempts", 3)
-
     with get_db(db_path) as conn:
         # Find tasks running longer than timeout
         stuck_tasks = conn.execute(
             """
-            SELECT id, node, started_at, attempt FROM tasks
+            SELECT id, node, started_at FROM tasks
             WHERE project = ? AND status = 'running'
             AND started_at < datetime('now', '-' || ? || ' minutes')
         """,
@@ -2028,27 +1744,26 @@ def refresh_stuck_tasks(db_path, project, timeout_minutes=5):
         for task in stuck_tasks:
             task_id = task["id"]
             node_name = task["node"]
-            attempt = task["attempt"] if task["attempt"] else 1
 
             # Check if task process is still alive on remote
             if node_name:
                 # Try to get status.json from remote
-                ssh_host = next(
-                    (
-                        n["ssh_host"]
-                        for n in load_nodes_config(get_dispatch_dir() / "nodes.json")
-                        if n["name"] == node_name
-                    ),
-                    None,
-                )
-
-                if not ssh_host:
-                    continue
-
                 status_cmd = (
                     f"cat ~/dispatch/{project}/tasks/{task_id}/status.json 2>/dev/null"
                 )
-                status_out, _ = run_ssh(ssh_host, status_cmd)
+                status_out, _ = run_ssh(
+                    next(
+                        (
+                            n["ssh_host"]
+                            for n in load_nodes_config(
+                                Path.home() / "Downloads" / "dispatch" / "nodes.json"
+                            )
+                            if n["name"] == node_name
+                        ),
+                        None,
+                    ),
+                    status_cmd,
+                )
 
                 if status_out:
                     try:
@@ -2056,75 +1771,41 @@ def refresh_stuck_tasks(db_path, project, timeout_minutes=5):
                         # If status is still running but task is old, check heartbeat
                         if status_data.get("status") == "running":
                             heartbeat_cmd = f"cat ~/dispatch/{project}/tasks/{task_id}/heartbeat 2>/dev/null"
-                            heartbeat_out, _ = run_ssh(ssh_host, heartbeat_cmd)
-
-                            # If no heartbeat file or heartbeat is stale (5 min old)
-                            if not heartbeat_out:
-                                # No heartbeat - task is definitely stuck
-                                if attempt < max_attempts:
-                                    # Reset to pending and increment attempt
-                                    conn.execute(
-                                        "UPDATE tasks SET status='pending', attempt=?, error='stuck_no_heartbeat' WHERE id=?",
-                                        (attempt + 1, task_id),
-                                    )
-                                    refreshed += 1
-                                    log(
-                                        f"Refreshed stuck task (no heartbeat): {task_id} on {node_name} (attempt {attempt + 1})"
-                                    )
-                                else:
-                                    # Max attempts reached, mark as failed
-                                    conn.execute(
-                                        "UPDATE tasks SET status='failed', error='max_attempts_reached' WHERE id=?",
-                                        (task_id,),
-                                    )
-                                    log(
-                                        f"Task failed (max attempts): {task_id} on {node_name}"
-                                    )
-                            else:
+                            heartbeat_out, _ = run_ssh(
+                                next(
+                                    (
+                                        n["ssh_host"]
+                                        for n in load_nodes_config(
+                                            Path.home()
+                                            / "Downloads"
+                                            / "dispatch"
+                                            / "nodes.json"
+                                        )
+                                        if n["name"] == node_name
+                                    ),
+                                    None,
+                                ),
+                                heartbeat_cmd,
+                            )
+                            if heartbeat_out:
                                 try:
                                     heartbeat_time = datetime.fromisoformat(
                                         heartbeat_out.strip()
                                     )
                                     if (
-                                        (
-                                            datetime.now() - heartbeat_time
-                                        ).total_seconds()
-                                        > 300
-                                    ):  # 5 min no heartbeat update
-                                        # Heartbeat stale - task is stuck
-                                        if attempt < max_attempts:
-                                            conn.execute(
-                                                "UPDATE tasks SET status='pending', attempt=?, error='stuck_heartbeat_stale' WHERE id=?",
-                                                (attempt + 1, task_id),
-                                            )
-                                            refreshed += 1
-                                            log(
-                                                f"Refreshed stuck task (stale heartbeat): {task_id} on {node_name} (attempt {attempt + 1})"
-                                            )
-                                        else:
-                                            conn.execute(
-                                                "UPDATE tasks SET status='failed', error='max_attempts_reached' WHERE id=?",
-                                                (task_id,),
-                                            )
-                                            log(
-                                                f"Task failed (max attempts): {task_id} on {node_name}"
-                                            )
-                                except Exception:
-                                    # Can't parse heartbeat - treat as stuck
-                                    if attempt < max_attempts:
+                                        datetime.now() - heartbeat_time
+                                    ).total_seconds() > 300:  # 5 min no heartbeat
+                                        # Force mark as failed to allow retry
                                         conn.execute(
-                                            "UPDATE tasks SET status='pending', attempt=?, error='stuck_bad_heartbeat' WHERE id=?",
-                                            (attempt + 1, task_id),
+                                            "UPDATE tasks SET status='pending', error='timeout_refreshed' WHERE id=?",
+                                            (task_id,),
                                         )
                                         refreshed += 1
                                         log(
-                                            f"Refreshed stuck task (bad heartbeat): {task_id} on {node_name}"
+                                            f"Refreshed stuck task: {task_id} on {node_name}"
                                         )
-                                    else:
-                                        conn.execute(
-                                            "UPDATE tasks SET status='failed', error='max_attempts_reached' WHERE id=?",
-                                            (task_id,),
-                                        )
+                                except:
+                                    pass
                     except:
                         pass
 
@@ -2153,9 +1834,6 @@ def cmd_start(args):
     project = args.project
     daemon_mode = getattr(args, "daemon", False)
 
-    # Acquire lock before starting (prevents multiple instances)
-    acquire_lock()
-
     # If daemon mode, fork to background
     if daemon_mode:
         log("Starting dispatch in daemon mode...")
@@ -2177,13 +1855,16 @@ def cmd_start(args):
         os.setsid()
 
         # Write PID file
-        dispatch_dir = get_dispatch_dir()
+        dispatch_dir = Path.home() / "Downloads" / "dispatch"
         pid_file = dispatch_dir / f"{project}.pid"
         with open(pid_file, "w") as f:
             f.write(str(os.getpid()))
 
-    dispatch_dir = get_dispatch_dir()
-    specs_dir = get_specs_dir()
+    dispatch_dir = Path.home() / "Downloads" / "dispatch"
+    project_config = load_project_config(project)
+    specs_dir = Path(
+        project_config.get("specs_dir", str(Path.home() / "Downloads" / "specs"))
+    ).expanduser()
     db_path = dispatch_dir / "dispatch.db"
     pid_file = dispatch_dir / f"{project}.pid"
     stop_file = dispatch_dir / f"{project}.stop"
@@ -2246,17 +1927,15 @@ def cmd_start(args):
                 log("Stop file detected. Exiting...")
                 break
 
-            # Clean up ghost tasks (running in DB but not on remote)
-            cleanup_ghost_tasks(db_path)
-
             # Check all running tasks
             log("Checking node status...")
             check_all_nodes(db_path, project)
 
-            # Auto-refresh stuck tasks (every cycle for faster detection)
-            refreshed = refresh_stuck_tasks(db_path, project, timeout_minutes=5)
-            if refreshed > 0:
-                log(f"Refreshed {refreshed} stuck tasks")
+            # Auto-refresh stuck tasks (every 3 cycles)
+            if cycle % 3 == 0:
+                refreshed = refresh_stuck_tasks(db_path, project, timeout_minutes=15)
+                if refreshed > 0:
+                    log(f"Refreshed {refreshed} stuck tasks")
 
             # Schedule new tasks
             log("Scheduling pending tasks...")
@@ -2295,7 +1974,7 @@ def cmd_start(args):
 
 def cmd_status(args):
     """Status command: show current state"""
-    dispatch_dir = get_dispatch_dir()
+    dispatch_dir = Path.home() / "Downloads" / "dispatch"
     db_path = dispatch_dir / "dispatch.db"
 
     if not db_path.exists():
@@ -2366,7 +2045,7 @@ def cmd_status(args):
 def cmd_report(args):
     """Report command: generate completion report"""
     project = args.project
-    dispatch_dir = get_dispatch_dir()
+    dispatch_dir = Path.home() / "Downloads" / "dispatch"
     db_path = dispatch_dir / "dispatch.db"
     report_file = dispatch_dir / f"{project}-report.md"
 
@@ -2397,7 +2076,7 @@ def cmd_report(args):
         f"- Total tasks: {total}",
         f"- Completed: {completed}",
         f"- Failed: {failed}",
-        f"- Success rate: {completed / total * 100:.1f}%",
+        f"- Success rate: {completed / total * 100:.1f}%" if total > 0 else "N/A",
         "",
         f"## Task Details",
         "",
@@ -2436,7 +2115,7 @@ def cmd_report(args):
 def cmd_stop(args):
     """Stop command: write stop flag"""
     project = args.project
-    dispatch_dir = get_dispatch_dir()
+    dispatch_dir = Path.home() / "Downloads" / "dispatch"
     stop_file = dispatch_dir / f"{project}.stop"
 
     with open(stop_file, "w") as f:
@@ -2450,7 +2129,7 @@ def cmd_cleanup(args):
     project = args.project
     older_than_hours = args.older_than
     force_all = args.all
-    dispatch_dir = get_dispatch_dir()
+    dispatch_dir = Path.home() / "Downloads" / "dispatch"
     db_path = str(dispatch_dir / "dispatch.db")
     nodes_file = dispatch_dir / "nodes.json"
 
@@ -2566,7 +2245,7 @@ def cmd_validate(args):
 
 def cmd_poll(args):
     """Get pending tasks (for pull mode)"""
-    db_path = get_dispatch_dir() / "dispatch.db"
+    db_path = Path.home() / "Downloads" / "dispatch" / "dispatch.db"
 
     with get_db(db_path) as conn:
         tasks = conn.execute(
@@ -2613,7 +2292,7 @@ def cmd_poll(args):
 
 def cmd_claim(args):
     """Claim a task for execution"""
-    db_path = get_dispatch_dir() / "dispatch.db"
+    db_path = Path.home() / "Downloads" / "dispatch" / "dispatch.db"
     task_id = args.task_id
 
     with get_db(db_path) as conn:
@@ -2652,7 +2331,7 @@ def cmd_claim(args):
 
 def cmd_finish(args):
     """Mark task as completed or failed"""
-    db_path = get_dispatch_dir() / "dispatch.db"
+    db_path = Path.home() / "Downloads" / "dispatch" / "dispatch.db"
     task_id = args.task_id
     status = args.status
     error = args.error
@@ -2675,7 +2354,7 @@ def cmd_finish(args):
 
 def cmd_heartbeat(args):
     """Send heartbeat for a task"""
-    db_path = get_dispatch_dir() / "dispatch.db"
+    db_path = Path.home() / "Downloads" / "dispatch" / "dispatch.db"
     task_id = args.task_id
 
     with get_db(db_path) as conn:
@@ -2686,6 +2365,40 @@ def cmd_heartbeat(args):
         conn.commit()
 
         print(json.dumps({"status": "ok", "task_id": task_id}))
+
+
+def cmd_memory(args):
+    """Memory store commands"""
+    import sys
+
+    sys.path.insert(0, str(Path(__file__).parent))
+    from memory_store import MemoryStore
+
+    store = MemoryStore()
+
+    if args.memory_action == "search":
+        query = args.query
+        limit = args.limit
+        mem_type = args.type
+
+        results = store.search(query, memory_type=mem_type, limit=limit)
+        print(
+            json.dumps(
+                {"query": query, "count": len(results), "results": results}, indent=2
+            )
+        )
+
+    elif args.memory_action == "stats":
+        stats = store.get_stats()
+        print(json.dumps(stats, indent=2))
+
+    elif args.memory_action == "add":
+        store.add(args.content, args.type or "task")
+        print(json.dumps({"status": "ok", "added": args.content[:50]}))
+
+    elif args.memory_action == "clear":
+        count = store.clear(args.type)
+        print(json.dumps({"status": "ok", "cleared": count}))
 
 
 def main():
@@ -2767,6 +2480,25 @@ def main():
     )
     heartbeat_parser.add_argument("task_id", help="Task ID")
 
+    # memory: semantic search
+    memory_parser = subparsers.add_parser("memory", help="Memory store commands")
+    memory_parser.add_argument(
+        "memory_action",
+        choices=["search", "stats", "add", "clear"],
+        help="Action to perform",
+    )
+    memory_parser.add_argument(
+        "query", nargs="?", help="Search query (for search action)"
+    )
+    memory_parser.add_argument("--limit", type=int, default=5, help="Max results")
+    memory_parser.add_argument(
+        "--type", "-t", help="Memory type filter (event/task/error/spec/rule)"
+    )
+    memory_parser.add_argument(
+        "--content", "-c", help="Content to add (for add action)"
+    )
+    memory_parser.set_defaults(func=cmd_memory)
+
     args = parser.parse_args()
 
     if args.command == "start":
@@ -2789,6 +2521,8 @@ def main():
         cmd_finish(args)
     elif args.command == "heartbeat":
         cmd_heartbeat(args)
+    elif args.command == "memory":
+        cmd_memory(args)
 
 
 if __name__ == "__main__":

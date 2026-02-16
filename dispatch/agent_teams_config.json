@@ -1,0 +1,18 @@
+{
+  "enabled": false,
+  "threshold_complexity": 5,
+  "model_mapping": {
+    "complex": "claude-opus",
+    "medium": "claude-sonnet",
+    "simple": "claude-haiku"
+  },
+  "max_teammates": 5,
+  "auto_reallocate": true,
+  "cost_budget_per_task": 10.0,
+  "cost_strategy": {
+    "simple_threshold_chars": 500,
+    "complex_threshold_chars": 2000,
+    "retry_model": "haiku",
+    "code_review_model": "sonnet"
+  }
+}

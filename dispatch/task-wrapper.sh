@@ -229,8 +229,10 @@ while true; do
     configure_mode "$CURRENT_MODE"
     echo "[$(get_timestamp)] Attempt $ATTEMPT: claude api_mode=$CURRENT_MODE"
 
+    # Use claude CLI with --dangerously-skip-permissions to allow external directory access
+    # -p for non-interactive (print mode), --dangerously-skip-permissions to bypass permission checks
     run_with_timeout "$TASK_TIMEOUT_SECS" "$TASK_TIMEOUT_KILL_SECS" \
-        ~/.opencode/bin/opencode run --model opencode/minimax-m2.5-free -- "$PROMPT" > "$LOG_FILE" 2>&1
+        claude -p --dangerously-skip-permissions "$PROMPT" > "$LOG_FILE" 2>&1
     EXIT_CODE=$?
 
     if [[ $EXIT_CODE -eq 124 ]]; then
