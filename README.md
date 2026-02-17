@@ -130,6 +130,7 @@ dispatch.py 支持通过环境变量自定义路径（默认值适用于 Howard 
 | [团队快速入门](./docs/TEAM_QUICKSTART.md) | 新成员 5 分钟上手 |
 | [搭建指南](./docs/SETUP_ZH.md) | 从零搭建集群 |
 | [Spec 编写指南](./docs/SPEC_GUIDE.md) | 怎么写好一个 spec |
+| [运维手册](./docs/INFRA.md) | Guardian、Monitor、集群维护 |
 
 ## License
 
