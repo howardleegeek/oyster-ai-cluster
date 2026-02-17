@@ -2,12 +2,12 @@
   "clawmarketing": {
     "sync_mode": "scp",
     "repo_local": "~/Downloads/clawmarketing",
-    "specs_dir": "~/Downloads/specs/clawmarketing"
+    "specs_dir": "~/Downloads/specs"
   },
   "gem-platform": {
     "repo_url": "https://github.com/The-world-is-your-Oyster/gem-platform.git",
     "repo_local": "~/Downloads/gem-platform",
-    "specs_dir": "~/Downloads/specs/gem-platform",
+    "specs_dir": "~/Downloads/specs",
     "sync_mode": "git",
     "main_branch": "main"
   },
@@ -153,6 +153,11 @@
     "repo_local": "~/Downloads/clawphones-admin",
     "specs_dir": "~/Downloads/specs/clawphones-admin"
   },
+  "byzantine-collision": {
+    "sync_mode": "scp",
+    "repo_local": "~/Downloads/specs/byzantine-collision",
+    "specs_dir": "~/Downloads/specs/byzantine-collision"
+  },
   "security": {
     "sync_mode": "scp",
     "specs_dir": "~/Downloads/specs/security"
@@ -161,5 +166,15 @@
     "sync_mode": "scp",
     "repo_local": "~/Downloads/openclaw-mission-control",
     "specs_dir": "~/Downloads/specs/openclaw-mission-control"
+  },
+  "oyster-infra": {
+    "sync_mode": "scp",
+    "repo_local": "~/Downloads/infrastructure",
+    "specs_dir": "~/Downloads/specs"
+  },
+  "dispatch": {
+    "sync_mode": "scp",
+    "repo_local": "~/Downloads/dispatch",
+    "specs_dir": "~/Downloads/dispatch/specs/dispatch"
   }
 }

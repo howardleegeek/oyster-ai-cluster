@@ -55,6 +55,15 @@ def get_db(db_path):
         conn.close()
 
 
+def _ensure_column(conn, table: str, col: str, ddl: str):
+    """Ensure a column exists, add if not (SQLite migration helper)"""
+    cur = conn.execute(f"PRAGMA table_info({table})")
+    cols = {row[1] for row in cur.fetchall()}  # row[1] = name
+    if col not in cols:
+        conn.execute(ddl)
+        conn.commit()
+
+
 def init_database(db_path):
     """Initialize database schema"""
     with get_db(db_path) as conn:
@@ -64,7 +73,7 @@ def init_database(db_path):
                 project TEXT NOT NULL,
                 spec_file TEXT NOT NULL,
                 spec_hash TEXT,
-                status TEXT DEFAULT 'pending' CHECK(status IN ('pending','claimed','running','completed','failed')),
+                status TEXT DEFAULT 'pending' CHECK(status IN ('pending','claimed','running','completed','failed','deadletter')),
                 node TEXT,
                 pid INTEGER,
                 attempt INTEGER DEFAULT 0,
@@ -118,6 +127,39 @@ def init_database(db_path):
             conn.execute("ALTER TABLE tasks ADD COLUMN collected_at TEXT")
         except sqlite3.OperationalError:
             pass  # column already exists
+
+        # P0: Lease system columns
+        _ensure_column(
+            conn,
+            "tasks",
+            "lease_owner",
+            "ALTER TABLE tasks ADD COLUMN lease_owner TEXT",
+        )
+        _ensure_column(
+            conn,
+            "tasks",
+            "lease_expires_at",
+            "ALTER TABLE tasks ADD COLUMN lease_expires_at INTEGER",
+        )
+        _ensure_column(
+            conn,
+            "tasks",
+            "visibility_timeout",
+            "ALTER TABLE tasks ADD COLUMN visibility_timeout INTEGER DEFAULT 300",
+        )
+        _ensure_column(
+            conn,
+            "tasks",
+            "idempotency_key",
+            "ALTER TABLE tasks ADD COLUMN idempotency_key TEXT",
+        )
+        _ensure_column(
+            conn,
+            "tasks",
+            "updated_at",
+            "ALTER TABLE tasks ADD COLUMN updated_at INTEGER",
+        )
+
         conn.commit()
 
 
@@ -165,11 +207,32 @@ def parse_spec_metadata(spec_path):
 
 
 def scan_specs(project, specs_dir):
-    """Scan spec files and return list of tasks"""
-    # specs_dir already includes the project path, don't add project again
-    specs_path = Path(specs_dir)
+    """Scan spec files and return list of tasks
+
+    Supports two directory structures:
+    1. specs/<project>/ (legacy) - e.g., specs/clawmarketing/
+    2. specs/<project>/PROJECTS/SPEC/ (v2.0 standard)
+    """
+    # Expand ~ in path
+    specs_path = Path(specs_dir).expanduser()
+
+    # If specs_path doesn't have S*.md files, try project subdirectory
+    if not any(specs_path.glob("S*.md")):
+        # Try: specs/<project>/
+        project_path = specs_path / project
+        if project_path.exists() and any(project_path.glob("S*.md")):
+            specs_path = project_path
+            log(f"Using project subdirectory: {specs_path}")
+
+    # Try v2.0 structure: specs/<project>/PROJECTS/SPEC/
+    v2_specs_path = specs_path / project / "PROJECTS" / "SPEC"
+    if v2_specs_path.exists() and any(v2_specs_path.glob("S*.md")):
+        specs_path = v2_specs_path
+        log(f"Using v2.0 spec structure: {specs_path}")
+
     if not specs_path.exists():
         log(f"ERROR: Specs directory not found: {specs_path}")
+        return []
         return []
 
     # Only treat numeric-prefixed S*/P* files as runnable tasks.
@@ -335,6 +398,158 @@ def log_event(db_path, task_id, event_type, node, details):
             (datetime.now().isoformat(), task_id, event_type, node, details),
         )
         conn.commit()
+
+
+# =============================================================================
+# P0: Lease System for Node Recovery / Task Requeue
+# =============================================================================
+
+VISIBILITY_TIMEOUT_DEFAULT = 300  # 5 minutes
+VISIBILITY_TIMEOUT_BROWSER = 900  # 15 minutes for browser tasks
+
+
+def lease_task(db_path, task_id: str, lease_owner: str, lease_expires_at: int) -> bool:
+    """
+    Atomically claim a task by setting lease.
+    Returns True if claim succeeded, False if task was already leased.
+    """
+    now = int(time.time())
+    with get_db(db_path) as conn:
+        # Only claim pending tasks that are not leased or whose lease expired
+        cursor = conn.execute(
+            """
+            UPDATE tasks
+            SET lease_owner = ?,
+                lease_expires_at = ?,
+                updated_at = ?
+            WHERE id = ?
+              AND status = 'pending'
+              AND (lease_expires_at IS NULL OR lease_expires_at < ?)
+        """,
+            (lease_owner, lease_expires_at, now, task_id, now),
+        )
+        conn.commit()
+        return cursor.rowcount == 1
+
+
+def heartbeat(db_path, task_id: str, lease_owner: str) -> bool:
+    """
+    Worker sends heartbeat to extend lease.
+    Returns True if heartbeat succeeded, False if lease no longer valid.
+    """
+    now = int(time.time())
+    with get_db(db_path) as conn:
+        # Get current visibility_timeout
+        task = conn.execute(
+            "SELECT visibility_timeout FROM tasks WHERE id = ?", (task_id,)
+        ).fetchone()
+        if not task:
+            return False
+
+        vis_timeout = task["visibility_timeout"] or VISIBILITY_TIMEOUT_DEFAULT
+        new_expiry = now + vis_timeout
+
+        cursor = conn.execute(
+            """
+            UPDATE tasks
+            SET lease_expires_at = ?,
+                updated_at = ?
+            WHERE id = ?
+              AND lease_owner = ?
+              AND status IN ('pending', 'running')
+        """,
+            (new_expiry, now, task_id, lease_owner),
+        )
+        conn.commit()
+        return cursor.rowcount == 1
+
+
+def reclaim_expired_leases(db_path) -> int:
+    """
+    Reclaim all tasks whose lease has expired.
+    Returns number of tasks reclaimed.
+    """
+    now = int(time.time())
+    with get_db(db_path) as conn:
+        cursor = conn.execute(
+            """
+            UPDATE tasks
+            SET lease_owner = NULL,
+                lease_expires_at = NULL,
+                updated_at = ?
+            WHERE status IN ('pending', 'running')
+              AND lease_expires_at IS NOT NULL
+              AND lease_expires_at < ?
+        """,
+            (now, now),
+        )
+        conn.commit()
+        if cursor.rowcount > 0:
+            log(f"[Lease] Reclaimed {cursor.rowcount} expired leases")
+        return cursor.rowcount
+
+
+def mark_deadletter(db_path, task_id: str, reason: str):
+    """Mark a task as deadletter (will not be retried)"""
+    now = int(time.time())
+    with get_db(db_path) as conn:
+        conn.execute(
+            """
+            UPDATE tasks
+            SET status = 'deadletter',
+                lease_owner = NULL,
+                lease_expires_at = NULL,
+                updated_at = ?,
+                error = ?
+            WHERE id = ?
+        """,
+            (now, reason, task_id),
+        )
+        conn.commit()
+    log_event(db_path, task_id, "task.deadlettered", None, reason)
+    log(f"[Deadletter] Task {task_id}: {reason}")
+
+
+def clear_lease(db_path, task_id: str, lease_owner: str = None):
+    """
+    Clear lease on task completion/failure.
+    If lease_owner provided, verifies ownership before clearing.
+    """
+    now = int(time.time())
+    with get_db(db_path) as conn:
+        if lease_owner:
+            cursor = conn.execute(
+                """
+                UPDATE tasks
+                SET lease_owner = NULL,
+                    lease_expires_at = NULL,
+                    updated_at = ?
+                WHERE id = ?
+                  AND lease_owner = ?
+            """,
+                (now, task_id, lease_owner),
+            )
+        else:
+            cursor = conn.execute(
+                """
+                UPDATE tasks
+                SET lease_owner = NULL,
+                    lease_expires_at = NULL,
+                    updated_at = ?
+                WHERE id = ?
+            """,
+                (now, task_id),
+            )
+        conn.commit()
+        return cursor.rowcount > 0
+
+
+def get_visibility_timeout(task_id: str) -> int:
+    """Get visibility timeout based on task type"""
+    task_type = get_task_type(task_id)
+    if task_type == "browser":
+        return VISIBILITY_TIMEOUT_BROWSER
+    return VISIBILITY_TIMEOUT_DEFAULT
 
 
 def collect_git(db_path, project):
@@ -1053,17 +1268,20 @@ def apply_task_updates(db_path, updates, project):
 
     with get_db(db_path) as conn:
         for update in updates:
+            now = int(time.time())
             if update["status"] == "completed":
                 conn.execute(
                     """
                     UPDATE tasks
-                    SET status = ?, completed_at = ?, duration_seconds = ?
+                    SET status = ?, completed_at = ?, duration_seconds = ?,
+                        lease_owner = NULL, lease_expires_at = NULL, updated_at = ?
                     WHERE id = ?
                 """,
                     (
                         update["status"],
                         update["completed_at"],
                         update["duration"],
+                        now,
                         update["id"],
                     ),
                 )
@@ -1072,13 +1290,15 @@ def apply_task_updates(db_path, updates, project):
                 conn.execute(
                     """
                     UPDATE tasks
-                    SET status = ?, completed_at = ?, error = ?
+                    SET status = ?, completed_at = ?, error = ?,
+                        lease_owner = NULL, lease_expires_at = NULL, updated_at = ?
                     WHERE id = ?
                 """,
                     (
                         update["status"],
                         update["completed_at"],
                         update["error"],
+                        now,
                         update["id"],
                     ),
                 )
@@ -1127,7 +1347,7 @@ def update_node_running_counts(db_path):
         conn.commit()
 
 
-def deploy_task_to_node(db_path, node, project, task):
+def deploy_task_to_node(db_path, node, project, task, lease_owner=None):
     """Deploy a task to a node"""
     task_id = task["id"]
     spec_file = task["spec_file"]
@@ -1548,6 +1768,9 @@ def detect_circular_dependencies(db_path, project):
 
 def schedule_tasks(db_path, project):
     """Schedule pending tasks to available nodes"""
+    # P0: Reclaim expired leases first
+    reclaim_expired_leases(db_path)
+
     # Get enabled nodes with available slots
     with get_db(db_path) as conn:
         nodes = [
@@ -1559,15 +1782,18 @@ def schedule_tasks(db_path, project):
         """).fetchall()
         ]
 
+        # P0: Only select tasks that don't have active leases (pending + no lease OR lease expired)
         pending_tasks = [
             dict(r)
             for r in conn.execute(
                 """
             SELECT * FROM tasks
-            WHERE status = 'pending' AND project = ?
+            WHERE status = 'pending' 
+              AND project = ?
+              AND (lease_owner IS NULL OR lease_expires_at < ?)
             ORDER BY priority ASC, id ASC
         """,
-                (project,),
+                (project, int(time.time())),
             ).fetchall()
         ]
 
@@ -1669,7 +1895,20 @@ def schedule_tasks(db_path, project):
                 best_node = node
 
         if best_node and max_available > 0:
-            if deploy_task_to_node(db_path, dict(best_node), project, dict(task)):
+            # P0: Acquire lease before deploying (atomic claim)
+            import uuid
+
+            lease_owner = f"{best_node['name']}:{uuid.uuid4().hex[:8]}"
+            vis_timeout = get_visibility_timeout(task["id"])
+            lease_expires = int(time.time()) + vis_timeout
+
+            if not lease_task(db_path, task["id"], lease_owner, lease_expires):
+                # Lease failed - task was likely taken by another scheduler
+                continue
+
+            if deploy_task_to_node(
+                db_path, dict(best_node), project, dict(task), lease_owner
+            ):
                 scheduled += 1
                 # Acquire file locks if task has exclusive files
                 modifies = json.loads(task.get("modifies", "[]"))
@@ -1943,9 +2182,9 @@ def cmd_start(args):
             if scheduled > 0:
                 log(f"Scheduled {scheduled} new tasks")
 
-            # Check if all done
+            # Check if all done - but keep looping in 24/7 mode
             if check_completion(db_path, project):
-                log("All tasks completed!")
+                log("All tasks completed! Keeping alive for 24/7 mode...")
 
                 # Auto-collect git branches if in git mode
                 project_config = load_project_config(project)
@@ -1953,12 +2192,14 @@ def cmd_start(args):
                     log("Auto-collecting git branches...")
                     collect_git(db_path, project)
 
-                log("Generating report...")
-                args.project = project
-                cmd_report(args)
-                break
+                # Don't break - keep running to pick up new tasks
+                # Generate report once
+                if cycle == 1:
+                    log("Generating report...")
+                    args.project = project
+                    cmd_report(args)
 
-            # Sleep
+            # Sleep and loop forever (24/7 mode)
             log("Sleeping 30 seconds...")
             for _ in range(30):
                 if not RUNNING:

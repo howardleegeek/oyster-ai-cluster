@@ -174,7 +174,8 @@ is_rate_limit_error() {
 get_fallback_mode() {
     case "$1" in
         minimax) echo "direct" ;;
-        direct)  echo "minimax" ;;
+        direct)  echo "opencode" ;;
+        opencode) echo "" ;;
         zai)     echo "minimax" ;;
         *)       echo "" ;;
     esac
@@ -188,8 +189,16 @@ configure_mode() {
         export ANTHROPIC_BASE_URL="https://api.z.ai/api/anthropic"
         export API_TIMEOUT_MS="3000000"
     elif [[ "$mode" == "minimax" ]]; then
-        MMKEY=$(cat ~/.oyster-keys/minimax-key.txt 2>/dev/null | head -1 | tr -d '\n')
-        export ANTHROPIC_AUTH_TOKEN="${MMKEY:-}"
+        # Load from minimax.env first, fallback to minimax-key.txt
+        if [[ -f ~/.oyster-keys/minimax.env ]]; then
+            source ~/.oyster-keys/minimax.env 2>/dev/null
+            MMKEY="${MINIMAX_API_KEY:-}"
+        else
+            MMKEY=$(cat ~/.oyster-keys/minimax-key.txt 2>/dev/null | head -1 | tr -d '\n')
+        fi
+        if [[ -n "$MMKEY" ]]; then
+            export ANTHROPIC_AUTH_TOKEN="${MMKEY}"
+        fi
         export ANTHROPIC_BASE_URL="https://api.minimax.io/anthropic"
         export API_TIMEOUT_MS="3000000"
     elif [[ "$mode" == "direct" ]]; then
@@ -206,6 +215,47 @@ set +e
 while true; do
     ATTEMPT=$((ATTEMPT + 1))
 
+    # === SPEC STANDARD HEADER ===
+    # Load SPEC_STANDARD.md to inject规范 into every task
+    SPEC_STANDARD_HEADER=""
+    SPEC_STANDARD_PATH="$HOME/dispatch/SPEC_STANDARD.md"
+    if [[ -f "$SPEC_STANDARD_PATH" ]]; then
+        SPEC_STANDARD_HEADER=$(cat << 'SPECEOF'
+
+════════════════════════════════════════════════════════════════════════════
+  OYSTER LABS SPEC EXECUTION STANDARD v2.0
+════════════════════════════════════════════════════════════════════════════
+
+你正在执行的任务必须遵循以下规范：
+
+【必须遵守的约束】
+- Max 5 files per diff：每次改动最多 5 个文件
+- No file deletion：不要删除文件，除非 spec 明确说明
+- No rename of public interfaces：不要重命名公开接口
+- Must add tests：新功能必须添加测试
+- Preserve behavior：保持现有功能不变
+
+【验收标准】
+- spec 中定义的验收标准必须全部通过
+- 验证命令必须是可执行的（非 watch 模式）
+- 不要说"应该可以了"，必须跑测试证明
+
+【禁止】
+- 禁止 TODO/FIXME/placeholder 交付
+- 禁止硬编码 secret
+- 禁止提交 .env 文件
+
+【代码质量】
+- 函数 < 30 行
+- 错误处理具体（不写 except Exception）
+- 日志有 context（包含 task_id）
+
+详细规范请参考: ~/dispatch/SPEC_STANDARD.md
+════════════════════════════════════════════════════════════════════════════
+SPECEOF
+)
+    fi
+
     # Extract prompt from spec file (skip YAML front-matter)
     # Use awk to skip content between first two --- markers
     PROMPT=$(awk 'BEGIN{in_body=0} /^---$/{in_body++; next} in_body>=1 && !/^---$/{print}' "$SPEC_FILE" 2>/dev/null | head -500)
@@ -213,6 +263,9 @@ while true; do
         # Fallback: use whole file if no YAML
         PROMPT=$(cat "$SPEC_FILE")
     fi
+
+    # Prepend SPEC STANDARD to prompt
+    PROMPT="${SPEC_STANDARD_HEADER}${PROMPT}"
 
     if [[ "$CURRENT_MODE" == "codex" ]]; then
         echo "[$( get_timestamp)] Executing codex (no fallback)"
@@ -223,6 +276,28 @@ while true; do
         if [[ $EXIT_CODE -eq 124 ]]; then
             echo "[$(get_timestamp)] TIMEOUT after ${TASK_TIMEOUT_SECS}s (executor=codex)" | tee -a "$LOG_FILE"
         fi
+        break
+    fi
+
+    # === OpenCode free MiniMax fallback ===
+    if [[ "$CURRENT_MODE" == "opencode" ]]; then
+        echo "[$(get_timestamp)] Attempt $ATTEMPT: opencode (free minimax)"
+        # Pipe prompt via stdin to opencode run
+        run_with_timeout "$TASK_TIMEOUT_SECS" "$TASK_TIMEOUT_KILL_SECS" \
+            bash -c "echo \"\$1\" | ~/.opencode/bin/opencode run -m opencode/minimax-m2.5-free" -- "$PROMPT" > "$LOG_FILE" 2>&1
+        EXIT_CODE=$?
+
+        if [[ $EXIT_CODE -eq 124 ]]; then
+            echo "[$(get_timestamp)] TIMEOUT after ${TASK_TIMEOUT_SECS}s (executor=opencode)" | tee -a "$LOG_FILE"
+            break
+        fi
+
+        if [[ $EXIT_CODE -eq 0 ]]; then
+            break
+        fi
+
+        # OpenCode failed - no more fallbacks
+        echo "[$(get_timestamp)] OpenCode failed (exit=$EXIT_CODE)" | tee -a "$LOG_FILE"
         break
     fi
 
@@ -298,50 +373,109 @@ if [[ "$GIT_MODE" == true ]] && [[ $LLM_EXIT_CODE -eq 0 ]]; then
     fi
 fi
 
-# === Best Practice: Check for TODO/FIXME (禁止糊弄) ===
+# ╔══════════════════════════════════════════════════════════════╗
+# ║  QUALITY GATES — 假完成在这里死  (2026-02-16 v2)           ║
+# ║  Gate 1: 最小时间 (< 45s = 假完成)                         ║
+# ║  Gate 2: 实际代码变更 (0 changes = 没干活)                  ║
+# ║  Gate 3: TODO/FIXME 检查 (有 = 糊弄)                       ║
+# ║  Gate 4: 跑测试 (git + SCP 都跑)                           ║
+# ╚══════════════════════════════════════════════════════════════╝
+
+# Determine scan directory: works for BOTH git and SCP modes
+SCAN_DIR=""
+if [[ -d "$REPO_DIR" ]] && [[ "$GIT_MODE" == true ]]; then
+    SCAN_DIR="$REPO_DIR"
+else
+    SCAN_DIR="$WORKING_DIR"
+fi
+
+# === GATE 1: Minimum duration (anti-fake-completion) ===
 if [[ $LLM_EXIT_CODE -eq 0 ]]; then
-    echo "[$(get_timestamp)] === Checking for TODO/FIXME ==="
+    END_EPOCH=$(date +%s)
+    # Cross-platform epoch from STARTED_AT
+    if date -d "2000-01-01" +%s >/dev/null 2>&1; then
+        START_EPOCH=$(date -d "$STARTED_AT" +%s 2>/dev/null || echo "$END_EPOCH")
+    else
+        START_EPOCH=$(python3 -c "from datetime import datetime; print(int(datetime.fromisoformat('$STARTED_AT'.replace('+00:00','+00:00').rstrip('Z')).timestamp()))" 2>/dev/null || echo "$END_EPOCH")
+    fi
+    DURATION=$((END_EPOCH - START_EPOCH))
+    MIN_DURATION="${MIN_TASK_DURATION:-45}"
+
+    if [[ $DURATION -lt $MIN_DURATION ]]; then
+        echo "[$(get_timestamp)] GATE 1 FAIL: Too fast (${DURATION}s < ${MIN_DURATION}s)"
+        echo "QUALITY_GATE_1: FAILED - too fast (${DURATION}s)" >> "$LOG_FILE"
+        EXIT_CODE=1
+        ERROR_MSG="Gate 1: too fast (${DURATION}s < ${MIN_DURATION}s)"
+    else
+        echo "[$(get_timestamp)] GATE 1 PASS: Duration ${DURATION}s"
+    fi
+fi
+
+# === GATE 2: Actual code changes produced ===
+if [[ $LLM_EXIT_CODE -eq 0 ]] && [[ ${EXIT_CODE:-0} -eq 0 ]]; then
+    echo "[$(get_timestamp)] === Gate 2: Checking code changes ==="
+    CHANGED_FILES=0
+
+    if [[ -d "$SCAN_DIR/.git" ]]; then
+        CHANGED_FILES=$(cd "$SCAN_DIR" && (git diff --name-only 2>/dev/null; git diff --cached --name-only 2>/dev/null; git ls-files --others --exclude-standard 2>/dev/null) | sort -u | wc -l | tr -d ' ')
+    fi
+
+    OUTPUT_FILES=0
+    if [[ -d "$OUTPUT_DIR" ]]; then
+        OUTPUT_FILES=$(find "$OUTPUT_DIR" -type f \( -name "*.py" -o -name "*.ts" -o -name "*.js" -o -name "*.tsx" -o -name "*.jsx" -o -name "*.md" -o -name "*.sh" \) 2>/dev/null | wc -l | tr -d ' ')
+    fi
+
+    TOTAL_CHANGES=$((CHANGED_FILES + OUTPUT_FILES))
+
+    if [[ $TOTAL_CHANGES -eq 0 ]]; then
+        echo "[$(get_timestamp)] GATE 2 FAIL: No code changes (git=$CHANGED_FILES output=$OUTPUT_FILES)"
+        echo "QUALITY_GATE_2: FAILED - no changes" >> "$LOG_FILE"
+        EXIT_CODE=1
+        ERROR_MSG="Gate 2: no code changes produced"
+    else
+        echo "[$(get_timestamp)] GATE 2 PASS: git=$CHANGED_FILES output=$OUTPUT_FILES"
+    fi
+fi
+
+# === GATE 3: TODO/FIXME/placeholder check (covers git + SCP) ===
+if [[ $LLM_EXIT_CODE -eq 0 ]] && [[ ${EXIT_CODE:-0} -eq 0 ]]; then
+    echo "[$(get_timestamp)] === Gate 3: TODO/FIXME check ==="
     TODO_COUNT=0
-    if [[ -d "$REPO_DIR" ]]; then
-        TODO_COUNT=$(grep -r -l "TODO\|FIXME\|placeholder\|XXX" "$REPO_DIR" --include="*.py" --include="*.ts" --include="*.tsx" --include="*.js" 2>/dev/null | wc -l | tr -d ' ')
+
+    if [[ -d "$SCAN_DIR" ]]; then
+        TODO_COUNT=$(grep -r -l 'TODO\|FIXME\|placeholder\|XXX' "$SCAN_DIR" --include="*.py" --include="*.ts" --include="*.tsx" --include="*.js" 2>/dev/null | wc -l | tr -d ' ')
+    fi
+    if [[ -d "$OUTPUT_DIR" ]]; then
+        OUTPUT_TODO=$(grep -r -l 'TODO\|FIXME\|placeholder\|XXX' "$OUTPUT_DIR" --include="*.py" --include="*.ts" --include="*.tsx" --include="*.js" 2>/dev/null | wc -l | tr -d ' ')
+        TODO_COUNT=$((TODO_COUNT + OUTPUT_TODO))
     fi
 
     if [[ "$TODO_COUNT" -gt 0 ]]; then
-        echo "[$(get_timestamp)] WARNING: Found $TODO_COUNT files with TODO/FIXME/placeholder"
-        echo "TODO_CHECK: WARNING (found $TODO_COUNT files)" >> "$LOG_FILE"
+        echo "[$(get_timestamp)] GATE 3 FAIL: $TODO_COUNT files with TODO/FIXME"
+        echo "QUALITY_GATE_3: FAILED - $TODO_COUNT files" >> "$LOG_FILE"
+        EXIT_CODE=1
+        ERROR_MSG="Gate 3: $TODO_COUNT files contain TODO/FIXME"
     else
-        echo "[$(get_timestamp)] TODO check: PASSED"
+        echo "[$(get_timestamp)] GATE 3 PASS: clean"
     fi
+fi
 
-    # === Best Practice: Run tests if available ===
-    echo "[$(get_timestamp)] === Running verification tests ==="
+# === GATE 4: Run tests (works for BOTH git and SCP modes) ===
+if [[ $LLM_EXIT_CODE -eq 0 ]] && [[ ${EXIT_CODE:-0} -eq 0 ]]; then
+    echo "[$(get_timestamp)] === Gate 4: Running tests ==="
     TEST_PASSED=true
     VERIFY_EXIT_CODE=0
     TEST_OUTPUT=""
 
-    if [[ -d "$REPO_DIR" ]]; then
-        cd "$REPO_DIR"
+    if [[ -d "$SCAN_DIR" ]]; then
+        cd "$SCAN_DIR"
 
-        # Python/pytest support
-        if [[ -f "$REPO_DIR/requirements.txt" ]] || [[ -f "$REPO_DIR/pyproject.toml" ]]; then
-            if [[ -f "$REPO_DIR/.venv/bin/activate" ]]; then
-                echo "[$(get_timestamp)] Found Python venv, running pytest..."
-                source "$REPO_DIR/.venv/bin/activate"
-                if command -v pytest &> /dev/null; then
-                    TEST_OUTPUT=$(run_with_timeout "$VERIFY_TIMEOUT_SECS" "$VERIFY_TIMEOUT_KILL_SECS" pytest -v --tb=short 2>&1)
-                    TEST_CODE=$?
-                    [[ $TEST_CODE -ne 0 ]] && TEST_PASSED=false
-                    [[ $VERIFY_EXIT_CODE -eq 0 && $TEST_CODE -ne 0 ]] && VERIFY_EXIT_CODE=$TEST_CODE
-                    echo "$TEST_OUTPUT" >> "$LOG_FILE"
-                elif [[ -f "$REPO_DIR/Makefile" ]] && grep -q 'test:' "$REPO_DIR/Makefile"; then
-                    echo "[$(get_timestamp)] Running: make test"
-                    TEST_OUTPUT=$(run_with_timeout "$VERIFY_TIMEOUT_SECS" "$VERIFY_TIMEOUT_KILL_SECS" make test 2>&1)
-                    TEST_CODE=$?
-                    [[ $TEST_CODE -ne 0 ]] && TEST_PASSED=false
-                    [[ $VERIFY_EXIT_CODE -eq 0 && $TEST_CODE -ne 0 ]] && VERIFY_EXIT_CODE=$TEST_CODE
-                    echo "$TEST_OUTPUT" >> "$LOG_FILE"
-                fi
-            elif command -v pytest &> /dev/null; then
+        # Python/pytest
+        if [[ -f "$SCAN_DIR/requirements.txt" ]] || [[ -f "$SCAN_DIR/pyproject.toml" ]] || [[ -f "$SCAN_DIR/setup.py" ]]; then
+            if [[ -f "$SCAN_DIR/.venv/bin/activate" ]]; then
+                source "$SCAN_DIR/.venv/bin/activate"
+            fi
+            if command -v pytest &> /dev/null; then
                 echo "[$(get_timestamp)] Running: pytest"
                 TEST_OUTPUT=$(run_with_timeout "$VERIFY_TIMEOUT_SECS" "$VERIFY_TIMEOUT_KILL_SECS" pytest -v --tb=short 2>&1)
                 TEST_CODE=$?
@@ -351,9 +485,9 @@ if [[ $LLM_EXIT_CODE -eq 0 ]]; then
             fi
         fi
 
-        # Node.js support
-        if [[ -f "$REPO_DIR/package.json" ]]; then
-            if grep -q '"test"' "$REPO_DIR/package.json"; then
+        # Node.js
+        if [[ -f "$SCAN_DIR/package.json" ]]; then
+            if grep -q '"test"' "$SCAN_DIR/package.json"; then
                 echo "[$(get_timestamp)] Running: npm test"
                 TEST_OUTPUT=$(run_with_timeout "$VERIFY_TIMEOUT_SECS" "$VERIFY_TIMEOUT_KILL_SECS" npm test 2>&1)
                 TEST_CODE=$?
@@ -363,49 +497,44 @@ if [[ $LLM_EXIT_CODE -eq 0 ]]; then
             fi
         fi
 
-        # Makefile support
-        if [[ -f "$REPO_DIR/Makefile" ]]; then
-            if grep -q 'test:' "$REPO_DIR/Makefile"; then
-                echo "[$(get_timestamp)] Running: make test"
-                TEST_OUTPUT=$(run_with_timeout "$VERIFY_TIMEOUT_SECS" "$VERIFY_TIMEOUT_KILL_SECS" make test 2>&1)
-                TEST_CODE=$?
-                [[ $TEST_CODE -ne 0 ]] && TEST_PASSED=false
-                [[ $VERIFY_EXIT_CODE -eq 0 && $TEST_CODE -ne 0 ]] && VERIFY_EXIT_CODE=$TEST_CODE
-                echo "$TEST_OUTPUT" >> "$LOG_FILE"
-            fi
+        # Makefile
+        if [[ -f "$SCAN_DIR/Makefile" ]] && grep -q 'test:' "$SCAN_DIR/Makefile"; then
+            echo "[$(get_timestamp)] Running: make test"
+            TEST_OUTPUT=$(run_with_timeout "$VERIFY_TIMEOUT_SECS" "$VERIFY_TIMEOUT_KILL_SECS" make test 2>&1)
+            TEST_CODE=$?
+            [[ $TEST_CODE -ne 0 ]] && TEST_PASSED=false
+            [[ $VERIFY_EXIT_CODE -eq 0 && $TEST_CODE -ne 0 ]] && VERIFY_EXIT_CODE=$TEST_CODE
+            echo "$TEST_OUTPUT" >> "$LOG_FILE"
         fi
 
-        # run.sh support
-        if [[ -f "$REPO_DIR/run.sh" ]]; then
-            if grep -q 'test' "$REPO_DIR/run.sh"; then
-                echo "[$(get_timestamp)] Running: ./run.sh test"
-                TEST_OUTPUT=$(run_with_timeout "$VERIFY_TIMEOUT_SECS" "$VERIFY_TIMEOUT_KILL_SECS" bash ./run.sh test 2>&1)
-                TEST_CODE=$?
-                [[ $TEST_CODE -ne 0 ]] && TEST_PASSED=false
-                [[ $VERIFY_EXIT_CODE -eq 0 && $TEST_CODE -ne 0 ]] && VERIFY_EXIT_CODE=$TEST_CODE
-                echo "$TEST_OUTPUT" >> "$LOG_FILE"
-            fi
+        # run.sh
+        if [[ -x "$SCAN_DIR/run.sh" ]] && grep -q 'test' "$SCAN_DIR/run.sh"; then
+            echo "[$(get_timestamp)] Running: ./run.sh test"
+            TEST_OUTPUT=$(run_with_timeout "$VERIFY_TIMEOUT_SECS" "$VERIFY_TIMEOUT_KILL_SECS" bash ./run.sh test 2>&1)
+            TEST_CODE=$?
+            [[ $TEST_CODE -ne 0 ]] && TEST_PASSED=false
+            [[ $VERIFY_EXIT_CODE -eq 0 && $TEST_CODE -ne 0 ]] && VERIFY_EXIT_CODE=$TEST_CODE
+            echo "$TEST_OUTPUT" >> "$LOG_FILE"
         fi
     fi
 
-    # Best Practice: 测试失败必须标记为 failed
     if [[ "$TEST_PASSED" == "false" ]]; then
-        echo "[$(get_timestamp)] ❌ TEST FAILED - marking task as FAILED"
-        echo "TEST_RESULT: FAILED" >> "$LOG_FILE"
+        echo "[$(get_timestamp)] GATE 4 FAIL: tests failed"
+        echo "QUALITY_GATE_4: FAILED" >> "$LOG_FILE"
         if [[ $VERIFY_EXIT_CODE -eq 124 ]]; then
             EXIT_CODE=124
-            ERROR_MSG="Verification timeout after ${VERIFY_TIMEOUT_SECS}s"
+            ERROR_MSG="Gate 4: test timeout (${VERIFY_TIMEOUT_SECS}s)"
         else
             EXIT_CODE=1
-            ERROR_MSG="Verification tests failed"
+            ERROR_MSG="Gate 4: tests failed"
         fi
     else
-        echo "[$(get_timestamp)] ✅ ALL TESTS PASSED"
-        echo "TEST_RESULT: PASSED" >> "$LOG_FILE"
+        echo "[$(get_timestamp)] GATE 4 PASS: all tests green"
+        echo "QUALITY_GATE_4: PASSED" >> "$LOG_FILE"
         EXIT_CODE=0
     fi
 else
-    EXIT_CODE=$LLM_EXIT_CODE
+    EXIT_CODE=${EXIT_CODE:-$LLM_EXIT_CODE}
 fi
 
 # === Write final status ===

@@ -36,6 +36,28 @@ def init_db():
             );
             CREATE INDEX IF NOT EXISTS idx_runs_project ON runs(project);
             CREATE INDEX IF NOT EXISTS idx_lr_run ON layer_results(run_id);
+
+            CREATE TABLE IF NOT EXISTS code_jobs (
+                id TEXT PRIMARY KEY,
+                type TEXT NOT NULL CHECK(type IN ('content', 'code')),
+                source TEXT NOT NULL CHECK(source IN ('github_issue', 'todo_scan', 'failing_ci', 'manual')),
+                priority INTEGER DEFAULT 2,
+                state TEXT DEFAULT 'queued' CHECK(state IN ('queued','running','blocked','done','failed','needs_human')),
+                lock_owner TEXT,
+                lock_expires_at TEXT,
+                workspace_path TEXT,
+                artifact_links JSON DEFAULT '{}',
+                payload JSON,
+                created_at TEXT NOT NULL,
+                updated_at TEXT NOT NULL,
+                started_at TEXT,
+                completed_at TEXT,
+                error TEXT,
+                retry_count INTEGER DEFAULT 0,
+                max_retries INTEGER DEFAULT 2
+            );
+            CREATE INDEX IF NOT EXISTS idx_code_jobs_state ON code_jobs(state);
+            CREATE INDEX IF NOT EXISTS idx_code_jobs_lock ON code_jobs(lock_owner, lock_expires_at);
         """)
 
 
