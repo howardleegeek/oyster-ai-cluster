@@ -1,0 +1,64 @@
+{
+  "_meta": {
+    "description": "Human-curated golden standard OSS matches. Scanner checks here FIRST before GitHub search.",
+    "updated": "2026-02-18",
+    "source": "Howard manual review"
+  },
+  "products": {
+    "clawmarketing": {"repo": "mautic/mautic", "stars": 9200, "license": "gpl-3.0", "usage": "Fork + brand + add AI layer"},
+    "clawphones": {"repo": "asterisk/asterisk", "stars": 3100, "license": "gpl-2.0", "usage": "Backend phone engine"},
+    "clawvision": {"repo": "roboflow/supervision", "stars": 36500, "license": "mit", "usage": "CV toolkit + YOLO"},
+    "clawcontrol": {"repo": "caprover/caprover", "stars": 14800, "license": "apache-2.0", "usage": "DevOps control panel"},
+    "gem-platform": {"repo": "reservoirprotocol/marketplace-v2", "stars": 164, "license": "mit", "usage": "NFT marketplace whitelabel"},
+    "worldglasses-web": {"repo": "AR-js-org/AR.js", "stars": 15800, "license": "mit", "usage": "Browser AR demo"},
+    "studytwin": {"repo": "HKUDS/DeepTutor", "stars": 10300, "license": "mit", "usage": "AI study assistant"},
+    "openclaw-mission-control": {"repo": "nasa/openmct", "stars": 12800, "license": "apache-2.0", "usage": "Mission control dashboard"},
+    "contentforge": {"repo": "langgenius/dify", "stars": 58000, "license": "apache-2.0", "usage": "AI content generation platform"},
+    "agentforge": {"repo": "crewAIInc/crewAI", "stars": 44000, "license": "mit", "usage": "Multi-agent framework"}
+  },
+  "social": {
+    "twitter-poster": {"repo": "tweepy/tweepy", "stars": 11100, "license": "mit", "usage": "Twitter API wrapper"},
+    "bluesky-poster": {"repo": "MarshalX/atproto", "stars": 639, "license": "mit", "usage": "AT Protocol SDK"},
+    "discord-admin": {"repo": "Cog-Creators/Red-DiscordBot", "stars": 5400, "license": "gpl-3.0", "usage": "Modular Discord bot"},
+    "linkedin-optimize": {"repo": "eracle/OpenOutreach", "stars": 100, "license": "mit", "usage": "LinkedIn automation"},
+    "whatsapp-web-sender": {"repo": "pedroslopez/whatsapp-web.js", "stars": 21200, "license": "apache-2.0", "usage": "WhatsApp automation"},
+    "reddit-manager": {"repo": "praw-dev/praw", "stars": 4000, "license": "bsd-2-clause", "usage": "Reddit API wrapper"}
+  },
+  "web3": {
+    "crypto-insurance": {"repo": "neptune-mutual-blue/protocol", "stars": 579, "license": "apache-2.0", "usage": "Parametric insurance contracts"},
+    "prediction-perps": {"repo": "drift-labs/protocol-v2", "stars": 377, "license": "apache-2.0", "usage": "Perps + prediction market"},
+    "prop-amm": {"repo": "Uniswap/v4-core", "stars": 2400, "license": "busl-1.1", "usage": "Hook-based custom AMM"},
+    "everyday-defi": {"repo": "rainbow-me/rainbow", "stars": 4100, "license": "gpl-3.0", "usage": "Consumer DeFi wallet"},
+    "sovereign-privacy": {"repo": "AztecProtocol/aztec-packages", "stars": 417, "license": "apache-2.0", "usage": "ZK privacy L2"},
+    "depin-assistant": {"repo": "iotexproject/w3bstream", "stars": 41, "license": "apache-2.0", "usage": "DePIN verification layer"},
+    "next-gen-oracles": {"repo": "smartcontractkit/chainlink", "stars": 8200, "license": "mit", "usage": "Oracle standard"},
+    "ai-powered-trading": {"repo": "freqtrade/freqtrade", "stars": 45900, "license": "gpl-3.0", "usage": "AI quant trading framework"},
+    "ai-driven-defi-advisor": {"repo": "AI4Finance-Foundation/FinGPT", "stars": 18600, "license": "mit", "usage": "Financial LLM"},
+    "decentralized-ai-compute": {"repo": "akash-network/node", "stars": 1100, "license": "apache-2.0", "usage": "Decentralized compute market"},
+    "ai-powered-web3-sdk": {"repo": "thirdweb-dev/js", "stars": 626, "license": "apache-2.0", "usage": "Web3 SDK + AI"},
+    "onchain-fx": {"repo": "GainsNetwork/gTrade-v6", "stars": 11, "license": "mit", "usage": "On-chain FX contracts"}
+  },
+  "ai_agent": {
+    "ai-software-engineering-agent": {"repo": "All-Hands-AI/OpenHands", "stars": 65000, "license": "mit", "usage": "AI coding agent"},
+    "ai-sales-startup": {"repo": "twentyhq/twenty", "stars": 20000, "license": "agpl-3.0", "usage": "Open source CRM + AI"},
+    "ai-contract-review": {"repo": "Open-Source-Legal/OpenContracts", "stars": 400, "license": "agpl-3.0", "usage": "AI legal contract review"},
+    "ai-enhanced-web-crawling": {"repo": "unclecode/crawl4ai", "stars": 58000, "license": "apache-2.0", "usage": "AI web crawler"},
+    "voice-ai-for-customer-service": {"repo": "livekit/agents", "stars": 9200, "license": "apache-2.0", "usage": "Voice AI agent"},
+    "self-improving-ai-agents": {"repo": "EvoAgentX/EvoAgentX", "stars": 2500, "license": "apache-2.0", "usage": "Self-evolving agent"},
+    "ai-in-edge-devices": {"repo": "ggml-org/llama.cpp", "stars": 95000, "license": "mit", "usage": "Edge LLM inference"},
+    "llm-cost-optimization": {"repo": "microsoft/LLMLingua", "stars": 5200, "license": "mit", "usage": "Prompt compression"},
+    "ai-in-ar-glasses": {"repo": "AugmentOS-Community/AugmentOS", "stars": 1800, "license": "apache-2.0", "usage": "Smart glasses OS"},
+    "competitor-gap-driven": {"repo": "brightdata/competitive-intelligence", "stars": 50, "license": "mit", "usage": "Competitive intel agent"}
+  },
+  "infra": {
+    "distributed-task-dispatch": {"repo": "ray-project/ray", "stars": 37000, "license": "apache-2.0", "usage": "Replaces 60% of dispatch"},
+    "workflow-orchestration": {"repo": "temporalio/temporal", "stars": 12000, "license": "mit", "usage": "Lease + self-healing"},
+    "bft-consensus": {"repo": "cometbft/cometbft", "stars": 5700, "license": "apache-2.0", "usage": "Byzantine consensus"},
+    "p2p-node-discovery": {"repo": "libp2p/go-libp2p", "stars": 6000, "license": "mit", "usage": "P2P node communication"},
+    "rag-pipeline": {"repo": "deepset-ai/haystack", "stars": 18000, "license": "apache-2.0", "usage": "Research pipeline"},
+    "research-agent": {"repo": "assafelovic/gpt-researcher", "stars": 16000, "license": "mit", "usage": "Deep research agent"},
+    "cv-detection": {"repo": "ultralytics/ultralytics", "stars": 38000, "license": "agpl-3.0", "usage": "YOLO object detection"},
+    "edge-inference": {"repo": "openvinotoolkit/openvino", "stars": 8000, "license": "apache-2.0", "usage": "Edge inference optimization"},
+    "decentralized-auth": {"repo": "ory/kratos", "stars": 11000, "license": "apache-2.0", "usage": "DAuth foundation"}
+  }
+}
