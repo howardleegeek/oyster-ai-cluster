@@ -1,7 +1,7 @@
 {
   "_meta": {
     "description": "Human-curated golden standard OSS matches. Scanner checks here FIRST before GitHub search.",
-    "updated": "2026-02-18",
+    "updated": "2026-02-18T14:30:00",
     "source": "Howard manual review"
   },
   "products": {
@@ -36,7 +36,20 @@
     "ai-driven-defi-advisor": {"repo": "AI4Finance-Foundation/FinGPT", "stars": 18600, "license": "mit", "usage": "Financial LLM"},
     "decentralized-ai-compute": {"repo": "akash-network/node", "stars": 1100, "license": "apache-2.0", "usage": "Decentralized compute market"},
     "ai-powered-web3-sdk": {"repo": "thirdweb-dev/js", "stars": 626, "license": "apache-2.0", "usage": "Web3 SDK + AI"},
-    "onchain-fx": {"repo": "GainsNetwork/gTrade-v6", "stars": 11, "license": "mit", "usage": "On-chain FX contracts"}
+    "onchain-fx": {"repo": "GainsNetwork/gTrade-v6", "stars": 11, "license": "mit", "usage": "On-chain FX contracts"},
+    "agent-wallet-sdk": {"repo": "coinbase/agentkit", "stars": 1100, "license": "apache-2.0", "usage": "Agent wallet SDK with spending limits + multi-chain"},
+    "zkml-verification": {"repo": "zkonduit/ezkl", "stars": 1170, "license": "apache-2.0", "usage": "ZKML proof engine for on-chain AI verification"},
+    "decentralized-inference-api": {"repo": "ritual-net/infernet-node", "stars": 200, "license": "bsd-3-clause", "usage": "Decentralized AI inference + on-chain delivery"},
+    "agent-identity-reputation": {"repo": "fetchai/uAgents", "stars": 1545, "license": "apache-2.0", "usage": "Agent identity + discovery + reputation"},
+    "stablecoin-yield-agent": {"repo": "yearn/yearn-vaults-v3", "stars": 158, "license": "agpl-3.0", "usage": "Yield vault framework + strategy plugins"},
+    "trading-agent": {"repo": "hummingbot/hummingbot", "stars": 17200, "license": "apache-2.0", "usage": "Market making + arbitrage framework 140+ venues"},
+    "treasury-manager": {"repo": "safe-fndn/safe-smart-account", "stars": 2110, "license": "lgpl-3.0", "usage": "Multi-sig treasury + spending policies"},
+    "nl-defi-bot": {"repo": "tradingstrategy-ai/web3-ethereum-defi", "stars": 774, "license": "mit", "usage": "Python DeFi primitives for NL bot"},
+    "ai-prediction-market": {"repo": "Polymarket/agents", "stars": 2187, "license": "mit", "usage": "AI prediction market agent framework"},
+    "nft-floor-agent": {"repo": "NFTGo/GoTrading", "stars": 178, "license": "bsd-3-clause", "usage": "NFT trading aggregation SDK"},
+    "mev-agent": {"repo": "flashbots/mev-boost", "stars": 1404, "license": "mit", "usage": "MEV infrastructure + searcher framework"},
+    "dao-governance-agent": {"repo": "snapshot-labs/snapshot", "stars": 9162, "license": "mit", "usage": "DAO voting platform + proposal API"},
+    "crosschain-bridge-agent": {"repo": "lifinance/sdk", "stars": 249, "license": "apache-2.0", "usage": "Cross-chain bridge + DEX aggregation SDK"}
   },
   "ai_agent": {
     "ai-software-engineering-agent": {"repo": "All-Hands-AI/OpenHands", "stars": 65000, "license": "mit", "usage": "AI coding agent"},
