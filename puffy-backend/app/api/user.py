@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 import logging
 
 from fastapi import APIRouter, HTTPException
@@ -118,6 +118,7 @@ def get_current_user(
 
 class TwitterOauth(BaseModel):
     auth_code: str
+    state: Optional[str] = None  # OAuth state param that maps to a cached PKCE verifier
 
 
 @router.post("/twitter-oauth")
@@ -125,13 +126,24 @@ def update_user_twitter(
     req: TwitterOauth,
     user: UserAuthDep,
     user_service: UserServiceDep,
-    settings: SettingsDep
+    settings: SettingsDep,
+    cache_db: CacheDbDep,
 ) -> SuccessResp:
+    # Look up the PKCE code_verifier from cache if state is provided.
+    # Falls back to 'challenge' for backward compatibility with frontends
+    # that haven't implemented PKCE yet.
+    code_verifier = "challenge"
+    if req.state:
+        cached_verifier = cache_db.get_data(f"pkce:{req.state}")
+        if cached_verifier:
+            code_verifier = cached_verifier
+
     twitter_id = twitter_oauth(
         settings.twitter_id,
         settings.twitter_secret,
         req.auth_code,
-        settings.twitter_redirect_url
+        settings.twitter_redirect_url,
+        code_verifier=code_verifier,
     )
     if twitter_id is None:
         logger.info("oauth failed")
