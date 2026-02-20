@@ -4,7 +4,7 @@ from sqlalchemy import select, desc, text
 from fastapi import Depends
 
 from app.models.order import Order as OrderModel, Payment, ShippingAddress, OrderItem
-from app.models.user import PassCode, ReferralCode
+from app.models.user import PassCode, ReferralCode, PassCodeUsage, ReferralCodeUsage
 from app.schemas.order import Order as OrderSchema, ShippingAddress as ShippingAddressSchema
 from app.db.err import RecordNotFoundError
 from app.db.base import get_db
@@ -79,6 +79,33 @@ class OrderRepo:
             self.db.commit()
             if result.rowcount == 0:
                 logger.warning("Pass code exhausted or not found: %s", order.pass_code)
+            else:
+                # Write PassCodeUsage audit record
+                try:
+                    passcode = self.get_pass_code(order.pass_code)
+                    if passcode:
+                        self.db.add(PassCodeUsage(
+                            code_owner_id=passcode.user_id,
+                            code_user_id=order.user_id,
+                            order_id=db_order.id,
+                            used_at=datetime.now(),
+                        ))
+                except Exception:
+                    logger.exception("Failed to write PassCodeUsage audit for code %s", order.pass_code)
+
+        # Write ReferralCodeUsage audit record if referral code provided
+        if order.referral_code:
+            try:
+                referral = self.get_referral_code(order.referral_code)
+                if referral:
+                    self.db.add(ReferralCodeUsage(
+                        code_owner_id=referral.user_id,
+                        code_user_id=order.user_id,
+                        order_id=db_order.id,
+                        used_at=datetime.now(),
+                    ))
+            except Exception:
+                logger.exception("Failed to write ReferralCodeUsage audit for code %s", order.referral_code)
 
         # Create order items
         if order.items:
