@@ -1,6 +1,6 @@
 from typing import List, Optional, Annotated
 from sqlalchemy.orm import Session
-from sqlalchemy import select, desc
+from sqlalchemy import select, desc, text
 from fastapi import Depends
 
 from app.models.order import Order as OrderModel, Payment, ShippingAddress, OrderItem
@@ -67,12 +67,18 @@ class OrderRepo:
         self.db.commit()
         self.db.refresh(db_order)
 
-        # Increment passcode usage if provided
+        # Atomically increment passcode usage if provided
         if order.pass_code:
-            passcode_db = self.db.query(PassCode).filter(PassCode.pass_code == order.pass_code).first()
-            if passcode_db:
-                passcode_db.current_uses = passcode_db.current_uses + 1
-                self.db.commit()
+            result = self.db.execute(
+                text(
+                    "UPDATE pass_codes SET current_uses = current_uses + 1 "
+                    "WHERE pass_code = :code AND current_uses < max_uses"
+                ),
+                {"code": order.pass_code},
+            )
+            self.db.commit()
+            if result.rowcount == 0:
+                logger.warning("Pass code exhausted or not found: %s", order.pass_code)
 
         # Create order items
         if order.items:
