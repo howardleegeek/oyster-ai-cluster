@@ -39,7 +39,7 @@ export default function WalletSwitch({
           className="font-pingfang px-[18px] py-[5px] border border-black/10 rounded-[60px] cursor-pointer active:scale-95 transition-all duration-300"
           onClick={disconnect}
         >
-          Swicth
+          Switch
         </button>
       )}
     </div>

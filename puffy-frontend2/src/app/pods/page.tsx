@@ -22,6 +22,7 @@ import { useCart } from "@/contexts/CartContext";
 import {
   UNIFIED_CHECKOUT_SESSION_KEY,
   type UnifiedCheckoutSessionPayload,
+  type UnifiedPodsItem,
 } from "@/types/unifiedCart";
 import { DEVICE_PRICE_USD, DEFAULT_DEVICE_SHIPPING_USD } from "@/types/cartCheckout";
 import { NOTIFICATION_CONFIG } from "@/components/common/notificationConfig";
@@ -74,18 +75,18 @@ export default function PodsPage() {
     const qtyToAdd = Math.min(selectedQuantity, room);
     if (qtyToAdd <= 0) return;
     addPodsItem(
-      selectedVariant === "fresh"
+      (selectedVariant === "fresh"
         ? {
-            variant: "fresh",
+            variant: "fresh" as const,
             flavor: selectedFlavor,
             quantity: qtyToAdd,
           }
         : {
-            variant: "vape",
+            variant: "vape" as const,
             flavor: selectedFlavor,
             nicotine: selectedNicotine,
             quantity: qtyToAdd,
-          }
+          }) as Omit<UnifiedPodsItem, "type">
     );
     api.success({
       content: "Added to cart",

@@ -133,7 +133,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const addPodsItem = useCallback(
     (item: Omit<UnifiedPodsItem, "type">) => {
-      const full: UnifiedPodsItem = { ...item, type: "pods" };
+      const full = { ...item, type: "pods" as const } as UnifiedPodsItem;
       setItems((prev) => {
         const podsOnly = getPodsItems(prev);
         const totalPods = podsOnly.reduce((s, i) => s + i.quantity, 0);
