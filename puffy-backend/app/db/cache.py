@@ -66,9 +66,9 @@ CacheDbDep = Annotated[CacheDb, Depends(get_cache_db)]
 
 
 if __name__ == '__main__':
-    storage = SessionDb()
-    a = storage.new_session("1234567890")  # Store OTP for 60 seconds
+    from app.config import get_settings
+    storage = CacheDb(get_settings())
+    a = storage.new_session(schemas.SessionData(message="test", wallet_address="0x1234"))
     print(a)
-    # Get stored OTP (valid for 60 seconds)
     otp = storage.get_session(a)
     print(otp)
