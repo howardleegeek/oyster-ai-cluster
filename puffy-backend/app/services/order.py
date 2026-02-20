@@ -12,7 +12,7 @@ from app.db.user import User as UserRepo
 import app.schemas as schemas
 import app.models as models
 from app.services.error import *
-from app.enums import OrderStatus, ProductType
+from app.enums import OrderStatus, ProductType, VAPE_ELIGIBLE_COUNTRIES
 
 
 logger = logging.getLogger(__name__)
@@ -249,15 +249,15 @@ class OrderService:
                 return False
 
             if product_db.product_type == ProductType.VAPE:
-                # If VAPE, check if shipping_address.country is in restricted areas
+                # If VAPE, check if shipping country is in eligible list
+                # (matching frontend puffyRules.ts)
                 if not order.shipping_address:
                     logger.warning("VAPE product requires shipping address")
                     return False
 
                 country = order.shipping_address.country
-                restricted_area = self.product_db.get_restricted_area(product_db.product_type, country)
-                if restricted_area:
-                    logger.warning(f"VAPE product cannot be shipped to restricted country: {country}")
+                if country not in VAPE_ELIGIBLE_COUNTRIES:
+                    logger.warning(f"VAPE product not eligible for country: {country}")
                     return False
 
         return True
