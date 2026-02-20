@@ -34,7 +34,8 @@ class Settings(BaseSettings):
     mint_key: str
     sol_api_url: str
     nft_api_url: str
-    nft_api_key: str 
+    nft_api_key: str
+    session_ttl: int = 600  # seconds
 
     model_config = SettingsConfigDict(env_file=".env")
 
