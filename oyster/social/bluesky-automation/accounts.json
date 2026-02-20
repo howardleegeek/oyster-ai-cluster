@@ -1,0 +1,86 @@
+{
+  "accounts": {
+    "oysterecosystem": {
+      "handle": "oysterecosystem.bsky.social",
+      "app_password": "yjs3-a2gf-3j5s-guu7",
+      "persona": "Nation Founder",
+      "bio": "Oyster Republic: AI + Web3 Hardware Nation 🦪\nPhysical Intelligence + DePIN + UBI + AI Hardware\n\nProducts: ClawGlasses | OpenClaw | UBS Phone | Puffy AI\nJoin us → oysterrepublic.xyz\n\n#DePIN #PhysicalIntelligence #AIHardware",
+      "enabled": true,
+      "color": "#FF6B35"
+    },
+    "clawglasses": {
+      "handle": "clawglasses.bsky.social",
+      "app_password": "TODO_GET_FROM_SCREENSHOT",
+      "persona": "Claw Operator + Hardware Tinkerer",
+      "bio": "Building the future of AI glasses 🧿\nClawGlasses daily ops & OTA updates\n\nReal usage, real feedback, real hardware vibes\n\n→ oysterrepublic.xyz/clawglasses\n\n#AIWearables #PhysicalIntelligence",
+      "enabled": true,
+      "color": "#4ECDC4"
+    },
+    "oyster_ubi_citizen": {
+      "handle": "oyster_ubi_citizen.bsky.social",
+      "app_password": "TODO",
+      "persona": "UBI Citizen",
+      "bio": "Living in Oyster Republic 🦪\nUBI recipient & crypto curious\n\nSharing the journey of being a UBI citizen in the AI age\n\n#UBI #OysterRepublic #DePIN",
+      "enabled": false,
+      "color": "#45B7D1"
+    },
+    "depin_scout_oyster": {
+      "handle": "depin_scout_oyster.bsky.social",
+      "app_password": "TODO",
+      "persona": "DePIN Scout",
+      "bio": "Scouting the DePIN frontier 🔭\nOyster Republic ecosystem observer\n\nTracking: AI Hardware, Physical Intelligence, Decentralized Infrastructure\n\n#DePIN #AIagents #Web3",
+      "enabled": false,
+      "color": "#96CEB4"
+    },
+    "openclaw_dev": {
+      "handle": "openclaw_dev.bsky.social",
+      "app_password": "TODO",
+      "persona": "Hardware Dev",
+      "bio": "OpenClaw developer 🛠️\nBuilding in public\n\nCode, hacks, bugs, OTA deploys\n\n→ github.com/oysterlabs\n\n#OpenSource #HardwareDev #AIagents",
+      "enabled": false,
+      "color": "#FFEAA7"
+    },
+    "puffy_ai_daily": {
+      "handle": "puffy_ai_daily.bsky.social",
+      "app_password": "26io-ft55-ktgy-6hop",
+      "persona": "Puffy AI Operator",
+      "bio": "Puffy AI daily vibes 🤖\nAI agent in action\n\nScreenshots, workflows, agent adventures\n\n#AIAgents #PuffyAI #OysterRepublic",
+      "enabled": true,
+      "color": "#DDA0DD"
+    },
+    "oyster_nation_memes": {
+      "handle": "oyster_nation_memes.bsky.social",
+      "app_password": "TODO",
+      "persona": "Meme Account",
+      "bio": "Oyster Republic Meme Lord 🎭\nPure memes, no substance\n\n🦪⚡\n\n#OysterRepublic #Memes #Crypto",
+      "enabled": false,
+      "color": "#FF69B4"
+    }
+  },
+  "schedule": {
+    "peak_hours": ["10:00", "14:00", "20:00"],
+    "posts_per_day": 3,
+    "account_rotation": "random",
+    "enabled": true
+  },
+  "content": {
+    "topics": [
+      "ClawGlasses new features",
+      "OpenClaw OTA updates",
+      "UBI distribution",
+      "Puffy AI workflows",
+      "DePIN news",
+      "AI hardware trends"
+    ],
+    "hashtags": [
+      "#OysterRepublic",
+      "#DePIN",
+      "#PhysicalIntelligence",
+      "#AIHardware",
+      "#ClawGlasses",
+      "#OpenClaw",
+      "#UBI",
+      "#AIAgents"
+    ]
+  }
+}
