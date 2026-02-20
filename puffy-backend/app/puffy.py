@@ -3,8 +3,11 @@ from app.api.product import router as product_router
 from app.api.order import router as order_router
 from app.config import get_settings
 from app.db.base import Base, engine, get_db
+from app.rate_limit import limiter
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 from dotenv import load_dotenv
@@ -15,6 +18,8 @@ import os
 
 def start_app():
     app = FastAPI(swagger_ui_parameters={"syntaxHighlight": False}, openapi_url="/apidoc/openapi.json")
+    app.state.limiter = limiter
+    app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
     app.include_router(user_router)
     app.include_router(product_router)
     app.include_router(order_router)

@@ -17,6 +17,7 @@ PyYAML==6.0.1
 solana==0.34.0
 toml==0.10.2
 alembic==1.13.1
+slowapi==0.1.9
 
 # Testing dependencies
 pytest==8.0.0

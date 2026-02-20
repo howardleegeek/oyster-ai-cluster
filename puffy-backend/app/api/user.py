@@ -1,10 +1,11 @@
 from typing import List, Optional
 import logging
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
 from app.error import UserError, ServerError
+from app.rate_limit import limiter
 from app.utils import SuccessResp, SettingsDep, SolDep
 from app.plib import *
 
@@ -26,7 +27,8 @@ logger = logging.getLogger(__name__)
 
 
 @router.get("/sign-in")
-def sign_in_user(cache_db: CacheDbDep) -> schemas.SessionInfo:
+@limiter.limit("10/minute")
+def sign_in_user(request: Request, cache_db: CacheDbDep) -> schemas.SessionInfo:
     # Generate a random message
     message = gen_random_hex_str(20)
     # Store the message and user address for later verification
@@ -70,7 +72,9 @@ class TokenResp(BaseModel):
 
 
 @router.post("/verify")
+@limiter.limit("10/minute")
 def verify_user(
+    request: Request,
     req: UserVerify,
     cache_db: CacheDbDep,
     sol: SolDep,
@@ -122,7 +126,9 @@ class TwitterOauth(BaseModel):
 
 
 @router.post("/twitter-oauth")
+@limiter.limit("10/minute")
 def update_user_twitter(
+    request: Request,
     req: TwitterOauth,
     user: UserAuthDep,
     user_service: UserServiceDep,
