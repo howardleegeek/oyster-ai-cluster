@@ -1,0 +1,40 @@
+## 目标
+重构 ClawMarketing 认证页面 (Login, Register)，打造高级感 UI
+
+## 约束
+- 不改后端 API 逻辑
+- 不改功能流程，只提升视觉
+- 使用现有依赖 (Tailwind CSS 已安装)
+
+## 具体改动
+
+### Login.tsx
+- **美学方向**: 极简奢华 (Luxury Minimal)
+- **设计要点**:
+  - 深色主题，背景用微妙的渐变或几何纹理
+  - 字体: 选 distinctive font (如 Playfair Display + Inter 组合)
+  - 登录框: 磨砂玻璃效果 (backdrop-blur)，精致边框
+  - 输入框: 优雅的 focus 动画，微光效果
+  - 按钮: 高级渐变，hover 有细腻的 scale 和光晕
+  - 动画: 页面加载时 staggered fade-in
+
+### Register.tsx
+- **美学方向**: 与 Login 一致，保持品牌统一
+- **设计要点**:
+  - 复用 Login 的设计系统
+  - 表单布局更宽敞，label 和 input 间距舒适
+  - 密码强度指示器用优雅的可视化设计
+
+## 验收标准
+- [ ] Login 页面视觉高级，有品牌感
+- [ ] Register 页面与 Login 风格统一
+- [ ] 动画流畅，无卡顿
+- [ ] 表单交互有反馈 (focus, hover, error states)
+
+## FALLBACK PROTOCOL INITIATED
+Previous attempts continuously failed. Final error:
+```
+Activity task failed
+```
+
+**CRITICAL INSTRUCTION**: Abandon your previous approach. Simplify your solution, use alternative methods, or stub the functionality safely. Do NOT repeat the same mistakes.

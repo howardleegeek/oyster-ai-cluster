@@ -1,0 +1,7 @@
+# SOPS Configuration for Oyster Labs
+# Use age encryption with the generated key
+
+creation_rules:
+  # Encrypt all files by default
+  - age: >-
+      age1eqmr908nfnn7p5qly0r2a4v89w3z046vvk6cccdcy69zkvk9nqvsejm3cp

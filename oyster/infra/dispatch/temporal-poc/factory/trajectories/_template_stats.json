@@ -1,0 +1,8 @@
+{
+  "default": {
+    "template_id": "default",
+    "description": "Base spec template",
+    "successes": 12,
+    "failures": 16
+  }
+}

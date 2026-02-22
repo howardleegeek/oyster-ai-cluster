@@ -1,0 +1,12 @@
+model_list:
+  - model_name: MiniMax-M2.5
+    litellm_params:
+      model: MiniMax/MiniMax-M2.5
+      api_key: os.environ/MINIMAX_API_KEY
+      base_url: https://api.minimax.io/v1/text/chatcompletion_v2
+
+litellm_settings:
+  drop_params: true
+
+general_settings:
+  master_key: sk-oyster-123456

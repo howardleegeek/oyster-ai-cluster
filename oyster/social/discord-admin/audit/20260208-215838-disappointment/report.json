@@ -1,0 +1,116 @@
+{
+  "ok": true,
+  "guildId": "1404726112159793172",
+  "guildName": "Oyster Republic (服务器)",
+  "pickedChannels": [
+    {
+      "name": "entry-channel",
+      "channelId": "1416430673652355112",
+      "aria": null,
+      "url": "https://discord.com/channels/1404726112159793172/1416430673652355112",
+      "messagesCount": 59
+    }
+  ],
+  "scannedMessages": 59,
+  "disappointedMessages": 8,
+  "themes": [
+    {
+      "theme": "claim/rewards",
+      "count": 8
+    },
+    {
+      "theme": "product/app broken",
+      "count": 1
+    }
+  ],
+  "authors": [
+    {
+      "author": "PS886 $DROPEE",
+      "lang": "en",
+      "themes": [
+        "claim/rewards",
+        "product/app broken"
+      ],
+      "count": 2,
+      "channels": [
+        "entry-channel"
+      ],
+      "sample": "@Oysterguard Hey guys something confusing here, most of us holders got eligibl using our UBS1 ton wallet, \n\nHowever when we get the getpuffy whitelist, the website opt us to use SOL wallet, so I myself use that too, so I think most of us are not eligible because the wallet registed to it is our SOL wallet and not the UBS1 ton wallet address. \n\nlet me know if this is right or wrong, because I can't",
+      "targetChannelId": "1416430673652355112",
+      "targetMessageId": "1447513128110915624",
+      "targetMessageUrl": "https://discord.com/channels/1404726112159793172/1416430673652355112/1447513128110915624",
+      "replyShort": "Thanks for raising this — we’ll reconcile the numbers. If you’re seeing “No eligible NFT found”, share your wallet + a screenshot of that screen. I’ll reconcile any mismatch (DM ok).",
+      "draft": "@PS886 $DROPEE Thanks for calling this out. You're right to be frustrated.\\nOn claims/rewards: tell me what you see in-app (screenshot is ok). We'll verify your Founder Pass / OYS allocation and fix any mismatch.\\nIf it's an app/device issue, share the error or steps to reproduce and we'll triage it fast.\\nIf you prefer, DM me your details and I'll handle it 1:1.\\nI saw your message: \"@Oysterguard Hey guys something confusing here, most of us holders got eligibl using our UBS1 ton wallet, \n\nHowever when\""
+    },
+    {
+      "author": "leyiao",
+      "lang": "zh",
+      "themes": [
+        "claim/rewards"
+      ],
+      "count": 2,
+      "channels": [
+        "entry-channel"
+      ],
+      "sample": "领取护照怎么一直连不上钱包，一直失败？\\n这个没上链吧",
+      "targetChannelId": "1416430673652355112",
+      "targetMessageId": "1450708696287019049",
+      "targetMessageUrl": "https://discord.com/channels/1404726112159793172/1416430673652355112/1450708696287019049",
+      "replyShort": "懂，我来跟进到有明确结果。 发钱包地址+App里Founder Pass/OYS截图，我核对并修正；不方便公开就私信。",
+      "draft": "@leyiao 你提到的这些我看到了，确实会让人很失望/着急，对不起。\\n关于领取/奖励：你把 App 里看到的页面（截图也行）发一下，我来核对 Founder Pass/OYS 是否少发或显示异常，确认后给你处理。\\n不方便公开的话也可以私信我你的信息，我一对一帮你搞定。\\n我看到你说：\"领取护照怎么一直连不上钱包，一直失败？\\n这个没上链吧\""
+    },
+    {
+      "author": "unknown",
+      "lang": "zh",
+      "themes": [
+        "claim/rewards"
+      ],
+      "count": 2,
+      "channels": [
+        "entry-channel"
+      ],
+      "sample": "@btc155188：空投/积分显示让你很麻，这个我们会把规则和状态讲清楚；你把 App 里 OYS/Founder Pass 页面截图发我，我来核对是否少发。",
+      "targetChannelId": "1416430673652355112",
+      "targetMessageId": "1469871521433518190",
+      "targetMessageUrl": "https://discord.com/channels/1404726112159793172/1416430673652355112/1469871521433518190",
+      "replyShort": "收到，我来帮你把这件事查清楚。 发钱包地址+App里Founder Pass/OYS截图，我核对并修正；不方便公开就私信。",
+      "draft": "@unknown 你提到的这些我看到了，确实会让人很失望/着急，对不起。\\n关于领取/奖励：你把 App 里看到的页面（截图也行）发一下，我来核对 Founder Pass/OYS 是否少发或显示异常，确认后给你处理。\\n不方便公开的话也可以私信我你的信息，我一对一帮你搞定。\\n我看到你说：\"@btc155188：空投/积分显示让你很麻，这个我们会把规则和状态讲清楚；你把 App 里 OYS/Founder Pass 页面截图发我，我来核对是否少发。\""
+    },
+    {
+      "author": "btc155188",
+      "lang": "zh",
+      "themes": [
+        "claim/rewards"
+      ],
+      "count": 1,
+      "channels": [
+        "entry-channel"
+      ],
+      "sample": "买sol手机的空投麻了",
+      "targetChannelId": "1416430673652355112",
+      "targetMessageId": "1463901319986417853",
+      "targetMessageUrl": "https://discord.com/channels/1404726112159793172/1416430673652355112/1463901319986417853",
+      "replyShort": "收到，我来帮你把这件事查清楚。 发钱包地址+App里Founder Pass/OYS截图，我核对并修正；不方便公开就私信。",
+      "draft": "@btc155188 你提到的这些我看到了，确实会让人很失望/着急，对不起。\\n关于领取/奖励：你把 App 里看到的页面（截图也行）发一下，我来核对 Founder Pass/OYS 是否少发或显示异常，确认后给你处理。\\n不方便公开的话也可以私信我你的信息，我一对一帮你搞定。\\n我看到你说：\"买sol手机的空投麻了\""
+    },
+    {
+      "author": "Oysterguard",
+      "lang": "zh",
+      "themes": [
+        "claim/rewards"
+      ],
+      "count": 1,
+      "channels": [
+        "entry-channel"
+      ],
+      "sample": "@PS886 $DROPEE $DROPEE：我看到你反馈的领取/功能问题了，麻烦把截图+复现步骤发一下，我这边核对并跟进。\\n哪一个？ puffy 还是oyster",
+      "targetChannelId": "1416430673652355112",
+      "targetMessageId": "1469910322101092352",
+      "targetMessageUrl": "https://discord.com/channels/1404726112159793172/1416430673652355112/1469910322101092352",
+      "replyShort": "懂，我来跟进到有明确结果。 发钱包地址+App里Founder Pass/OYS截图，我核对并修正；不方便公开就私信。",
+      "draft": "@Oysterguard 你提到的这些我看到了，确实会让人很失望/着急，对不起。\\n关于领取/奖励：你把 App 里看到的页面（截图也行）发一下，我来核对 Founder Pass/OYS 是否少发或显示异常，确认后给你处理。\\n不方便公开的话也可以私信我你的信息，我一对一帮你搞定。\\n我看到你说：\"@PS886 $DROPEE $DROPEE：我看到你反馈的领取/功能问题了，麻烦把截图+复现步骤发一下，我这边核对并跟进。\\n哪一个？ puffy 还是oyster\""
+    }
+  ],
+  "outputDir": "/Users/howardli/Downloads/discord-admin/audit/20260208-215838-disappointment",
+  "note": "This is based on the messages loaded in the Discord web UI (virtualized). It may not include the full history."
+}

@@ -1,0 +1,391 @@
+{
+  "nodes": {
+    "node_81d7e94a0a233a155ef4": {
+      "node_id": "node_81d7e94a0a233a155ef4",
+      "token": "tok_6fddfad784819273b0c3",
+      "name": "demo-cam",
+      "capabilities": [
+        "frame"
+      ],
+      "created_at": "2026-02-09T21:57:53.629Z"
+    },
+    "node_fbc2a8d6a29f8e8d1448": {
+      "node_id": "node_fbc2a8d6a29f8e8d1448",
+      "token": "tok_1ffeb1a37b8d26f60859",
+      "name": "demo-new-york-1",
+      "capabilities": [],
+      "created_at": "2026-02-11T04:20:19.085Z"
+    },
+    "node_1128a7a0419b9efe582d": {
+      "node_id": "node_1128a7a0419b9efe582d",
+      "token": "tok_9af0edc38d91406582af",
+      "name": "demo-new-york-2",
+      "capabilities": [],
+      "created_at": "2026-02-11T04:20:19.126Z"
+    },
+    "node_4da8c643fc4fca549781": {
+      "node_id": "node_4da8c643fc4fca549781",
+      "token": "tok_44e6b1e818c43baf34ba",
+      "name": "demo-san-francisco-1",
+      "capabilities": [],
+      "created_at": "2026-02-11T04:20:19.142Z"
+    },
+    "node_57fe47985208c3abcbbe": {
+      "node_id": "node_57fe47985208c3abcbbe",
+      "token": "tok_5c5350c714a8f9ff3243",
+      "name": "demo-san-francisco-2",
+      "capabilities": [],
+      "created_at": "2026-02-11T04:20:19.161Z"
+    },
+    "node_8f1468d500e765966296": {
+      "node_id": "node_8f1468d500e765966296",
+      "token": "tok_291344a4c65ea828c585",
+      "name": "demo-los-angeles-1",
+      "capabilities": [],
+      "created_at": "2026-02-11T04:20:19.192Z"
+    },
+    "node_09af8c3c9a8f7f20db19": {
+      "node_id": "node_09af8c3c9a8f7f20db19",
+      "token": "tok_6c44cfcfec75770f3ca4",
+      "name": "demo-los-angeles-2",
+      "capabilities": [],
+      "created_at": "2026-02-11T04:20:19.200Z"
+    },
+    "node_609252524c4813999ff1": {
+      "node_id": "node_609252524c4813999ff1",
+      "token": "tok_85f542ceb58ebd97f169",
+      "name": "demo-london-1",
+      "capabilities": [],
+      "created_at": "2026-02-11T04:20:19.209Z"
+    },
+    "node_b609be2b4d813460c4db": {
+      "node_id": "node_b609be2b4d813460c4db",
+      "token": "tok_cb37336eef80491d46c3",
+      "name": "demo-london-2",
+      "capabilities": [],
+      "created_at": "2026-02-11T04:20:19.216Z"
+    },
+    "node_73bab43faa66e0c3eac6": {
+      "node_id": "node_73bab43faa66e0c3eac6",
+      "token": "tok_0192b3be1d4c4b65805c",
+      "name": "demo-tokyo-1",
+      "capabilities": [],
+      "created_at": "2026-02-11T04:20:19.221Z"
+    },
+    "node_adc4f7c970e1c20349a2": {
+      "node_id": "node_adc4f7c970e1c20349a2",
+      "token": "tok_dab7e2a7b88efe1f0f6e",
+      "name": "demo-tokyo-2",
+      "capabilities": [],
+      "created_at": "2026-02-11T04:20:19.224Z"
+    },
+    "node_e7637bff8470622d45f2": {
+      "node_id": "node_e7637bff8470622d45f2",
+      "token": "tok_d4b9918165049fe0c896",
+      "name": "demo-tokyo-3",
+      "capabilities": [],
+      "created_at": "2026-02-11T04:20:19.226Z"
+    },
+    "node_abe85d7c323c91b7dce4": {
+      "node_id": "node_abe85d7c323c91b7dce4",
+      "token": "tok_5dee53ae3079439babbb",
+      "name": "demo-shanghai-1",
+      "capabilities": [],
+      "created_at": "2026-02-11T04:20:19.229Z"
+    },
+    "node_13f8b984e7cffecfb940": {
+      "node_id": "node_13f8b984e7cffecfb940",
+      "token": "tok_d057f79e6f8e5e3620a0",
+      "name": "demo-shanghai-2",
+      "capabilities": [],
+      "created_at": "2026-02-11T04:20:19.235Z"
+    },
+    "node_6e5ae0c45950ef7256f9": {
+      "node_id": "node_6e5ae0c45950ef7256f9",
+      "token": "tok_af4d2589327e220378cb",
+      "name": "demo-singapore-1",
+      "capabilities": [],
+      "created_at": "2026-02-11T04:20:19.241Z"
+    },
+    "node_fd3093a4002d24562d89": {
+      "node_id": "node_fd3093a4002d24562d89",
+      "token": "tok_8b7020304ff51e06839c",
+      "name": "demo-singapore-2",
+      "capabilities": [],
+      "created_at": "2026-02-11T04:20:19.246Z"
+    },
+    "node_d99759d5bd607891a8c3": {
+      "node_id": "node_d99759d5bd607891a8c3",
+      "token": "tok_1416093a0b3517e07541",
+      "name": "demo-dubai-1",
+      "capabilities": [],
+      "created_at": "2026-02-11T04:20:19.250Z"
+    },
+    "node_cc03434d487f59ff6fa7": {
+      "node_id": "node_cc03434d487f59ff6fa7",
+      "token": "tok_141d47712f8efcab9bb7",
+      "name": "demo-dubai-2",
+      "capabilities": [],
+      "created_at": "2026-02-11T04:20:19.254Z"
+    },
+    "node_566a0b08a3c3ba1dba2c": {
+      "node_id": "node_566a0b08a3c3ba1dba2c",
+      "token": "tok_1593cc71f166206d81ed",
+      "name": "demo-sydney-1",
+      "capabilities": [],
+      "created_at": "2026-02-11T04:20:19.258Z"
+    },
+    "node_e82a787c5d31145946d1": {
+      "node_id": "node_e82a787c5d31145946d1",
+      "token": "tok_f83d6aa1a76d7111389e",
+      "name": "demo-sydney-2",
+      "capabilities": [],
+      "created_at": "2026-02-11T04:20:19.263Z"
+    },
+    "node_b653001dd41054cbce13": {
+      "node_id": "node_b653001dd41054cbce13",
+      "token": "tok_80a7b0b31b118ce2d755",
+      "name": "demo-berlin-1",
+      "capabilities": [],
+      "created_at": "2026-02-11T04:20:19.270Z"
+    },
+    "node_dcd6114b49e47d1385b4": {
+      "node_id": "node_dcd6114b49e47d1385b4",
+      "token": "tok_b5afe39a6d09cd4b32e1",
+      "name": "demo-berlin-2",
+      "capabilities": [],
+      "created_at": "2026-02-11T04:20:19.272Z"
+    },
+    "node_f71f7132ccd12b014468": {
+      "node_id": "node_f71f7132ccd12b014468",
+      "token": "tok_584351f8b6bebfaabe62",
+      "name": "demo-paris-1",
+      "capabilities": [],
+      "created_at": "2026-02-11T04:20:19.276Z"
+    },
+    "node_1ea9b84aacc540c4f3af": {
+      "node_id": "node_1ea9b84aacc540c4f3af",
+      "token": "tok_665ed2a062fe30f22e53",
+      "name": "demo-paris-2",
+      "capabilities": [],
+      "created_at": "2026-02-11T04:20:19.278Z"
+    },
+    "node_c84a148824e19c3d3fe0": {
+      "node_id": "node_c84a148824e19c3d3fe0",
+      "token": "tok_2ca90065704baff39038",
+      "name": "demo-toronto-1",
+      "capabilities": [],
+      "created_at": "2026-02-11T04:20:19.282Z"
+    },
+    "node_207e8d1e93a7c14d6549": {
+      "node_id": "node_207e8d1e93a7c14d6549",
+      "token": "tok_42b86acfec6168e3e1fa",
+      "name": "demo-toronto-2",
+      "capabilities": [],
+      "created_at": "2026-02-11T04:20:19.285Z"
+    },
+    "node_98496e9d373c164dc5ff": {
+      "node_id": "node_98496e9d373c164dc5ff",
+      "token": "tok_953166135824555bfd2f",
+      "name": "demo-seoul-1",
+      "capabilities": [],
+      "created_at": "2026-02-11T04:20:19.288Z"
+    },
+    "node_e93bbd40fd275e7d7899": {
+      "node_id": "node_e93bbd40fd275e7d7899",
+      "token": "tok_4d6a19b91ae7af3c6e94",
+      "name": "demo-seoul-2",
+      "capabilities": [],
+      "created_at": "2026-02-11T04:20:19.293Z"
+    },
+    "node_88f29a807ff4e4ac9936": {
+      "node_id": "node_88f29a807ff4e4ac9936",
+      "token": "tok_4e1a89e9ff488c003439",
+      "name": "demo-hong-kong-1",
+      "capabilities": [],
+      "created_at": "2026-02-11T04:20:19.296Z"
+    },
+    "node_18dd9ff8257f986009e8": {
+      "node_id": "node_18dd9ff8257f986009e8",
+      "token": "tok_c77ecd007d78664a8ed7",
+      "name": "demo-hong-kong-2",
+      "capabilities": [],
+      "created_at": "2026-02-11T04:20:19.299Z"
+    },
+    "node_7330833d2797b0a4b23a": {
+      "node_id": "node_7330833d2797b0a4b23a",
+      "token": "tok_faf5d01397c168875ab1",
+      "name": "demo-mumbai-1",
+      "capabilities": [],
+      "created_at": "2026-02-11T04:20:19.305Z"
+    },
+    "node_09315c54220baa8e7778": {
+      "node_id": "node_09315c54220baa8e7778",
+      "token": "tok_1a0a40739b20b5f10499",
+      "name": "demo-mumbai-2",
+      "capabilities": [],
+      "created_at": "2026-02-11T04:20:19.307Z"
+    },
+    "node_09981ea4f1a6d21ac096": {
+      "node_id": "node_09981ea4f1a6d21ac096",
+      "token": "tok_c8894350f7c4ecd59e40",
+      "name": "demo-shenzhen-1",
+      "capabilities": [],
+      "created_at": "2026-02-11T04:20:19.312Z"
+    },
+    "node_3b5680135ce0f9767f2c": {
+      "node_id": "node_3b5680135ce0f9767f2c",
+      "token": "tok_f2be54ea107394433532",
+      "name": "demo-shenzhen-2",
+      "capabilities": [],
+      "created_at": "2026-02-11T04:20:19.317Z"
+    },
+    "node_a9876eff846f1e7e1887": {
+      "node_id": "node_a9876eff846f1e7e1887",
+      "token": "tok_ac2efbdf0d783a3977f5",
+      "name": "demo-beijing-1",
+      "capabilities": [],
+      "created_at": "2026-02-11T04:20:19.326Z"
+    },
+    "node_64c0fe83d4281ec54bec": {
+      "node_id": "node_64c0fe83d4281ec54bec",
+      "token": "tok_d76612fe4b7bd2a033a4",
+      "name": "demo-beijing-2",
+      "capabilities": [],
+      "created_at": "2026-02-11T04:20:19.333Z"
+    },
+    "node_cc694a2520cf95eb5761": {
+      "node_id": "node_cc694a2520cf95eb5761",
+      "token": "tok_7a4b4a0008368b909723",
+      "name": "demo-taipei",
+      "capabilities": [],
+      "created_at": "2026-02-11T04:20:19.337Z"
+    },
+    "node_26e5841d62219100c191": {
+      "node_id": "node_26e5841d62219100c191",
+      "token": "tok_6a87791b527a29c23f04",
+      "name": "demo-bangkok",
+      "capabilities": [],
+      "created_at": "2026-02-11T04:20:19.339Z"
+    },
+    "node_a19657bf46e555b68e78": {
+      "node_id": "node_a19657bf46e555b68e78",
+      "token": "tok_58d06926e243d1bbfc3b",
+      "name": "demo-mexico-city",
+      "capabilities": [],
+      "created_at": "2026-02-11T04:20:19.345Z"
+    },
+    "node_232fc822f6b15c078ee3": {
+      "node_id": "node_232fc822f6b15c078ee3",
+      "token": "tok_8b8e49716758c56cebba",
+      "name": "demo-sao-paulo",
+      "capabilities": [],
+      "created_at": "2026-02-11T04:20:19.348Z"
+    },
+    "node_ce7192857405f02cfda9": {
+      "node_id": "node_ce7192857405f02cfda9",
+      "token": "tok_eaf22faf8a28e7ca5f42",
+      "name": "demo-istanbul",
+      "capabilities": [],
+      "created_at": "2026-02-11T04:20:19.353Z"
+    },
+    "node_017a1eecc470c95f6a3e": {
+      "node_id": "node_017a1eecc470c95f6a3e",
+      "token": "tok_788ef7daeca0205ee627",
+      "name": "demo-johannesburg",
+      "capabilities": [],
+      "created_at": "2026-02-11T04:20:19.356Z"
+    },
+    "node_c618034510090d6967aa": {
+      "node_id": "node_c618034510090d6967aa",
+      "token": "tok_99b710a7849a64cb2d37",
+      "name": "demo-cairo",
+      "capabilities": [],
+      "created_at": "2026-02-11T04:20:19.361Z"
+    },
+    "node_1b98a14d47be047ab897": {
+      "node_id": "node_1b98a14d47be047ab897",
+      "token": "tok_965b21e68e2991c593a1",
+      "name": "demo-nairobi",
+      "capabilities": [],
+      "created_at": "2026-02-11T04:20:19.367Z"
+    },
+    "node_aeb53f5926cbb6a2351f": {
+      "node_id": "node_aeb53f5926cbb6a2351f",
+      "token": "tok_b4231789a281bf21f767",
+      "name": "demo-moscow",
+      "capabilities": [],
+      "created_at": "2026-02-11T04:20:19.368Z"
+    },
+    "node_036f13384145fb1443a7": {
+      "node_id": "node_036f13384145fb1443a7",
+      "token": "tok_584cbbf50f0386766b62",
+      "name": "demo-buenos-aires",
+      "capabilities": [],
+      "created_at": "2026-02-11T04:20:19.370Z"
+    },
+    "node_1caf4061b4241f2642b7": {
+      "node_id": "node_1caf4061b4241f2642b7",
+      "token": "tok_198b76fdbae54f0865b5",
+      "name": "demo-madrid",
+      "capabilities": [],
+      "created_at": "2026-02-11T04:20:19.373Z"
+    },
+    "node_f593f95064b1966ab56f": {
+      "node_id": "node_f593f95064b1966ab56f",
+      "token": "tok_45a1c6c760f0b535f32a",
+      "name": "demo-rome",
+      "capabilities": [],
+      "created_at": "2026-02-11T04:20:19.379Z"
+    },
+    "node_f0d57697c70ab576f23e": {
+      "node_id": "node_f0d57697c70ab576f23e",
+      "token": "tok_40b638ed536f4a9c4883",
+      "name": "demo-chicago",
+      "capabilities": [],
+      "created_at": "2026-02-11T04:20:19.383Z"
+    },
+    "node_257f4dad12528d7f4fdb": {
+      "node_id": "node_257f4dad12528d7f4fdb",
+      "token": "tok_b03a2c3c3335c21de1bb",
+      "name": "demo-seattle",
+      "capabilities": [],
+      "created_at": "2026-02-11T04:20:19.389Z"
+    },
+    "node_ab63ad9dff84ff45182b": {
+      "node_id": "node_ab63ad9dff84ff45182b",
+      "token": "tok_f32fc97f8c40a828c0cd",
+      "name": "demo-vancouver",
+      "capabilities": [],
+      "created_at": "2026-02-11T04:20:19.393Z"
+    },
+    "node_4cbd1206dba758bdd49d": {
+      "node_id": "node_4cbd1206dba758bdd49d",
+      "token": "tok_15c5376711710e3b12e0",
+      "name": "x402-test-node",
+      "capabilities": [],
+      "created_at": "2026-02-11T05:58:16.752Z"
+    },
+    "node_5043d01cb01cc11fec27": {
+      "node_id": "node_5043d01cb01cc11fec27",
+      "token": "tok_74585989fd691c245b19",
+      "name": "x402-test-node",
+      "capabilities": [],
+      "created_at": "2026-02-11T05:59:21.164Z"
+    },
+    "node_3033efc2846f52316bb1": {
+      "node_id": "node_3033efc2846f52316bb1",
+      "token": "tok_540861dc078915b9fd5b",
+      "name": "x402-test-node",
+      "capabilities": [],
+      "created_at": "2026-02-11T06:00:01.709Z"
+    },
+    "node_eac17b2979440d7e6ca8": {
+      "node_id": "node_eac17b2979440d7e6ca8",
+      "token": "tok_d64ad2cb916d93e6c79a",
+      "name": "x402-test-node",
+      "capabilities": [],
+      "created_at": "2026-02-11T06:01:10.591Z"
+    }
+  }
+}

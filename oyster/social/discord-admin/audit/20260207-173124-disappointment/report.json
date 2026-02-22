@@ -1,0 +1,12 @@
+{
+  "ok": true,
+  "guildId": "1404726112159793172",
+  "guildName": "Oyster Republic (服务器)",
+  "pickedChannels": [],
+  "scannedMessages": 0,
+  "disappointedMessages": 0,
+  "themes": [],
+  "authors": [],
+  "outputDir": "/Users/howardli/Downloads/discord-admin/audit/20260207-173124-disappointment",
+  "note": "This is based on the messages loaded in the Discord web UI (virtualized). It may not include the full history."
+}

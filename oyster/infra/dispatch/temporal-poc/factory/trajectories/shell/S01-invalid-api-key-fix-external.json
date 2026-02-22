@@ -1,0 +1,30 @@
+{
+  "task_id": "S01-invalid-api-key-fix-external",
+  "project": "shell",
+  "spec_content": "---\ntask_id: S01-invalid-api-key-fix-external\nproject: shell\npriority: 2\nestimated_minutes: 30\ndepends_on: []\n---\n## Goal\nInvalid API key \u00b7 Fix external API key\n\n\n\n## Constraints\n- Work within the existing codebase structure\n- Write meaningful tests for new functionality\n- Do not refactor unrelated code\n- Do not change UI/CSS unless explicitly required\n\n## Acceptance Criteria\n- [ ] Core functionality implemented\n- [ ] Tests pass\n- [ ] No lint errors\n- [ ] Changes are minimal and focused\n\n## Do N",
+  "template_id": "default",
+  "outcome": "stuck",
+  "failure_reason": "size_diff_early_kill: 2x loc_added=0",
+  "advisor_consensus": "",
+  "total_tokens": 0,
+  "total_duration": 0.04419112205505371,
+  "started_at": 1771778893.678366,
+  "completed_at": 1771778893.7227242,
+  "step_count": 2,
+  "steps": [
+    {
+      "phase": "build",
+      "action": "execute_attempt_1",
+      "result": "failed",
+      "duration": 0.03105306625366211,
+      "error": "Empty run: exit 0 but loc_added=0, no code produced"
+    },
+    {
+      "phase": "build",
+      "action": "execute_attempt_2",
+      "result": "failed",
+      "duration": 0.013138055801391602,
+      "error": "Empty run: exit 0 but loc_added=0, no code produced"
+    }
+  ]
+}

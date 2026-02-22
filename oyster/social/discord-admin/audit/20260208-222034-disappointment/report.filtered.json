@@ -1,0 +1,257 @@
+{
+  "ok": true,
+  "guildId": "1404726112159793172",
+  "guildName": "Oyster Republic (服务器)",
+  "pickedChannels": [
+    {
+      "name": "entry-channel",
+      "channelId": "1404870331759591575",
+      "aria": null,
+      "url": "https://discord.com/channels/1404726112159793172/1404870331759591575",
+      "messagesCount": 358
+    }
+  ],
+  "scannedMessages": 358,
+  "disappointedMessages": 119,
+  "themes": [
+    {
+      "theme": "claim/rewards",
+      "count": 78
+    },
+    {
+      "theme": "product/app broken",
+      "count": 27
+    },
+    {
+      "theme": "shipping/delivery",
+      "count": 14
+    },
+    {
+      "theme": "support",
+      "count": 13
+    },
+    {
+      "theme": "value/expectations",
+      "count": 6
+    },
+    {
+      "theme": "lack of updates",
+      "count": 3
+    }
+  ],
+  "authors": [
+    {
+      "author": "unknown",
+      "lang": "en",
+      "themes": [
+        "claim/rewards",
+        "shipping/delivery",
+        "support",
+        "product/app broken"
+      ],
+      "count": 13,
+      "channels": [
+        "entry-channel"
+      ],
+      "sample": "If it’s an app/device bug, send the error + steps to reproduce (and your device/app version).",
+      "targetChannelId": "1404870331759591575",
+      "targetMessageId": "1469908758376353940",
+      "targetMessageUrl": "https://discord.com/channels/1404726112159793172/1404870331759591575/1469908758376353940",
+      "replyShort": "Thanks for checking in — let’s get you a real status update. Share your wallet + an in-app screenshot for Founder Pass/OYS. I’ll reconcile any mismatch (DM ok).",
+      "draft": "@unknown Thanks for calling this out. You're right to be frustrated.\\nOn shipping: can you drop your order number (or last 4 digits) and country/region? We'll check your status and give you a concrete ETA.\\nOn claims/rewards: tell me what you see in-app (screenshot is ok). We'll verify your Founder Pass / OYS allocation and fix any mismatch.\\nOn support: if you already opened a ticket, paste the ticket number and we'll pick it up.\\nIf it's an app/device issue, share the error or steps to reproduce and we'll triage it fast.\\nIf you prefer, DM me your details and I'll handle it 1:1.\\nI saw your message: \"If it’s an app/device bug, send the error + steps to reproduce (and your device/app version).\""
+    },
+    {
+      "author": "Scouser",
+      "lang": "en",
+      "themes": [
+        "product/app broken"
+      ],
+      "count": 2,
+      "channels": [
+        "entry-channel"
+      ],
+      "sample": "Hey guys. Getting the same error: No eligible NFT found... any solution for that?\\nGot it — we’ll investigate the error and follow up. What device/app version are you on, and what exact error do you see? If you can, share steps to reproduce (DM ok).",
+      "targetChannelId": "1404870331759591575",
+      "targetMessageId": "1470241847090741383",
+      "targetMessageUrl": "https://discord.com/channels/1404726112159793172/1404870331759591575/1470241847090741383",
+      "replyShort": "Thanks for reporting this — we’ll get you unstuck. What device/app version are you on, and what exact error do you see? If you can, share steps to reproduce (DM ok).",
+      "draft": "@Scouser Thanks for calling this out. You're right to be frustrated.\\nIf it's an app/device issue, share the error or steps to reproduce and we'll triage it fast.\\nIf you prefer, DM me your details and I'll handle it 1:1.\\nI saw your message: \"Hey guys. Getting the same error: No eligible NFT found... any solution for that?\\nGot it — we’ll investigate the error \""
+    },
+    {
+      "author": "Notty",
+      "lang": "en",
+      "themes": [
+        "claim/rewards"
+      ],
+      "count": 2,
+      "channels": [
+        "entry-channel"
+      ],
+      "sample": "Hi could I get a little help? Where can I find which address I have my WL pass in?\\nThanks for raising this — we’ll reconcile the numbers.",
+      "targetChannelId": "1404870331759591575",
+      "targetMessageId": "1470241915948630016",
+      "targetMessageUrl": "https://discord.com/channels/1404726112159793172/1404870331759591575/1470241915948630016",
+      "replyShort": "Got it — we’ll verify what you’re seeing and fix any mismatch.",
+      "draft": "@Notty Thanks for calling this out. You're right to be frustrated.\\nOn claims/rewards: tell me what you see in-app (screenshot is ok). We'll verify your Founder Pass / OYS allocation and fix any mismatch.\\nIf you prefer, DM me your details and I'll handle it 1:1.\\nI saw your message: \"Hi could I get a little help? Where can I find which address I have my WL pass in?\\nThanks for raising this — we’ll reco\""
+    },
+    {
+      "author": "Dr.Plague | Cosmic Guardian",
+      "lang": "en",
+      "themes": [
+        "product/app broken"
+      ],
+      "count": 1,
+      "channels": [
+        "entry-channel"
+      ],
+      "sample": "How does it work?\\ni have the same problem...",
+      "targetChannelId": "1404870331759591575",
+      "targetMessageId": "1448826447287550004",
+      "targetMessageUrl": "https://discord.com/channels/1404726112159793172/1404870331759591575/1448826447287550004",
+      "replyShort": "Thanks for reporting this — we’ll get you unstuck. What device/app version are you on, and what exact error do you see? If you can, share steps to reproduce (DM ok).",
+      "draft": "@Dr.Plague | Cosmic Guardian Thanks for calling this out. You're right to be frustrated.\\nIf it's an app/device issue, share the error or steps to reproduce and we'll triage it fast.\\nIf you prefer, DM me your details and I'll handle it 1:1.\\nI saw your message: \"How does it work?\\ni have the same problem...\""
+    },
+    {
+      "author": "Clairee",
+      "lang": "en",
+      "themes": [
+        "product/app broken",
+        "claim/rewards"
+      ],
+      "count": 1,
+      "channels": [
+        "entry-channel"
+      ],
+      "sample": "Please, help \n\nI am not able to claim my citizenship passport, and I am eligible. I have been trying for decades now, no difference \nWhat should I do, please?\n\nThe error message I get is, Failed to update Solana wallet. Please try again. I have used phone, I have used system, I have used different browsers, still the same error message \n\nPls, help",
+      "targetChannelId": "1404870331759591575",
+      "targetMessageId": "1449041993853305034",
+      "targetMessageUrl": "https://discord.com/channels/1404726112159793172/1404870331759591575/1449041993853305034",
+      "replyShort": "Got it — we’ll verify what you’re seeing and fix any mismatch. Share your wallet + an in-app screenshot for Founder Pass/OYS. I’ll reconcile any mismatch (DM ok).",
+      "draft": "@Clairee Thanks for calling this out. You're right to be frustrated.\\nOn claims/rewards: tell me what you see in-app (screenshot is ok). We'll verify your Founder Pass / OYS allocation and fix any mismatch.\\nIf it's an app/device issue, share the error or steps to reproduce and we'll triage it fast.\\nIf you prefer, DM me your details and I'll handle it 1:1.\\nI saw your message: \"Please, help \n\nI am not able to claim my citizenship passport, and I am eligible. I have been trying for decades now, no\""
+    },
+    {
+      "author": "froggytales",
+      "lang": "en",
+      "themes": [
+        "claim/rewards"
+      ],
+      "count": 1,
+      "channels": [
+        "entry-channel"
+      ],
+      "sample": "lol sol got the solana mobile phones and volume coming its easier to use that  attention to grow there\\nBut Solana hasn't said anything about oyster",
+      "targetChannelId": "1404870331759591575",
+      "targetMessageId": "1449788460217925904",
+      "targetMessageUrl": "https://discord.com/channels/1404726112159793172/1404870331759591575/1449788460217925904",
+      "replyShort": "Got it — we’ll verify what you’re seeing and fix any mismatch. Share your wallet + an in-app screenshot for Founder Pass/OYS. I’ll reconcile any mismatch (DM ok).",
+      "draft": "@froggytales Thanks for calling this out. You're right to be frustrated.\\nOn claims/rewards: tell me what you see in-app (screenshot is ok). We'll verify your Founder Pass / OYS allocation and fix any mismatch.\\nIf you prefer, DM me your details and I'll handle it 1:1.\\nI saw your message: \"lol sol got the solana mobile phones and volume coming its easier to use that  attention to grow there\\nBut Solana hasn'\""
+    },
+    {
+      "author": "YuknggY3T",
+      "lang": "en",
+      "themes": [
+        "lack of updates"
+      ],
+      "count": 1,
+      "channels": [
+        "entry-channel"
+      ],
+      "sample": "Hey, how's it going? What's new in your life?",
+      "targetChannelId": "1404870331759591575",
+      "targetMessageId": "1450403398053527562",
+      "targetMessageUrl": "https://discord.com/channels/1404726112159793172/1404870331759591575/1450403398053527562",
+      "replyShort": "Agreed — the update cadence hasn’t been good enough. We’ll post regular, dated updates in #announcements so you don’t have to chase info.",
+      "draft": "@YuknggY3T Thanks for calling this out. You're right to be frustrated.\\nOn updates: we'll start posting regular, dated updates in #announcements so you don't have to chase info.\\nIf you prefer, DM me your details and I'll handle it 1:1.\\nI saw your message: \"Hey, how's it going? What's new in your life?\""
+    },
+    {
+      "author": "300men_only",
+      "lang": "en",
+      "themes": [
+        "claim/rewards"
+      ],
+      "count": 1,
+      "channels": [
+        "entry-channel"
+      ],
+      "sample": "heyyy @Oysterguard @Oyster Republic After waiting for more than a year after ordering my mobile device i was asked to pay $35 custom duties...i just paid, after confriming transaction the next thing i'm getting is invalid id? why? how?....i await your response please....\\nHello hello",
+      "targetChannelId": "1404870331759591575",
+      "targetMessageId": "1450804464872325121",
+      "targetMessageUrl": "https://discord.com/channels/1404726112159793172/1404870331759591575/1450804464872325121",
+      "replyShort": "Got it — we’ll verify what you’re seeing and fix any mismatch. Share your wallet + an in-app screenshot for Founder Pass/OYS. I’ll reconcile any mismatch (DM ok).",
+      "draft": "@300men_only Thanks for calling this out. You're right to be frustrated.\\nOn claims/rewards: tell me what you see in-app (screenshot is ok). We'll verify your Founder Pass / OYS allocation and fix any mismatch.\\nIf you prefer, DM me your details and I'll handle it 1:1.\\nI saw your message: \"heyyy @Oysterguard @Oyster Republic After waiting for more than a year after ordering my mobile device i was asked to pa\""
+    },
+    {
+      "author": "Toyo Theophilus",
+      "lang": "en",
+      "themes": [
+        "claim/rewards"
+      ],
+      "count": 1,
+      "channels": [
+        "entry-channel"
+      ],
+      "sample": "You've already claim it, that's why it's showing No eligible NFT found.\\nI do not know",
+      "targetChannelId": "1404870331759591575",
+      "targetMessageId": "1457700760950411295",
+      "targetMessageUrl": "https://discord.com/channels/1404726112159793172/1404870331759591575/1457700760950411295",
+      "replyShort": "Got it — we’ll verify what you’re seeing and fix any mismatch. If you’re seeing “No eligible NFT found”, share your wallet + a screenshot of that screen. I’ll reconcile any mismatch (DM ok).",
+      "draft": "@Toyo Theophilus Thanks for calling this out. You're right to be frustrated.\\nOn claims/rewards: tell me what you see in-app (screenshot is ok). We'll verify your Founder Pass / OYS allocation and fix any mismatch.\\nIf you prefer, DM me your details and I'll handle it 1:1.\\nI saw your message: \"You've already claim it, that's why it's showing No eligible NFT found.\\nI do not know\""
+    },
+    {
+      "author": "Hate Gary",
+      "lang": "en",
+      "themes": [
+        "value/expectations"
+      ],
+      "count": 1,
+      "channels": [
+        "entry-channel"
+      ],
+      "sample": "what kind of project is this? is this a scam? why the owner is doing nothing? are we scammed?",
+      "targetChannelId": "1404870331759591575",
+      "targetMessageId": "1463906019733274819",
+      "targetMessageUrl": "https://discord.com/channels/1404726112159793172/1404870331759591575/1463906019733274819",
+      "replyShort": "Appreciate you calling it out. What did you expect vs what you see now? I’ll map what’s live + what’s next (with dates).",
+      "draft": "@Hate Gary Thanks for calling this out. You're right to be frustrated.\\nIf it feels like \"I got the phone but there's nothing to do/claim\", that's on us. We'll clarify what's available and what's next.\\nIf you prefer, DM me your details and I'll handle it 1:1.\\nI saw your message: \"what kind of project is this? is this a scam? why the owner is doing nothing? are we scammed?\""
+    },
+    {
+      "author": "deniz439",
+      "lang": "en",
+      "themes": [
+        "claim/rewards"
+      ],
+      "count": 1,
+      "channels": [
+        "entry-channel"
+      ],
+      "sample": "its very silent and this onest is go check oaut the puffys device hmmm i have claimed the node and wait for it we will se what happen",
+      "targetChannelId": "1404870331759591575",
+      "targetMessageId": "1464178104896585843",
+      "targetMessageUrl": "https://discord.com/channels/1404726112159793172/1404870331759591575/1464178104896585843",
+      "replyShort": "Thanks for raising this — we’ll reconcile the numbers. Share your wallet + an in-app screenshot for Founder Pass/OYS. I’ll reconcile any mismatch (DM ok).",
+      "draft": "@deniz439 Thanks for calling this out. You're right to be frustrated.\\nOn claims/rewards: tell me what you see in-app (screenshot is ok). We'll verify your Founder Pass / OYS allocation and fix any mismatch.\\nIf you prefer, DM me your details and I'll handle it 1:1.\\nI saw your message: \"its very silent and this onest is go check oaut the puffys device hmmm i have claimed the node and wait for it we will s\""
+    },
+    {
+      "author": "melantas",
+      "lang": "en",
+      "themes": [
+        "shipping/delivery"
+      ],
+      "count": 1,
+      "channels": [
+        "entry-channel"
+      ],
+      "sample": "where is my phone",
+      "targetChannelId": "1404870331759591575",
+      "targetMessageId": "1464490249395896430",
+      "targetMessageUrl": "https://discord.com/channels/1404726112159793172/1404870331759591575/1464490249395896430",
+      "replyShort": "You’re right to ask — we owe you a clear shipping update. What’s your order # (or last 4) + country/region? I’ll check status and come back with an ETA (DM ok).",
+      "draft": "@melantas Thanks for calling this out. You're right to be frustrated.\\nOn shipping: can you drop your order number (or last 4 digits) and country/region? We'll check your status and give you a concrete ETA.\\nIf you prefer, DM me your details and I'll handle it 1:1.\\nI saw your message: \"where is my phone\""
+    }
+  ],
+  "outputDir": "/Users/howardli/Downloads/discord-admin/audit/20260208-222034-disappointment",
+  "note": "This is based on the messages loaded in the Discord web UI (virtualized). It may not include the full history.",
+  "filteredFrom": "audit/20260208-222034-disappointment",
+  "filteredCount": 12,
+  "pendingTotal": 16
+}

@@ -1,0 +1,3 @@
+# Storage Audit | 2026-02-14
+
+No stale inbox artifacts (>3 days). ✅

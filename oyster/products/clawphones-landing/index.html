@@ -1,0 +1,707 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ClawPhone — A Phone That AI Controls</title>
+  <meta name="description" content="ClawPhone: NanoClaw pre-installed. Your AI agent lives here — it sees, decides, and acts. $99." />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #000000;
+      --bg-2: #050608;
+      --ink: #ffffff;
+      --muted: rgba(255,255,255,0.62);
+      --accent: #ffffff;
+      --accent-2: rgba(255,255,255,0.82);
+      --line: rgba(255,255,255,0.14);
+      --line-2: rgba(255,255,255,0.08);
+    }
+    html, body { background: var(--bg); color: var(--ink); }
+    body { font-family: "Inter", system-ui, -apple-system, Segoe UI, sans-serif; }
+    .mono { font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
+    .serif { font-family: inherit; }
+    .glass {
+      background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+      border: 1px solid rgba(255,255,255,0.10);
+      box-shadow: 0 40px 120px rgba(0,0,0,0.70);
+      backdrop-filter: blur(10px);
+    }
+    .halo {
+      background: radial-gradient(900px 500px at 70% 10%, rgba(255,255,255,0.06), transparent 60%),
+                  radial-gradient(900px 500px at 20% 80%, rgba(255,255,255,0.03), transparent 60%);
+    }
+    .halo::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.07;
+      mix-blend-mode: overlay;
+      background-image:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)' opacity='.55'/%3E%3C/svg%3E");
+      background-size: 240px 240px;
+    }
+    .grid-pattern {
+      background-image: linear-gradient(rgba(255,255,255,0.06) 1px, transparent 1px),
+                        linear-gradient(90deg, rgba(255,255,255,0.06) 1px, transparent 1px);
+      background-size: 64px 64px;
+      mask-image: radial-gradient(circle at 50% 30%, black 40%, transparent 70%);
+      opacity: 0.14;
+      pointer-events: none;
+    }
+    .reveal { opacity: 0; transform: translateY(12px); animation: rise 0.9s ease forwards; }
+    .reveal.d1 { animation-delay: 0.15s; }
+    .reveal.d2 { animation-delay: 0.3s; }
+    .reveal.d3 { animation-delay: 0.45s; }
+    @keyframes rise { to { opacity: 1; transform: translateY(0); } }
+    .scan {
+      position: absolute; inset: 0; pointer-events: none;
+      background: linear-gradient(180deg, transparent, rgba(255,255,255,0.04), transparent);
+      animation: scan 6s ease-in-out infinite;
+    }
+    @keyframes scan { 0%,100% { transform: translateY(-30%);} 50% { transform: translateY(30%);} }
+    .phone-glow {
+      width: 220px; height: 420px;
+      border: 2px solid rgba(255,255,255,0.85);
+      border-radius: 28px;
+      position: relative;
+      box-shadow: 0 0 60px rgba(255,255,255,0.08), inset 0 0 40px rgba(255,255,255,0.03);
+    }
+    .phone-glow::before {
+      content: ''; position: absolute; top: 8px; left: 8px; right: 8px; bottom: 8px;
+      border: 1px solid var(--line); border-radius: 20px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.06), transparent 40%);
+    }
+    .phone-mark { position: absolute; inset: 0; display: grid; place-items: center; }
+    .phone-mark svg { width: 56px; height: 56px; opacity: 0.92; }
+    @keyframes pulse-glow {
+      0%, 100% { box-shadow: 0 0 60px rgba(255,255,255,0.08), inset 0 0 40px rgba(255,255,255,0.03); }
+      50% { box-shadow: 0 0 90px rgba(255,255,255,0.12), inset 0 0 70px rgba(255,255,255,0.06); }
+    }
+    .phone-glow { animation: pulse-glow 4s ease-in-out infinite; }
+    .device-frame {
+      width: min(440px, 92vw);
+      aspect-ratio: 4 / 5;
+      border: 1px solid rgba(255,255,255,0.14);
+      border-radius: 24px;
+      background: radial-gradient(900px 360px at 50% 30%, rgba(255,255,255,0.06), transparent 60%);
+      box-shadow: 0 50px 110px rgba(0,0,0,0.65);
+      position: relative;
+      overflow: hidden;
+    }
+    .device-frame::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(180deg, rgba(255,255,255,0.05), transparent 35%, rgba(255,255,255,0.02));
+      pointer-events: none;
+    }
+    .device-img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      transform: translateZ(0) scale(1.12);
+      filter: drop-shadow(0 60px 80px rgba(0,0,0,0.65));
+    }
+    .device-img.brighten { filter: drop-shadow(0 60px 80px rgba(0,0,0,0.65)) brightness(1.25) contrast(1.1); }
+    .thumb {
+      border: 1px solid rgba(255,255,255,0.18);
+      color: rgba(255,255,255,0.75);
+      padding: 10px 12px;
+      font-size: 12px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      transition: all 0.2s;
+      user-select: none;
+    }
+    .thumb:hover { border-color: rgba(255,255,255,0.9); color: #fff; }
+    .thumb.active { background: #fff; color: #000; border-color: rgba(255,255,255,0.9); }
+    .btn-primary {
+      padding: 14px 28px; border: 1px solid rgba(255,255,255,0.9); background: #fff; color: #000;
+      font-size: 14px; letter-spacing: 0.12em; transition: all 0.2s;
+    }
+    .btn-primary:hover { background: transparent; color: #fff; transform: translateY(-1px); box-shadow: 0 18px 40px rgba(0,0,0,0.55); }
+    .btn-ghost {
+      padding: 14px 28px; border: 1px solid rgba(255,255,255,0.22); color: var(--muted);
+      font-size: 14px; transition: all 0.2s;
+    }
+    .btn-ghost:hover { border-color: rgba(255,255,255,0.9); color: #fff; transform: translateY(-1px); }
+    .lang-toggle { cursor: pointer; user-select: none; }
+    .lang-toggle span { padding: 4px 8px; border-radius: 4px; transition: all 0.2s; }
+    .lang-toggle span.active { color: #fff; background: rgba(255,255,255,0.10); }
+    [data-lang-cn] { display: none; }
+    body.cn [data-lang-en] { display: none; }
+    body.cn [data-lang-cn] { display: inline; }
+    body.cn [data-lang-cn-block] { display: block; }
+    body.cn [data-lang-en-block] { display: none; }
+    body:not(.cn) [data-lang-cn-block] { display: none; }
+    .compare-table { width: 100%; border-collapse: collapse; }
+    .compare-table th, .compare-table td {
+      padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--line);
+    }
+    .compare-table th { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: 0.15em; font-weight: 400; }
+    .compare-table td:first-child { color: var(--muted); }
+    .compare-table .highlight { color: #fff; font-weight: 600; }
+
+    .navlink { position: relative; }
+    .navlink::after {
+      content: "";
+      position: absolute;
+      left: 0; right: 0;
+      bottom: -6px;
+      height: 1px;
+      background: rgba(255,255,255,0.0);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.2s ease, background 0.2s ease;
+    }
+    .navlink:hover::after { background: rgba(255,255,255,0.6); transform: scaleX(1); }
+
+    .iconline svg { width: 26px; height: 26px; }
+  </style>
+</head>
+<body class="antialiased">
+  <div class="halo min-h-screen relative overflow-hidden">
+    <div class="grid-pattern absolute inset-0"></div>
+
+    <!-- Header -->
+    <header class="px-6 sm:px-10 lg:px-16 pt-8">
+      <div class="max-w-6xl mx-auto flex items-center justify-between">
+        <div class="flex items-center gap-4">
+          <div class="mono text-[11px] tracking-[0.45em] uppercase font-medium text-[color:var(--ink)]">ClawPhone</div>
+          <div class="text-xs text-[color:var(--muted)] hidden sm:block">
+            <span data-lang-en>by</span><span data-lang-cn>by</span>
+            <a href="https://universalphone.xyz" class="hover:text-white ml-1">Oyster Labs</a>
+          </div>
+        </div>
+        <div class="flex items-center gap-5 text-xs text-[color:var(--muted)]">
+          <a href="/oysterrepublic.html" class="navlink hover:text-white mono text-[11px] tracking-[0.22em] uppercase">Oyster Republic</a>
+          <a href="https://github.com/howardleegeek/OysterNanoClaw" class="navlink hover:text-white mono text-[11px] tracking-[0.22em] uppercase">GitHub</a>
+          <div class="lang-toggle flex items-center gap-1 text-xs">
+            <span id="langEn" class="active" onclick="setLang('en')">EN</span>
+            <span class="text-[color:var(--line)]">|</span>
+            <span id="langCn" onclick="setLang('cn')">中文</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="px-6 sm:px-10 lg:px-16">
+
+       <!-- Hero -->
+       <section class="max-w-6xl mx-auto grid lg:grid-cols-[1.2fr_0.8fr] gap-10 lg:gap-16 items-center pt-14 pb-16">
+         <div>
+          <div class="reveal text-[color:var(--accent)] text-xs tracking-[0.35em] uppercase">
+            <span data-lang-en>NanoClaw Pre-Installed · $99</span>
+            <span data-lang-cn>NanoClaw 预装 · $99</span>
+          </div>
+          <h1 class="reveal d1 text-4xl sm:text-5xl lg:text-[3.5rem] leading-[1.1] mt-4 font-semibold">
+            <span data-lang-en>A phone that <span class="serif italic">AI controls</span>.</span>
+            <span data-lang-cn>一台 <span class="serif italic">AI 自己控制</span>的手机。</span>
+          </h1>
+          <p class="reveal d2 text-lg text-[color:var(--muted)] mt-6 max-w-xl leading-relaxed">
+            <span data-lang-en>NanoClaw pre-installed. Your AI agent lives here — it sees, decides, and acts. No app. No cloud. Just a phone with a lobster inside.</span>
+            <span data-lang-cn>NanoClaw 预装。你的 AI Agent 住在这里——它看、它想、它行动。不需要 App，不依赖云端。一台龙虾预装的手机。</span>
+          </p>
+          <div class="reveal d3 mt-8 flex flex-wrap items-center gap-3">
+            <a href="https://buy.stripe.com/4gMbJ1dmudka48V3D95AQ12" class="btn-primary">
+              <span data-lang-en>Pre-Order $99</span>
+              <span data-lang-cn>预购 $99</span>
+            </a>
+            <a href="/oysterrepublic.html" class="btn-ghost">
+              <span data-lang-en>Enter Oyster Republic</span>
+              <span data-lang-cn>进入 Oyster Republic</span>
+            </a>
+            <a href="https://github.com/howardleegeek/OysterNanoClaw" class="btn-ghost">
+              <span data-lang-en>View Code</span>
+              <span data-lang-cn>查看代码</span>
+            </a>
+          </div>
+         </div>
+ 
+        <!-- Device Visual -->
+        <div class="flex flex-col items-center gap-4">
+          <div class="device-frame">
+            <img
+              id="deviceImg"
+              class="device-img"
+              src="/assets/oyster-back.png"
+              alt="ClawPhone device render"
+              loading="eager"
+              decoding="async"
+              onerror="window.__deviceImgMissing=true; this.style.display='none'; document.getElementById('deviceFallback').style.display='flex';"
+            />
+            <div id="deviceFallback" class="w-full h-full hidden items-center justify-center">
+              <div class="phone-glow"></div>
+              <div class="phone-mark" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path opacity="0.75" d="M7 8.5c0-3.7 3.4-6.5 7.5-6.5 1.6 0 3.1.4 4.2 1.1" />
+                  <path d="M7 8.5v7c0 3.8 3 6.5 6.7 6.5 3.9 0 6.3-2.3 6.3-5.8v-6.4" />
+                  <path opacity="0.85" d="M10 12h7" />
+                  <path opacity="0.85" d="M10 15h6" />
+                </svg>
+              </div>
+            </div>
+          </div>
+          <div class="flex flex-wrap justify-center gap-2">
+            <button class="thumb active" data-device-src="/assets/oyster-back.png">Back</button>
+            <button class="thumb" data-device-src="/assets/oyster-side.png">Side</button>
+            <button class="thumb" data-device-src="/assets/oyster-top.png">Top</button>
+          </div>
+          <div class="text-xs text-[color:var(--muted)]">
+            <span data-lang-en>Product renders (local assets)</span>
+            <span data-lang-cn>产品渲染图（本地资源）</span>
+          </div>
+        </div>
+       </section>
+
+      <!-- Trust Bar -->
+      <section class="max-w-6xl mx-auto pb-14">
+        <div class="flex flex-wrap items-center justify-center gap-6 text-xs text-[color:var(--muted)] tracking-wide">
+          <span data-lang-en>From the makers of <a href="https://universalphone.xyz" class="text-[color:var(--ink)] hover:text-[color:var(--accent)]">Universal Phone</a></span>
+          <span data-lang-cn>来自 <a href="https://universalphone.xyz" class="text-[color:var(--ink)] hover:text-[color:var(--accent)]">Universal Phone</a> 团队</span>
+          <span class="w-1 h-1 rounded-full bg-[color:var(--accent)]"></span>
+          <span>30,000+ devices shipped</span>
+          <span class="w-1 h-1 rounded-full bg-[color:var(--accent)]"></span>
+          <span>70,000+ DePIN nodes</span>
+          <span class="w-1 h-1 rounded-full bg-[color:var(--accent)]"></span>
+          <span>
+            <span data-lang-en>Open source</span>
+            <span data-lang-cn>开源</span>
+          </span>
+        </div>
+      </section>
+
+      <!-- What the Lobster Can Do -->
+      <section class="max-w-6xl mx-auto pb-16">
+        <div class="text-center mb-10">
+          <div class="text-xs text-[color:var(--accent)] uppercase tracking-[0.35em]">
+            <span data-lang-en>What the Lobster Can Do</span>
+            <span data-lang-cn>龙虾能做什么</span>
+          </div>
+          <h2 class="text-3xl mt-3 font-semibold">
+            <span data-lang-en>See. Decide. Act.</span>
+            <span data-lang-cn>看。想。行动。</span>
+          </h2>
+        </div>
+        <div class="grid md:grid-cols-3 gap-6">
+          <div class="glass rounded-2xl p-6 sm:p-8">
+            <div class="iconline mb-4 opacity-95">
+              <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path opacity="0.85" d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/>
+                <path d="M12 15.2a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4Z"/>
+              </svg>
+            </div>
+            <div class="text-xs text-[color:var(--accent)] uppercase tracking-[0.35em]">
+              <span data-lang-en>See</span><span data-lang-cn>看</span>
+            </div>
+            <h3 class="text-xl mt-2">
+              <span data-lang-en>Camera + Screen Access</span>
+              <span data-lang-cn>摄像头 + 屏幕访问</span>
+            </h3>
+            <p class="text-[color:var(--muted)] mt-3">
+              <span data-lang-en>Your AI agent sees what you see, reads what's on screen. Full visual context, no API middleware.</span>
+              <span data-lang-cn>你的 AI Agent 看到你看到的一切，读取屏幕上的内容。完整视觉上下文，无需 API 中间层。</span>
+            </p>
+          </div>
+          <div class="glass rounded-2xl p-6 sm:p-8">
+            <div class="iconline mb-4 opacity-95">
+              <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path opacity="0.85" d="M9.5 3.5a3 3 0 0 0-3 3v1.2A2.7 2.7 0 0 0 4 10.3v3.4a2.7 2.7 0 0 0 2.5 2.6V18a3 3 0 0 0 3 3h1.2"/>
+                <path opacity="0.85" d="M14.5 3.5a3 3 0 0 1 3 3v1.2A2.7 2.7 0 0 1 20 10.3v3.4a2.7 2.7 0 0 1-2.5 2.6V18a3 3 0 0 1-3 3h-1.2"/>
+                <path d="M10.8 8.3h2.4M10.5 12h3M10.8 15.7h2.4"/>
+              </svg>
+            </div>
+            <div class="text-xs text-[color:var(--accent)] uppercase tracking-[0.35em]">
+              <span data-lang-en>Decide</span><span data-lang-cn>想</span>
+            </div>
+            <h3 class="text-xl mt-2">
+              <span data-lang-en>On-Device Inference</span>
+              <span data-lang-cn>端侧推理</span>
+            </h3>
+            <p class="text-[color:var(--muted)] mt-3">
+              <span data-lang-en>NanoClaw runs locally. No cloud round-trip, no data leakage. Your decisions stay on your device.</span>
+              <span data-lang-cn>NanoClaw 本地运行。没有云端往返，没有数据泄漏。你的决策留在你的设备上。</span>
+            </p>
+          </div>
+          <div class="glass rounded-2xl p-6 sm:p-8">
+            <div class="iconline mb-4 opacity-95">
+              <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path opacity="0.85" d="M8 13.5c0 3.6 1.6 6 4 6s4-2.4 4-6"/>
+                <path opacity="0.85" d="M12 7v6.5"/>
+                <path d="M9 9.5c-1.8 0-3 .8-3 2.2 0 1.2.9 2.2 2.5 2.2M15 9.5c1.8 0 3 .8 3 2.2 0 1.2-.9 2.2-2.5 2.2"/>
+                <path opacity="0.85" d="M10 6.8c.8-.6 1.7-.9 2-.9s1.2.3 2 .9"/>
+              </svg>
+            </div>
+            <div class="text-xs text-[color:var(--accent)] uppercase tracking-[0.35em]">
+              <span data-lang-en>Act</span><span data-lang-cn>行动</span>
+            </div>
+            <h3 class="text-xl mt-2">
+              <span data-lang-en>Tap, Swipe, Buy</span>
+              <span data-lang-cn>点击、滑动、购买</span>
+            </h3>
+            <p class="text-[color:var(--muted)] mt-3">
+              <span data-lang-en>The agent operates the phone like a human would. Browse, message, transact — autonomously.</span>
+              <span data-lang-cn>Agent 像人一样操作手机。浏览、发消息、交易——完全自主。</span>
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- How It Works -->
+      <section class="max-w-6xl mx-auto pb-16">
+        <div class="glass rounded-2xl p-6 sm:p-10">
+          <div class="text-xs text-[color:var(--accent)] uppercase tracking-[0.35em] mb-6">
+            <span data-lang-en>How It Works</span>
+            <span data-lang-cn>工作原理</span>
+          </div>
+          <div class="grid md:grid-cols-3 gap-8 text-center">
+            <div>
+              <div class="text-[color:var(--accent)] text-4xl font-light mb-3">01</div>
+              <h3 class="text-lg font-medium">
+                <span data-lang-en>Buy</span><span data-lang-cn>购买</span>
+              </h3>
+              <p class="text-sm text-[color:var(--muted)] mt-2">
+                <span data-lang-en>$99. Android phone with NanoClaw pre-installed. Ready out of the box.</span>
+                <span data-lang-cn>$99。预装 NanoClaw 的安卓手机。开箱即用。</span>
+              </p>
+            </div>
+            <div>
+              <div class="text-[color:var(--accent)] text-4xl font-light mb-3">02</div>
+              <h3 class="text-lg font-medium">
+                <span data-lang-en>Boot</span><span data-lang-cn>启动</span>
+              </h3>
+              <p class="text-sm text-[color:var(--muted)] mt-2">
+                <span data-lang-en>Power on. NanoClaw activates. Your AI agent comes alive in the local sandbox.</span>
+                <span data-lang-cn>开机。NanoClaw 激活。你的 AI Agent 在本地沙箱中苏醒。</span>
+              </p>
+            </div>
+            <div>
+              <div class="text-[color:var(--accent)] text-4xl font-light mb-3">03</div>
+              <h3 class="text-lg font-medium">
+                <span data-lang-en>Join the Republic</span><span data-lang-cn>加入共和国</span>
+              </h3>
+              <p class="text-sm text-[color:var(--muted)] mt-2">
+                <span data-lang-en>Your phone becomes a sovereign node. When idle, it contributes compute to the network.</span>
+                <span data-lang-cn>你的手机成为一个主权节点。空闲时，它为网络贡献算力。</span>
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- NanoClaw Console -->
+      <section class="max-w-6xl mx-auto pb-16">
+        <div class="glass rounded-2xl p-6 sm:p-8">
+          <div class="flex flex-wrap items-center justify-between gap-4 mb-4">
+            <div>
+              <div class="text-xs text-[color:var(--accent)] uppercase tracking-[0.35em]">NanoClaw Console</div>
+              <div class="text-xs text-[color:var(--muted)] mt-1">
+                <span data-lang-en>Live simulation · On-device · Local sandbox</span>
+                <span data-lang-cn>实时模拟 · 端侧运行 · 本地沙箱</span>
+              </div>
+            </div>
+          </div>
+          <div class="rounded-xl bg-black/70 border border-[color:var(--line)] p-4 h-48 relative overflow-hidden">
+            <div class="scan"></div>
+            <pre id="terminal" class="text-xs leading-5 text-[color:var(--ink)] whitespace-pre-wrap"></pre>
+          </div>
+        </div>
+      </section>
+
+      <!-- Comparison Table -->
+      <section class="max-w-6xl mx-auto pb-16">
+        <div class="glass rounded-2xl p-6 sm:p-10 overflow-x-auto">
+          <div class="text-xs text-[color:var(--accent)] uppercase tracking-[0.35em] mb-6">
+            <span data-lang-en>Compare</span>
+            <span data-lang-cn>对比</span>
+          </div>
+          <table class="compare-table">
+            <thead>
+              <tr>
+                <th></th>
+                <th class="text-[color:var(--accent)]">ClawPhone</th>
+                <th>
+                  <span data-lang-en>Regular Android</span>
+                  <span data-lang-cn>普通安卓</span>
+                </th>
+                <th>Meta Ray-Ban</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <span data-lang-en>Price</span><span data-lang-cn>价格</span>
+                </td>
+                <td class="highlight">$99</td>
+                <td>$200+</td>
+                <td>$299</td>
+              </tr>
+              <tr>
+                <td>AI Agent</td>
+                <td class="highlight">
+                  <span data-lang-en>Native NanoClaw</span><span data-lang-cn>原生 NanoClaw</span>
+                </td>
+                <td>
+                  <span data-lang-en>None</span><span data-lang-cn>无</span>
+                </td>
+                <td>Meta AI (cloud)</td>
+              </tr>
+              <tr>
+                <td>
+                  <span data-lang-en>Privacy</span><span data-lang-cn>隐私</span>
+                </td>
+                <td class="highlight">
+                  <span data-lang-en>Local-first</span><span data-lang-cn>本地优先</span>
+                </td>
+                <td>Cloud</td>
+                <td>Cloud</td>
+              </tr>
+              <tr>
+                <td>
+                  <span data-lang-en>Compute Earn</span><span data-lang-cn>算力收益</span>
+                </td>
+                <td class="highlight">
+                  <span data-lang-en>Yes</span><span data-lang-cn>有</span>
+                </td>
+                <td>
+                  <span data-lang-en>No</span><span data-lang-cn>无</span>
+                </td>
+                <td>
+                  <span data-lang-en>No</span><span data-lang-cn>无</span>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <span data-lang-en>Open Source</span><span data-lang-cn>开源</span>
+                </td>
+                <td class="highlight">
+                  <span data-lang-en>Yes</span><span data-lang-cn>是</span>
+                </td>
+                <td>
+                  <span data-lang-en>No</span><span data-lang-cn>否</span>
+                </td>
+                <td>
+                  <span data-lang-en>No</span><span data-lang-cn>否</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Oyster Republic Preview -->
+      <section class="max-w-6xl mx-auto grid md:grid-cols-3 gap-6 pb-16">
+        <div class="glass rounded-2xl p-6">
+          <div class="text-xs text-[color:var(--accent)] uppercase tracking-[0.35em]">
+            <span data-lang-en>Physical Sovereignty</span>
+            <span data-lang-cn>物理主权</span>
+          </div>
+          <p class="text-[color:var(--muted)] mt-4">
+            <span data-lang-en>You own the chip, not a subscription. Hardware is territory.</span>
+            <span data-lang-cn>你拥有的是芯片，不是订阅。硬件即领土。</span>
+          </p>
+        </div>
+        <div class="glass rounded-2xl p-6">
+          <div class="text-xs text-[color:var(--accent)] uppercase tracking-[0.35em]">
+            <span data-lang-en>Local-First Intelligence</span>
+            <span data-lang-cn>本地优先智能</span>
+          </div>
+          <p class="text-[color:var(--muted)] mt-4">
+            <span data-lang-en>NanoClaw runs on your device, not in someone else's cloud.</span>
+            <span data-lang-cn>NanoClaw 运行在你的设备上，不在别人的云里。</span>
+          </p>
+        </div>
+        <div class="glass rounded-2xl p-6">
+          <div class="text-xs text-[color:var(--accent)] uppercase tracking-[0.35em]">
+            <span data-lang-en>Idle = Contribution</span>
+            <span data-lang-cn>空闲 = 贡献</span>
+          </div>
+          <p class="text-[color:var(--muted)] mt-4">
+            <span data-lang-en>When charging, your phone joins the compute republic. Idle time becomes value.</span>
+            <span data-lang-cn>充电时，你的手机加入算力共和国。空闲时间变成价值。</span>
+          </p>
+        </div>
+      </section>
+
+      <!-- GitHub Section -->
+      <section class="max-w-6xl mx-auto pb-16">
+        <div class="glass rounded-2xl p-6 sm:p-10">
+          <div class="flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <div class="text-xs text-[color:var(--accent)] uppercase tracking-[0.35em]">OysterNanoClaw</div>
+              <h2 class="text-2xl mt-3">
+                <span data-lang-en>Open source. 500 lines of core.</span>
+                <span data-lang-cn>开源。500 行核心代码。</span>
+              </h2>
+              <p class="text-[color:var(--muted)] mt-2 max-w-xl">
+                <span data-lang-en>Container isolation, WhatsApp I/O, memory, scheduled jobs — on the Claude Agent SDK.</span>
+                <span data-lang-cn>容器隔离、WhatsApp I/O、记忆系统、定时任务——基于 Claude Agent SDK。</span>
+              </p>
+            </div>
+            <div class="flex flex-wrap gap-3">
+              <a href="https://github.com/howardleegeek/OysterNanoClaw" class="btn-primary">
+                <span data-lang-en>View Repo</span>
+                <span data-lang-cn>查看仓库</span>
+              </a>
+            </div>
+          </div>
+          <div class="mt-6 rounded-xl bg-black/70 border border-[color:var(--line)] p-5 text-xs text-[color:var(--ink)] relative overflow-hidden">
+            <div class="scan"></div>
+            <pre class="whitespace-pre-wrap"># OysterNanoClaw: the core path
+WhatsApp (baileys) -> SQLite -> Polling loop -> Container (Claude Agent SDK) -> Response
+Single process. Isolated containers. IPC via filesystem.</pre>
+          </div>
+          <div class="mt-6 grid sm:grid-cols-4 gap-4 text-xs">
+            <div class="glass rounded-xl p-3 text-[color:var(--muted)]">MIT License</div>
+            <div class="glass rounded-xl p-3 text-[color:var(--muted)]">TypeScript 98.3%</div>
+            <div class="glass rounded-xl p-3 text-[color:var(--muted)]">91 commits</div>
+            <div class="glass rounded-xl p-3 text-[color:var(--muted)]">Public</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CTA -->
+      <section class="max-w-6xl mx-auto pb-24">
+        <div class="glass rounded-2xl p-6 sm:p-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+          <div>
+            <div class="text-xs text-[color:var(--accent)] uppercase tracking-[0.35em]">
+              <span data-lang-en>Join the First Wave</span>
+              <span data-lang-cn>加入第一批</span>
+            </div>
+            <h2 class="text-2xl mt-3">
+              <span data-lang-en>Get your ClawPhone. Deploy your lobster.</span>
+              <span data-lang-cn>拿到你的 ClawPhone。部署你的龙虾。</span>
+            </h2>
+            <p class="text-[color:var(--muted)] mt-2">
+              <span data-lang-en>Leave your email for early access and launch updates.</span>
+              <span data-lang-cn>留下邮箱，获取早期访问和上线更新。</span>
+            </p>
+          </div>
+          <div class="flex flex-col gap-3">
+            <form class="flex flex-wrap gap-3" onsubmit="event.preventDefault(); this.querySelector('button').innerText='✓';">
+              <input type="email" required placeholder="you@domain.com" class="bg-transparent border border-[color:var(--line)] rounded-lg px-4 py-3 w-64 focus:outline-none focus:border-[color:var(--accent)] text-sm" />
+              <button class="btn-primary">
+                <span data-lang-en>Request Access</span>
+                <span data-lang-cn>申请加入</span>
+              </button>
+            </form>
+            <div class="flex items-center gap-3">
+              <a href="https://discord.gg/clawglasses" class="text-xs text-[color:var(--muted)] hover:text-white">Discord</a>
+              <span class="text-[color:var(--line)]">·</span>
+              <a href="https://x.com/ClawPhones" class="text-xs text-[color:var(--muted)] hover:text-white">Twitter / X</a>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="px-6 sm:px-10 lg:px-16 pb-12">
+      <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-4 text-xs text-[color:var(--muted)]">
+        <div class="flex items-center gap-4">
+          <span>ClawPhones.com</span>
+          <span class="text-[color:var(--line)]">·</span>
+          <a href="https://universalphone.xyz" class="hover:text-white">By Oyster Labs</a>
+        </div>
+        <div class="flex items-center gap-4">
+          <a href="https://x.com/ClawPhones" class="hover:text-white">Twitter</a>
+          <a href="https://discord.gg/clawglasses" class="hover:text-white">Discord</a>
+          <a href="https://github.com/howardleegeek/OysterNanoClaw" class="hover:text-white">GitHub</a>
+        </div>
+        <div>© 2026 Oysterworld Inc.</div>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    // Device gallery (Back/Side/Top). If image assets are missing, the fallback CSS frame is shown.
+    (function () {
+      var img = document.getElementById('deviceImg');
+      var fallback = document.getElementById('deviceFallback');
+      var btns = document.querySelectorAll('[data-device-src]');
+      if (!img || !btns.length) return;
+      if (fallback) fallback.style.display = 'none';
+
+      // Hide view buttons that don't have an actual asset.
+      btns.forEach(function (b) {
+        var src = b.getAttribute('data-device-src');
+        if (!src) return;
+        var probe = new Image();
+        probe.onload = function () {};
+        probe.onerror = function () { b.style.display = 'none'; };
+        probe.src = src;
+      });
+
+      btns.forEach(function (b) {
+        b.addEventListener('click', function () {
+          var src = b.getAttribute('data-device-src');
+          if (!src) return;
+          btns.forEach(function (x) { x.classList.remove('active'); });
+          b.classList.add('active');
+          img.style.opacity = '0';
+          window.setTimeout(function () {
+            img.onerror = function () {
+              img.style.display = 'none';
+              if (fallback) fallback.style.display = 'flex';
+            };
+            img.onload = function () {
+              img.style.display = '';
+              if (fallback) fallback.style.display = 'none';
+              // Some renders are extremely dark; slightly boost them for legibility.
+              img.classList.toggle('brighten', true);
+              img.style.opacity = '1';
+            };
+            img.src = src;
+          }, 120);
+        });
+      });
+      img.style.transition = 'opacity 0.2s ease';
+      // Apply brighten to initial load too.
+      img.classList.add('brighten');
+    })();
+
+    // Language toggle
+    function setLang(lang) {
+      if (lang === 'cn') {
+        document.body.classList.add('cn');
+      } else {
+        document.body.classList.remove('cn');
+      }
+      document.getElementById('langEn').classList.toggle('active', lang === 'en');
+      document.getElementById('langCn').classList.toggle('active', lang === 'cn');
+      localStorage.setItem('clawphone-lang', lang);
+    }
+    // Restore saved language
+    var saved = localStorage.getItem('clawphone-lang');
+    if (saved === 'cn') setLang('cn');
+
+    // Terminal simulation
+    var logs = [
+      "[boot] nanoClawd start --profile=oyster-1",
+      "[sandbox] fs.mount: /dev/local",
+      "[vision] camera.capture: frame_0x3F1A",
+      "[decide] infer.run: local-npu / quant=4",
+      "[act] touch.tap: (412, 876) / confirm_purchase",
+      "[privacy] all decisions kept on device",
+      "[mesh] peer.connected: 12 devices",
+      "[earn] compute.contributed: 0.3 NCU",
+      "[commit] result sealed to local vault",
+      "[idle] wait-for-charge: true"
+    ];
+    var terminal = document.getElementById("terminal");
+    var i = 0;
+    function pushLog() {
+      terminal.textContent += (terminal.textContent ? "\n" : "") + logs[i % logs.length];
+      terminal.scrollTop = terminal.scrollHeight;
+      i++;
+      if (i % logs.length === 0) terminal.textContent = terminal.textContent.split("\n").slice(-6).join("\n");
+    }
+    setInterval(pushLog, 900);
+    pushLog();
+  </script>
+</body>
+</html>

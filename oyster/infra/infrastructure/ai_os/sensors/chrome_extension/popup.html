@@ -1,0 +1,61 @@
+<!doctype html>
+<html>
+  <body style="font-family: system-ui; padding: 12px; width: 260px;">
+    <h3 style="margin: 0 0 10px;">AI OS Intent</h3>
+
+
+    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+      <button data-intent="bd">BD</button>
+      <button data-intent="research">Research</button>
+      <button data-intent="content">Content</button>
+      <button data-intent="infra">Infra</button>
+    </div>
+
+
+    <hr style="margin: 12px 0;" />
+
+
+    <label style="display:block; font-size:12px;">Hub Token</label>
+    <input id="token" type="password" style="width:100%;" placeholder="AIOS_TOKEN" />
+    <button id="save" style="margin-top:8px;">Save Token</button>
+
+
+    <script>
+      const HUB = "http://127.0.0.1:8787/report";
+      const tokenEl = document.getElementById("token");
+
+
+      chrome.storage.local.get(["AIOS_TOKEN"]).then(v => {
+        tokenEl.value = v.AIOS_TOKEN || "";
+      });
+
+
+      document.getElementById("save").onclick = async () => {
+        await chrome.storage.local.set({ AIOS_TOKEN: tokenEl.value });
+        alert("Saved");
+      };
+
+
+      async function send(intent) {
+        const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+        const domain = tab?.url ? (new URL(tab.url)).hostname : "";
+        const title = tab?.title || "";
+        const { AIOS_TOKEN } = await chrome.storage.local.get(["AIOS_TOKEN"]);
+        await fetch(HUB, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-AIOS-Token": AIOS_TOKEN || ""
+          },
+          body: JSON.stringify({ source: "chrome", domain, title, intent })
+        }).catch(() => {});
+        window.close();
+      }
+
+
+      document.querySelectorAll("button[data-intent]").forEach(btn => {
+        btn.onclick = () => send(btn.dataset.intent);
+      });
+    </script>
+  </body>
+</html>

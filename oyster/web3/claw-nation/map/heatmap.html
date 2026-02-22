@@ -1,0 +1,576 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Oysterworld — Coverage Heatmap</title>
+
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  />
+
+  <style>
+    :root {
+      --bg0: #0a0c10;
+      --bg1: #0b1018;
+      --panel: rgba(12, 16, 22, 0.70);
+      --text: #f2f5ff;
+      --muted: rgba(242, 245, 255, 0.70);
+      --border: rgba(255,255,255,0.12);
+      --shadow: rgba(0,0,0,0.50);
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+    }
+
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      color: var(--text);
+      font: 14px/1.4 var(--sans);
+      background:
+        radial-gradient(1100px 700px at 20% 0%, rgba(0, 214, 170, 0.12), transparent 60%),
+        radial-gradient(900px 650px at 95% 15%, rgba(255, 204, 0, 0.10), transparent 60%),
+        linear-gradient(180deg, var(--bg0), var(--bg1));
+    }
+
+    #map {
+      position: absolute;
+      inset: 0;
+    }
+
+    .panel {
+      position: absolute;
+      left: 12px;
+      top: 12px;
+      width: min(420px, calc(100vw - 24px));
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 12px;
+      box-shadow: 0 16px 42px var(--shadow);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+    }
+
+    .titleRow {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .titleRow h1 {
+      margin: 0;
+      font-size: 14px;
+      font-weight: 900;
+      letter-spacing: 0.25px;
+    }
+
+    .chip {
+      font: 12px/1 var(--mono);
+      color: rgba(242, 245, 255, 0.86);
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(0,0,0,0.22);
+      padding: 6px 8px;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+
+    .kpis {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .kpi {
+      background: rgba(0,0,0,0.22);
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 14px;
+      padding: 10px;
+    }
+
+    .kpi .v {
+      font: 18px/1.05 var(--mono);
+      font-weight: 900;
+      letter-spacing: 0.2px;
+    }
+
+    .kpi .l {
+      margin-top: 6px;
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    label {
+      display: block;
+      color: var(--muted);
+      font-size: 11px;
+      margin: 10px 0 6px;
+    }
+
+    input, select {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 10px 10px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.12);
+      outline: none;
+      background: rgba(255,255,255,0.06);
+      color: var(--text);
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .btns {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+
+    button {
+      cursor: pointer;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(255,255,255,0.06);
+      color: var(--text);
+      padding: 10px 12px;
+      border-radius: 12px;
+      font-weight: 800;
+      letter-spacing: 0.2px;
+    }
+    button.primary {
+      background: linear-gradient(135deg, rgba(0, 214, 170, 0.22), rgba(0, 214, 170, 0.06));
+      border-color: rgba(0, 214, 170, 0.38);
+    }
+    button:disabled { opacity: 0.55; cursor: not-allowed; }
+
+    .status {
+      margin-top: 10px;
+      font: 12px/1.5 var(--mono);
+      color: rgba(242, 245, 255, 0.86);
+      background: rgba(0,0,0,0.22);
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 12px;
+      padding: 10px;
+      white-space: pre-wrap;
+      word-break: break-word;
+      min-height: 70px;
+    }
+
+    .legend {
+      margin-top: 10px;
+      display: grid;
+      gap: 8px;
+    }
+    .bar {
+      height: 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.14);
+      /* blue -> green -> yellow -> red */
+      background: linear-gradient(90deg,
+        hsl(220 88% 56%),
+        hsl(170 88% 52%),
+        hsl(70 92% 55%),
+        hsl(20 92% 55%));
+    }
+    .legendLine {
+      display: flex;
+      justify-content: space-between;
+      font: 11px/1 var(--mono);
+      color: rgba(242, 245, 255, 0.78);
+    }
+
+    /* Leaflet tweaks */
+    .leaflet-control-attribution {
+      background: rgba(0,0,0,0.35) !important;
+      color: rgba(242, 245, 255, 0.72) !important;
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 10px;
+      padding: 4px 8px;
+      margin: 10px;
+      backdrop-filter: blur(12px);
+    }
+    .leaflet-container a { color: rgba(242, 245, 255, 0.88) !important; }
+
+    @media (max-width: 520px) {
+      .kpis { grid-template-columns: 1fr; }
+      .row { grid-template-columns: 1fr; }
+      .panel { padding: 10px; }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="map"></div>
+
+  <div class="panel">
+    <div class="titleRow">
+      <h1>OYSTERWORLD COVERAGE</h1>
+      <div id="asOf" class="chip">as-of: -</div>
+    </div>
+
+    <div class="kpis">
+      <div class="kpi">
+        <div id="kpiCells" class="v">-</div>
+        <div class="l">Total Cells</div>
+      </div>
+      <div class="kpi">
+        <div id="kpiNodes" class="v">-</div>
+        <div class="l">Daily Active Nodes</div>
+      </div>
+      <div class="kpi">
+        <div id="kpiLast" class="v">-</div>
+        <div class="l">Latest Update (UTC)</div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div>
+        <label>Data Source</label>
+        <select id="source">
+          <option value="auto" selected>Auto (file → relay)</option>
+          <option value="file">Local files (/relay/data)</option>
+          <option value="relay">Relay API (/v1)</option>
+        </select>
+      </div>
+      <div>
+        <label>Auto Refresh</label>
+        <select id="autoEvery">
+          <option value="0" selected>Off</option>
+          <option value="10">Every 10s</option>
+          <option value="30">Every 30s</option>
+          <option value="60">Every 60s</option>
+        </select>
+      </div>
+    </div>
+
+    <label>Relay Base URL (used when source=relay or auto fallback)</label>
+    <input id="relayUrl" placeholder="http://127.0.0.1:8787" />
+
+    <div class="row">
+      <div>
+        <label>H3 Resolution</label>
+        <select id="h3Res">
+          <option value="6">6 (region)</option>
+          <option value="7">7</option>
+          <option value="8">8 (neighborhood)</option>
+          <option value="9" selected>9 (default)</option>
+          <option value="10">10 (block)</option>
+        </select>
+      </div>
+      <div>
+        <label>Window</label>
+        <select id="hours">
+          <option value="">All time</option>
+          <option value="1">Last 1h</option>
+          <option value="6">Last 6h</option>
+          <option value="24" selected>Last 24h</option>
+          <option value="168">Last 7d</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="row">
+      <div>
+        <label>Scale</label>
+        <select id="scale">
+          <option value="log" selected>Log</option>
+          <option value="linear">Linear</option>
+        </select>
+      </div>
+      <div>
+        <label>Min Count</label>
+        <input id="minCount" type="number" min="1" step="1" value="1" />
+      </div>
+    </div>
+
+    <div class="row">
+      <div>
+        <label>Limit</label>
+        <input id="limit" type="number" min="1" step="1000" value="15000" />
+      </div>
+      <div>
+        <label>Fit To Data</label>
+        <select id="fitMode">
+          <option value="first" selected>On first load</option>
+          <option value="always">Always</option>
+          <option value="never">Never</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="btns">
+      <button id="btnLoad" class="primary">Load</button>
+      <button id="btnFit">Fit</button>
+      <button id="btnClear">Clear</button>
+    </div>
+
+    <div id="status" class="status"></div>
+
+    <div class="legend">
+      <div class="bar"></div>
+      <div class="legendLine"><span id="minLabel">min</span><span id="maxLabel">max</span></div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/h3-js@4.1.0/dist/h3-js.umd.js"></script>
+
+  <script type="module">
+    import { loadCoverage } from './api.js';
+
+    const els = {
+      asOf: document.getElementById('asOf'),
+      kpiCells: document.getElementById('kpiCells'),
+      kpiNodes: document.getElementById('kpiNodes'),
+      kpiLast: document.getElementById('kpiLast'),
+
+      source: document.getElementById('source'),
+      autoEvery: document.getElementById('autoEvery'),
+      relayUrl: document.getElementById('relayUrl'),
+      h3Res: document.getElementById('h3Res'),
+      hours: document.getElementById('hours'),
+      scale: document.getElementById('scale'),
+      minCount: document.getElementById('minCount'),
+      limit: document.getElementById('limit'),
+      fitMode: document.getElementById('fitMode'),
+      btnLoad: document.getElementById('btnLoad'),
+      btnFit: document.getElementById('btnFit'),
+      btnClear: document.getElementById('btnClear'),
+      status: document.getElementById('status'),
+      minLabel: document.getElementById('minLabel'),
+      maxLabel: document.getElementById('maxLabel'),
+    };
+
+    const storageKey = 'oysterworld_relay_url';
+    const defaultRelay = (() => {
+      const saved = localStorage.getItem(storageKey);
+      if (saved) return saved;
+      // If served by map/server.mjs, it proxies /v1/* to the relay.
+      if (location.origin && location.origin !== 'null') return location.origin;
+      return 'http://127.0.0.1:8787';
+    })();
+    els.relayUrl.value = defaultRelay;
+    els.relayUrl.addEventListener('change', () => {
+      localStorage.setItem(storageKey, (els.relayUrl.value || '').trim());
+    });
+
+    const map = L.map('map', {
+      zoomControl: true,
+      preferCanvas: true,
+      worldCopyJump: true,
+    }).setView([20, 0], 2);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    const canvasRenderer = L.canvas({ padding: 0.3 });
+    const hexLayer = L.layerGroup().addTo(map);
+    let lastBounds = null;
+    let loadedOnce = false;
+    let autoTimer = null;
+
+    function setStatus(s) {
+      els.status.textContent = String(s || '');
+    }
+
+    function clamp01(x) {
+      return Math.max(0, Math.min(1, x));
+    }
+
+    function normalize(val, min, max, mode) {
+      if (!Number.isFinite(val)) return 0;
+      if (max <= min) return 1;
+      if (mode === 'log') {
+        const v = Math.log10(1 + Math.max(0, val - min));
+        const m = Math.log10(1 + Math.max(1e-9, max - min));
+        return clamp01(m ? (v / m) : 1);
+      }
+      return clamp01((val - min) / (max - min));
+    }
+
+    function rampColor(t) {
+      const tt = clamp01(t);
+      const hue = 220 - tt * 200; // 220..20
+      const sat = 88;
+      const light = 56 - tt * 8;
+      return `hsl(${hue} ${sat}% ${light}%)`;
+    }
+
+    function updateLegend(min, max) {
+      els.minLabel.textContent = `${min}`;
+      els.maxLabel.textContent = `${max}`;
+    }
+
+    function fitToBounds() {
+      if (!lastBounds) return;
+      map.fitBounds(lastBounds, { padding: [40, 40], maxZoom: 14 });
+    }
+
+    function fmtNum(n) {
+      if (n == null) return '-';
+      const x = Number(n);
+      if (!Number.isFinite(x)) return '-';
+      return x.toLocaleString();
+    }
+
+    function fmtTs(ts) {
+      if (!ts) return '-';
+      const ms = Date.parse(ts);
+      if (!Number.isFinite(ms)) return '-';
+      // Show HH:MM:SS for screenshots/readability.
+      return new Date(ms).toISOString().replace('T', ' ').replace('Z', 'Z').slice(0, 19);
+    }
+
+    async function loadAndRender() {
+      const started = performance.now();
+
+      const source = String(els.source.value || 'auto');
+      const relayBaseUrl = (els.relayUrl.value || '').trim();
+      const res = Number(els.h3Res.value || '9');
+      const hours = String(els.hours.value || '');
+      const scale = String(els.scale.value || 'log');
+      const minCount = Math.max(1, Number(els.minCount.value || '1'));
+      const limit = Math.max(1, Number(els.limit.value || '15000'));
+
+      els.btnLoad.disabled = true;
+      setStatus('Loading coverage...');
+
+      let data;
+      try {
+        data = await loadCoverage({ source, relayBaseUrl, res, hours, limit });
+      } catch (e) {
+        els.btnLoad.disabled = false;
+        setStatus(`ERROR: ${e?.message || e}`);
+        return;
+      }
+
+      const cellsRaw = Array.isArray(data.cells) ? data.cells : [];
+      const cells = cellsRaw
+        .map((c) => ({ cell: String(c.cell || ''), count: Number(c.count || 0) }))
+        .filter((c) => c.cell && Number.isFinite(c.count) && c.count >= minCount);
+
+      let min = Infinity;
+      let max = 0;
+      for (const c of cells) {
+        if (c.count < min) min = c.count;
+        if (c.count > max) max = c.count;
+      }
+      if (!Number.isFinite(min)) min = 0;
+      updateLegend(min, max);
+
+      // KPIs
+      els.kpiCells.textContent = fmtNum(data.unique_cells);
+      els.kpiNodes.textContent = fmtNum(data.active_nodes);
+      els.kpiLast.textContent = fmtTs(data?.last_event?.ts);
+
+      // Render polygons
+      hexLayer.clearLayers();
+
+      let minLat = 90, maxLat = -90, minLng = 180, maxLng = -180;
+      let rendered = 0;
+
+      for (const c of cells) {
+        let boundary;
+        try {
+          boundary = h3.cellToBoundary(c.cell, false);
+        } catch {
+          continue;
+        }
+
+        const latlngs = boundary.map(([lat, lng]) => [lat, lng]);
+        for (const [lat, lng] of latlngs) {
+          if (lat < minLat) minLat = lat;
+          if (lat > maxLat) maxLat = lat;
+          if (lng < minLng) minLng = lng;
+          if (lng > maxLng) maxLng = lng;
+        }
+
+        const t = normalize(c.count, min, max, scale);
+        const fill = rampColor(t);
+
+        const poly = L.polygon(latlngs, {
+          renderer: canvasRenderer,
+          weight: 0.7,
+          color: 'rgba(0,0,0,0.35)',
+          fillColor: fill,
+          fillOpacity: 0.68,
+        });
+
+        poly.on('click', () => {
+          const url = (relayBaseUrl || '').trim().replace(/\\/+$/, '');
+          const eventsUrl = url ? `${url}/v1/world/events?cell=${encodeURIComponent(c.cell)}&limit=25&res=${encodeURIComponent(String(res))}` : null;
+          const html = [
+            `<div style="font:12px/1.35 ${getComputedStyle(document.body).fontFamily};">`,
+            `<div style="font-weight:900; margin-bottom:6px;">H3 ${c.cell}</div>`,
+            `<div style="color:#222;">count: <b>${c.count}</b></div>`,
+            eventsUrl ? `<div style="margin-top:8px;"><a href="${eventsUrl}" target="_blank" rel="noreferrer">open /v1/world/events</a></div>` : '',
+            `</div>`,
+          ].join('');
+          poly.bindPopup(html, { maxWidth: 380 }).openPopup();
+        });
+
+        hexLayer.addLayer(poly);
+        rendered++;
+      }
+
+      lastBounds = (rendered > 0 && minLat <= maxLat && minLng <= maxLng)
+        ? L.latLngBounds([[minLat, minLng], [maxLat, maxLng]])
+        : null;
+
+      const mode = String(els.fitMode.value || 'first');
+      const shouldFit = mode === 'always' || (mode === 'first' && !loadedOnce);
+      loadedOnce = true;
+      if (shouldFit && lastBounds) fitToBounds();
+
+      const ms = Math.round(performance.now() - started);
+      els.asOf.textContent = `as-of: ${new Date().toISOString()}`;
+
+      setStatus([
+        `ok: true (${ms}ms)  source: ${data.source}`,
+        `res: ${data.res}  window: ${hours ? `${hours}h` : 'all'}  scale: ${scale}`,
+        `rendered_cells: ${rendered} (raw=${cellsRaw.length}, minCount>=${minCount})  unique_cells: ${data.unique_cells}  truncated: ${data.truncated}`,
+        `events_total: ${data.events_total ?? '-'}  active_nodes: ${data.active_nodes ?? '-'}  nodes_total: ${data.nodes_total ?? '-'}`,
+        `last_event: ${data?.last_event?.ts || '-'}`,
+        `since: ${data.since || '-'}`,
+      ].join('\\n'));
+
+      els.btnLoad.disabled = false;
+    }
+
+    function clearMap() {
+      hexLayer.clearLayers();
+      lastBounds = null;
+      setStatus('cleared');
+    }
+
+    function setAutoRefresh() {
+      const every = Number(els.autoEvery.value || '0');
+      if (autoTimer) {
+        clearInterval(autoTimer);
+        autoTimer = null;
+      }
+      if (every > 0) autoTimer = setInterval(loadAndRender, every * 1000);
+    }
+
+    els.btnLoad.addEventListener('click', loadAndRender);
+    els.btnFit.addEventListener('click', fitToBounds);
+    els.btnClear.addEventListener('click', clearMap);
+    els.autoEvery.addEventListener('change', setAutoRefresh);
+
+    // Kick off once.
+    setAutoRefresh();
+    loadAndRender();
+  </script>
+</body>
+</html>
+

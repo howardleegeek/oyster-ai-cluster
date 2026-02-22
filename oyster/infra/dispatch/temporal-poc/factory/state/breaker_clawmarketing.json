@@ -1,0 +1,10 @@
+{
+  "state": "OPEN",
+  "consecutive_no_progress": 3,
+  "consecutive_same_error": 0,
+  "last_error_hash": "",
+  "last_progress_cycle": 13,
+  "total_opens": 1,
+  "opened_at": 1771778467.182998,
+  "last_transition": "CLOSED->OPEN:no_progress_3_cycles"
+}

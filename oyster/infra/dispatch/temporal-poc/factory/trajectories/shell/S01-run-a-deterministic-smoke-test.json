@@ -1,0 +1,23 @@
+{
+  "task_id": "S01-run-a-deterministic-smoke-test",
+  "project": "shell",
+  "spec_content": "---\ntask_id: S01-run-a-deterministic-smoke-test\nproject: shell\npriority: 2\nestimated_minutes: 30\ndepends_on: []\n---\n## Goal\nrun a deterministic smoke test (echo 'hello' > /tmp/test.txt) through the full p\n\n\n## Identified Risks\n- Temporal migration may have lost edge case handling that the old 12K lines covered\n- Metrics collection might be silently failing (wrong DB connection, missing table)\n- Worker could be running but not receiving tasks (queue mismatch, wrong namespace)\n\n\n## Constraints\n- W",
+  "template_id": "default",
+  "outcome": "success",
+  "failure_reason": "",
+  "advisor_consensus": "",
+  "total_tokens": 0,
+  "total_duration": 1707.4785158634186,
+  "started_at": 1771734589.246609,
+  "completed_at": 1771736296.7252228,
+  "step_count": 1,
+  "steps": [
+    {
+      "phase": "build",
+      "action": "execute_attempt_1",
+      "result": "completed",
+      "duration": 1707.4785158634186,
+      "error": ""
+    }
+  ]
+}

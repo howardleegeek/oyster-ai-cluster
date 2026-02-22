@@ -1,0 +1,37 @@
+{
+  "task_id": "S01-add-basic-test-coverage-for-co",
+  "project": "clawmarketing",
+  "spec_content": "---\ntask_id: S01-add-basic-test-coverage-for-co\nproject: clawmarketing\npriority: 1\nestimated_minutes: 30\ndepends_on: []\n---\n## Goal\nAdd basic test coverage for core modules\n\n\n## Identified Risks\n- No advisors available \u2014 using codebase heuristics only\n\n\n## Constraints\n- Work within the existing codebase structure\n- Write meaningful tests for new functionality\n- Do not refactor unrelated code\n- Do not change UI/CSS unless explicitly required\n\n## Acceptance Criteria\n- [ ] Core functionality implem",
+  "template_id": "default",
+  "outcome": "stuck",
+  "failure_reason": "stuck:repeating_action_error",
+  "advisor_consensus": "",
+  "total_tokens": 0,
+  "total_duration": 0.0057218074798583984,
+  "started_at": 1771745124.965984,
+  "completed_at": 1771745124.979243,
+  "step_count": 3,
+  "steps": [
+    {
+      "phase": "build",
+      "action": "execute_attempt_1",
+      "result": "failed",
+      "duration": 0.005388736724853516,
+      "error": "task-wrapper.sh not found at /Users/howardli/Downloads/oyster/infra/dispatch/task-wrapper.sh"
+    },
+    {
+      "phase": "build",
+      "action": "execute_attempt_2",
+      "result": "failed",
+      "duration": 0.00013899803161621094,
+      "error": "task-wrapper.sh not found at /Users/howardli/Downloads/oyster/infra/dispatch/task-wrapper.sh"
+    },
+    {
+      "phase": "build",
+      "action": "execute_attempt_3",
+      "result": "failed",
+      "duration": 0.00019407272338867188,
+      "error": "task-wrapper.sh not found at /Users/howardli/Downloads/oyster/infra/dispatch/task-wrapper.sh"
+    }
+  ]
+}

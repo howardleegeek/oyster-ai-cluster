@@ -1,0 +1,30 @@
+{
+  "task_id": "S03-reduce-structural-debt-in-one",
+  "project": "clawmarketing",
+  "spec_content": "---\ntask_id: S03-reduce-structural-debt-in-one\nproject: clawmarketing\npriority: 2\nestimated_minutes: 30\ndepends_on: []\n---\n## Goal\nreduce structural debt in one pass: archive/ignore duplicate execution directori\n\n\n## Identified Risks\n- If discovery continues without hardening, iteration speed will drop as regressions increase from codebase sprawl.\n- 0KB or placeholder infra/config files can create false confidence and environment-specific failures during deployment.\n- Locking to one template too",
+  "template_id": "default",
+  "outcome": "stuck",
+  "failure_reason": "size_diff_early_kill: 2x loc_added=0",
+  "advisor_consensus": "",
+  "total_tokens": 0,
+  "total_duration": 117.4510326385498,
+  "started_at": 1771777984.334657,
+  "completed_at": 1771778101.7864141,
+  "step_count": 2,
+  "steps": [
+    {
+      "phase": "build",
+      "action": "execute_attempt_1",
+      "result": "failed",
+      "duration": 67.2341377735138,
+      "error": "Exit code 1"
+    },
+    {
+      "phase": "build",
+      "action": "execute_attempt_2",
+      "result": "failed",
+      "duration": 50.21689486503601,
+      "error": "Exit code 1"
+    }
+  ]
+}

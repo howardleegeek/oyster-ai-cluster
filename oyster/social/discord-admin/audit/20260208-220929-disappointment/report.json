@@ -1,0 +1,20 @@
+{
+  "ok": true,
+  "guildId": "1404726112159793172",
+  "guildName": "Oyster Republic (服务器)",
+  "pickedChannels": [
+    {
+      "name": "entry-channel",
+      "channelId": "1416431205309456424",
+      "aria": null,
+      "url": "https://discord.com/channels/1404726112159793172/1416431205309456424",
+      "messagesCount": 2
+    }
+  ],
+  "scannedMessages": 2,
+  "disappointedMessages": 0,
+  "themes": [],
+  "authors": [],
+  "outputDir": "/Users/howardli/Downloads/discord-admin/audit/20260208-220929-disappointment",
+  "note": "This is based on the messages loaded in the Discord web UI (virtualized). It may not include the full history."
+}

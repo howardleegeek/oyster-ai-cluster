@@ -1,0 +1,37 @@
+{
+  "task_id": "S02-run-a-short-hardening-sprint-t",
+  "project": "clawmarketing",
+  "spec_content": "---\ntask_id: S02-run-a-short-hardening-sprint-t\nproject: clawmarketing\npriority: 2\nestimated_minutes: 30\ndepends_on: []\n---\n## Goal\nrun a short hardening sprint to define canonical source directories and de-dupli\n\n\n## Identified Risks\n- Current 'best template' may be a local optimum due to evaluation bias or metric drift if instrumentation is inconsistent.\n- De-duplication can break hidden path dependencies in scripts and dispatch tooling if not staged carefully.\n- Without CI hard gates, autonom",
+  "template_id": "default",
+  "outcome": "stuck",
+  "failure_reason": "stuck:repeating_action_error",
+  "advisor_consensus": "",
+  "total_tokens": 0,
+  "total_duration": 2572.895872116089,
+  "started_at": 1771742990.242433,
+  "completed_at": 1771745563.1501682,
+  "step_count": 3,
+  "steps": [
+    {
+      "phase": "build",
+      "action": "execute_attempt_1",
+      "result": "failed",
+      "duration": 2572.821678161621,
+      "error": "Exit code 1"
+    },
+    {
+      "phase": "build",
+      "action": "execute_attempt_2",
+      "result": "failed",
+      "duration": 0.06616902351379395,
+      "error": "Exit code 2"
+    },
+    {
+      "phase": "build",
+      "action": "execute_attempt_3",
+      "result": "failed",
+      "duration": 0.008024930953979492,
+      "error": "Exit code 2"
+    }
+  ]
+}

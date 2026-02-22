@@ -1,0 +1,371 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Oyster Republic — A Declaration of Digital Sovereignty</title>
+  <meta name="description" content="Oyster Republic: a declaration of digital sovereignty for autonomous compute, local-first by design." />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #000000;
+      --ink: #ffffff;
+      --muted: rgba(255,255,255,0.62);
+      --accent: #ffffff;
+      --accent-2: rgba(255,255,255,0.82);
+      --line: rgba(255,255,255,0.14);
+      --line-2: rgba(255,255,255,0.08);
+    }
+    html, body { background: var(--bg); color: var(--ink); }
+    body { font-family: "Inter", system-ui, -apple-system, Segoe UI, sans-serif; }
+    .mono { font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
+    .serif { font-family: inherit; }
+    .glass {
+      background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+      border: 1px solid rgba(255,255,255,0.10);
+      box-shadow: 0 40px 120px rgba(0,0,0,0.70);
+      backdrop-filter: blur(10px);
+    }
+    .halo {
+      background: radial-gradient(900px 500px at 70% 10%, rgba(255,255,255,0.06), transparent 60%),
+                  radial-gradient(900px 500px at 20% 80%, rgba(255,255,255,0.03), transparent 60%);
+    }
+    .halo::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.07;
+      mix-blend-mode: overlay;
+      background-image:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)' opacity='.55'/%3E%3C/svg%3E");
+      background-size: 240px 240px;
+    }
+    .grid-pattern {
+      background-image: linear-gradient(rgba(255,255,255,0.06) 1px, transparent 1px),
+                        linear-gradient(90deg, rgba(255,255,255,0.06) 1px, transparent 1px);
+      background-size: 64px 64px;
+      mask-image: radial-gradient(circle at 50% 30%, black 40%, transparent 70%);
+      opacity: 0.14;
+      pointer-events: none;
+    }
+    .btn-primary {
+      padding: 14px 28px; border: 1px solid rgba(255,255,255,0.9); background: #fff; color: #000;
+      font-size: 14px; letter-spacing: 0.12em; transition: all 0.2s;
+    }
+    .btn-primary:hover { background: transparent; color: #fff; transform: translateY(-1px); box-shadow: 0 18px 40px rgba(0,0,0,0.55); }
+    .btn-ghost {
+      padding: 14px 28px; border: 1px solid rgba(255,255,255,0.22); color: var(--muted);
+      font-size: 14px; transition: all 0.2s;
+    }
+    .btn-ghost:hover { border-color: rgba(255,255,255,0.9); color: #fff; transform: translateY(-1px); }
+    .lang-toggle { cursor: pointer; user-select: none; }
+    .lang-toggle span { padding: 4px 8px; border-radius: 4px; transition: all 0.2s; }
+    .lang-toggle span.active { color: #fff; background: rgba(255,255,255,0.10); }
+    [data-lang-cn] { display: none; }
+    body.cn [data-lang-en] { display: none; }
+    body.cn [data-lang-cn] { display: inline; }
+    body.cn [data-lang-cn-block] { display: block; }
+    body.cn [data-lang-en-block] { display: none; }
+    body:not(.cn) [data-lang-cn-block] { display: none; }
+
+    .navlink { position: relative; }
+    .navlink::after {
+      content: "";
+      position: absolute;
+      left: 0; right: 0;
+      bottom: -6px;
+      height: 1px;
+      background: rgba(255,255,255,0.0);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.2s ease, background 0.2s ease;
+    }
+    .navlink:hover::after { background: rgba(255,255,255,0.6); transform: scaleX(1); }
+  </style>
+</head>
+<body class="antialiased">
+  <div class="halo min-h-screen relative overflow-hidden">
+    <div class="grid-pattern absolute inset-0"></div>
+
+    <!-- Header -->
+    <header class="px-6 sm:px-10 lg:px-16 pt-8">
+      <div class="max-w-6xl mx-auto flex items-center justify-between">
+        <div class="flex items-center gap-4">
+          <div class="mono text-[11px] tracking-[0.45em] uppercase font-medium text-[color:var(--muted)]">Oyster Republic</div>
+        </div>
+        <div class="flex items-center gap-5 text-xs text-[color:var(--muted)]">
+          <a href="/" class="navlink hover:text-white mono text-[11px] tracking-[0.22em] uppercase">
+            <span data-lang-en>Back to ClawPhone</span>
+            <span data-lang-cn>返回 ClawPhone</span>
+          </a>
+          <a href="https://github.com/howardleegeek/OysterNanoClaw" class="navlink hover:text-white mono text-[11px] tracking-[0.22em] uppercase">GitHub</a>
+          <div class="lang-toggle flex items-center gap-1 text-xs">
+            <span id="langEn" class="active" onclick="setLang('en')">EN</span>
+            <span class="text-[color:var(--line)]">|</span>
+            <span id="langCn" onclick="setLang('cn')">中文</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="px-6 sm:px-10 lg:px-16">
+
+      <!-- Hero -->
+      <section class="max-w-6xl mx-auto pt-14 pb-16">
+        <div class="text-[color:var(--accent)] text-xs tracking-[0.35em] uppercase">
+          <span data-lang-en>Declaration of Sovereignty</span>
+          <span data-lang-cn>主权宣言</span>
+        </div>
+        <h1 class="text-4xl sm:text-5xl lg:text-6xl leading-tight mt-4">
+          <span data-lang-en>A republic of nodes, <span class="serif italic">not a kingdom of servers</span>.</span>
+          <span data-lang-cn>一个节点的共和国，<span class="serif italic">不是服务器的王国</span>。</span>
+        </h1>
+        <p class="text-lg text-[color:var(--muted)] mt-6 max-w-2xl leading-relaxed">
+          <span data-lang-en>Oyster Republic is a declaration of digital sovereignty. We refuse idle devices and centralized extraction. We awaken forgotten silicon, and turn every ClawPhone into a sovereign node.</span>
+          <span data-lang-cn>Oyster Republic 是一份数字主权宣言。我们拒绝设备闲置和中心化榨取。我们唤醒被遗忘的芯片，让每一台 ClawPhone 成为主权节点。</span>
+        </p>
+        <div class="mt-8 flex flex-wrap gap-3">
+          <a href="https://buy.stripe.com/4gMbJ1dmudka48V3D95AQ12" class="btn-primary">
+            <span data-lang-en>Deploy a Node · $99</span>
+            <span data-lang-cn>部署节点 · $99</span>
+          </a>
+          <a href="https://github.com/howardleegeek/OysterNanoClaw" class="btn-ghost">
+            <span data-lang-en>Open Repository</span>
+            <span data-lang-cn>查看仓库</span>
+          </a>
+        </div>
+      </section>
+
+      <!-- Trust Bar -->
+      <section class="max-w-6xl mx-auto pb-14">
+        <div class="flex flex-wrap items-center justify-center gap-6 text-xs text-[color:var(--muted)] tracking-wide">
+          <span data-lang-en>From <a href="https://universalphone.xyz" class="text-[color:var(--ink)] hover:text-[color:var(--accent)]">Oyster Labs</a></span>
+          <span data-lang-cn>来自 <a href="https://universalphone.xyz" class="text-[color:var(--ink)] hover:text-[color:var(--accent)]">Oyster Labs</a></span>
+          <span class="w-1 h-1 rounded-full bg-[color:var(--accent)]"></span>
+          <span>30,000+ devices shipped</span>
+          <span class="w-1 h-1 rounded-full bg-[color:var(--accent)]"></span>
+          <span>70,000+ DePIN nodes</span>
+        </div>
+      </section>
+
+      <!-- The Why + The Call -->
+      <section class="max-w-6xl mx-auto grid lg:grid-cols-2 gap-6 pb-16">
+        <div class="glass rounded-2xl p-6 sm:p-8">
+          <div class="text-xs text-[color:var(--accent)] uppercase tracking-[0.35em]">
+            <span data-lang-en>The Why · Self-Criticism</span>
+            <span data-lang-cn>缘起 · 自我批评</span>
+          </div>
+          <h2 class="text-2xl mt-3">
+            <span data-lang-en>Compute Was Hoarded. Devices Were Abandoned.</span>
+            <span data-lang-cn>算力被垄断。设备被遗弃。</span>
+          </h2>
+          <p class="text-[color:var(--muted)] mt-3">
+            <span data-lang-en>Billions of phones sleep in drawers while cloud monopolies harvest data. This is wasted silicon and stolen agency. We admit we helped build this world — and we are changing it.</span>
+            <span data-lang-cn>数十亿手机沉睡在抽屉里，而云端垄断者收割数据。这是硅片的浪费和主体性的盗窃。我们承认参与建造了这个世界——而我们正在改变它。</span>
+          </p>
+        </div>
+        <div class="glass rounded-2xl p-6 sm:p-8">
+          <div class="text-xs text-[color:var(--accent)] uppercase tracking-[0.35em]">
+            <span data-lang-en>The Call · Mission</span>
+            <span data-lang-cn>使命 · 召唤</span>
+          </div>
+          <h2 class="text-2xl mt-3">
+            <span data-lang-en>A Federation of Compute</span>
+            <span data-lang-cn>算力联邦</span>
+          </h2>
+          <p class="text-[color:var(--muted)] mt-3">
+            <span data-lang-en>Oyster Republic is not a brand. It is a decentralized compute federation to awaken every forgotten chip. We build a local-first civilization where power belongs to the operator.</span>
+            <span data-lang-cn>Oyster Republic 不是品牌。它是一个去中心化算力联邦，唤醒每一块被遗忘的芯片。我们构建一个本地优先的文明，权力属于运营者。</span>
+          </p>
+        </div>
+      </section>
+
+      <!-- Three Pillars -->
+      <section class="max-w-6xl mx-auto pb-16">
+        <div class="text-center mb-10">
+          <div class="text-xs text-[color:var(--accent)] uppercase tracking-[0.35em]">
+            <span data-lang-en>Three Pillars</span>
+            <span data-lang-cn>三大支柱</span>
+          </div>
+          <h2 class="text-3xl mt-3 font-semibold">
+            <span data-lang-en>Sovereignty by Design</span>
+            <span data-lang-cn>主权即设计</span>
+          </h2>
+        </div>
+        <div class="grid lg:grid-cols-3 gap-6">
+          <div class="glass rounded-2xl p-6 sm:p-8">
+            <div class="text-xs text-[color:var(--accent)] uppercase tracking-[0.35em]">
+              <span data-lang-en>Pillar A</span>
+              <span data-lang-cn>支柱 A</span>
+            </div>
+            <h2 class="text-2xl mt-3">
+              <span data-lang-en>Physical Sovereignty</span>
+              <span data-lang-cn>物理主权</span>
+            </h2>
+            <p class="text-[color:var(--muted)] mt-3">
+              <span data-lang-en>Hardware is territory. Each ClawPhone is a border node. You own the chip, not a subscription.</span>
+              <span data-lang-cn>硬件即领土。每台 ClawPhone 都是一个边界节点。你拥有的是芯片，不是订阅。</span>
+            </p>
+          </div>
+          <div class="glass rounded-2xl p-6 sm:p-8">
+            <div class="text-xs text-[color:var(--accent)] uppercase tracking-[0.35em]">
+              <span data-lang-en>Pillar B</span>
+              <span data-lang-cn>支柱 B</span>
+            </div>
+            <h2 class="text-2xl mt-3">
+              <span data-lang-en>Algorithmic Sovereignty</span>
+              <span data-lang-cn>算法主权</span>
+            </h2>
+            <p class="text-[color:var(--muted)] mt-3">
+              <span data-lang-en>Algorithms are law. NanoClaw executes locally; intelligence is distributed, not centralized.</span>
+              <span data-lang-cn>算法即法律。NanoClaw 本地执行；智能是分布式的，不是中心化的。</span>
+            </p>
+          </div>
+          <div class="glass rounded-2xl p-6 sm:p-8">
+            <div class="text-xs text-[color:var(--accent)] uppercase tracking-[0.35em]">
+              <span data-lang-en>Pillar C</span>
+              <span data-lang-cn>支柱 C</span>
+            </div>
+            <h2 class="text-2xl mt-3">
+              <span data-lang-en>Economic Sovereignty</span>
+              <span data-lang-cn>经济主权</span>
+            </h2>
+            <p class="text-[color:var(--muted)] mt-3">
+              <span data-lang-en>Labor becomes value. Idle time converts to compute contributions that benefit the operator.</span>
+              <span data-lang-cn>劳动变成价值。空闲时间转化为算力贡献，收益归运营者所有。</span>
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Roles -->
+      <section class="max-w-6xl mx-auto pb-16">
+        <div class="text-center mb-10">
+          <div class="text-xs text-[color:var(--accent)] uppercase tracking-[0.35em]">
+            <span data-lang-en>Roles</span>
+            <span data-lang-cn>角色</span>
+          </div>
+          <h2 class="text-3xl mt-3 font-semibold">
+            <span data-lang-en>Citizens of the Republic</span>
+            <span data-lang-cn>共和国公民</span>
+          </h2>
+        </div>
+        <div class="grid lg:grid-cols-3 gap-6">
+          <div class="glass rounded-2xl p-6">
+            <div class="text-xs text-[color:var(--accent)] uppercase tracking-[0.35em]">
+              <span data-lang-en>Identity</span>
+              <span data-lang-cn>身份</span>
+            </div>
+            <h2 class="text-2xl mt-3">
+              <span data-lang-en>The Citizen</span>
+              <span data-lang-cn>公民</span>
+            </h2>
+            <p class="text-[color:var(--muted)] mt-3">
+              <span data-lang-en>Operates one or more ClawPhones. Runs a foundational node.</span>
+              <span data-lang-cn>运营一台或多台 ClawPhone。运行基础节点。</span>
+            </p>
+          </div>
+          <div class="glass rounded-2xl p-6">
+            <div class="text-xs text-[color:var(--accent)] uppercase tracking-[0.35em]">
+              <span data-lang-en>Role</span>
+              <span data-lang-cn>角色</span>
+            </div>
+            <h2 class="text-2xl mt-3">
+              <span data-lang-en>The Architect</span>
+              <span data-lang-cn>架构师</span>
+            </h2>
+            <p class="text-[color:var(--muted)] mt-3">
+              <span data-lang-en>Contributes NanoClaw code and optimizes orchestration logic.</span>
+              <span data-lang-cn>贡献 NanoClaw 代码，优化编排逻辑。</span>
+            </p>
+          </div>
+          <div class="glass rounded-2xl p-6">
+            <div class="text-xs text-[color:var(--accent)] uppercase tracking-[0.35em]">
+              <span data-lang-en>Rank</span>
+              <span data-lang-cn>军衔</span>
+            </div>
+            <h2 class="text-2xl mt-3">
+              <span data-lang-en>The Fleet Commander</span>
+              <span data-lang-cn>舰队司令</span>
+            </h2>
+            <p class="text-[color:var(--muted)] mt-3">
+              <span data-lang-en>Operates large-scale node arrays, delivering strategic compute.</span>
+              <span data-lang-cn>运营大规模节点阵列，提供战略算力。</span>
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- CTA -->
+      <section class="max-w-6xl mx-auto pb-24">
+        <div class="glass rounded-2xl p-6 sm:p-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+          <div>
+            <div class="text-xs text-[color:var(--accent)] uppercase tracking-[0.35em]">
+              <span data-lang-en>Join the Republic</span>
+              <span data-lang-cn>加入共和国</span>
+            </div>
+            <h2 class="text-2xl mt-3">
+              <span data-lang-en>Build with restraint. Scale with purpose.</span>
+              <span data-lang-cn>克制地构建。有目的地扩展。</span>
+            </h2>
+            <p class="text-[color:var(--muted)] mt-2">
+              <span data-lang-en>Oyster Republic is invite-only for the first wave of operators.</span>
+              <span data-lang-cn>Oyster Republic 对第一批运营者采用邀请制。</span>
+            </p>
+          </div>
+          <div class="flex flex-col gap-3">
+            <form class="flex flex-wrap gap-3" onsubmit="event.preventDefault(); this.querySelector('button').innerText='✓';">
+              <input type="email" required placeholder="you@domain.com" class="bg-transparent border border-[color:var(--line)] rounded-lg px-4 py-3 w-64 focus:outline-none focus:border-[color:var(--accent)] text-sm" />
+              <button class="btn-primary">
+                <span data-lang-en>Request Access</span>
+                <span data-lang-cn>申请加入</span>
+              </button>
+            </form>
+            <div class="flex items-center gap-3">
+              <a href="https://discord.gg/clawglasses" class="text-xs text-[color:var(--muted)] hover:text-white">Discord</a>
+              <span class="text-[color:var(--line)]">·</span>
+              <a href="https://x.com/ClawPhones" class="text-xs text-[color:var(--muted)] hover:text-white">Twitter / X</a>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="px-6 sm:px-10 lg:px-16 pb-12">
+      <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-4 text-xs text-[color:var(--muted)]">
+        <div class="flex items-center gap-4">
+          <span>OysterRepublic.xyz</span>
+          <span class="text-[color:var(--line)]">·</span>
+          <a href="https://universalphone.xyz" class="hover:text-white">By Oyster Labs</a>
+        </div>
+        <div class="flex items-center gap-4">
+          <a href="https://x.com/ClawPhones" class="hover:text-white">Twitter</a>
+          <a href="https://discord.gg/clawglasses" class="hover:text-white">Discord</a>
+          <a href="https://github.com/howardleegeek/OysterNanoClaw" class="hover:text-white">GitHub</a>
+        </div>
+        <div>© 2026 Oysterworld Inc.</div>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    function setLang(lang) {
+      if (lang === 'cn') {
+        document.body.classList.add('cn');
+      } else {
+        document.body.classList.remove('cn');
+      }
+      document.getElementById('langEn').classList.toggle('active', lang === 'en');
+      document.getElementById('langCn').classList.toggle('active', lang === 'cn');
+      localStorage.setItem('clawphone-lang', lang);
+    }
+    var saved = localStorage.getItem('clawphone-lang');
+    if (saved === 'cn') setLang('cn');
+  </script>
+</body>
+</html>

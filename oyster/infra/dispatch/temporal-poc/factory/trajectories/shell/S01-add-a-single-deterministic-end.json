@@ -1,0 +1,23 @@
+{
+  "task_id": "S01-add-a-single-deterministic-end",
+  "project": "shell",
+  "spec_content": "---\ntask_id: S01-add-a-single-deterministic-end\nproject: shell\npriority: 2\nestimated_minutes: 30\ndepends_on: []\n---\n## Goal\nadd a single deterministic end-to-end regression gate for shell (cleanup/init ->\n\n\n## Identified Risks\n- Current green status may be a false positive if tests are too shallow; cleanup-related breakage in Web3 integrations may go undetected until later.\n- Advisor instability (timeouts/auto-approve) can steer autonomous discovery toward low-quality or repetitive tasks despite",
+  "template_id": "default",
+  "outcome": "success",
+  "failure_reason": "",
+  "advisor_consensus": "",
+  "total_tokens": 0,
+  "total_duration": 2369.293771982193,
+  "started_at": 1771738656.809636,
+  "completed_at": 1771741026.1042078,
+  "step_count": 1,
+  "steps": [
+    {
+      "phase": "build",
+      "action": "execute_attempt_1",
+      "result": "completed",
+      "duration": 2369.293771982193,
+      "error": ""
+    }
+  ]
+}

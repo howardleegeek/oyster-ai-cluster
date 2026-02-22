@@ -1,0 +1,23 @@
+{
+  "task_id": "S02-do-a-focused-tech-debt-pass-to",
+  "project": "clawmarketing",
+  "spec_content": "---\ntask_id: S02-do-a-focused-tech-debt-pass-to\nproject: clawmarketing\npriority: 2\nestimated_minutes: 30\ndepends_on: []\n---\n## Goal\ndo a focused tech-debt pass to define canonical code paths (single frontend sour\n\n\n## Identified Risks\n- Duplicate/parallel code paths can cause silent regressions when fixes land in the wrong copy.\n- Optimizing CMP alone can produce local maxima that do not improve revenue or qualified leads.\n- Automated multi-channel dispatch can amplify low-quality experiments wi",
+  "template_id": "default",
+  "outcome": "success",
+  "failure_reason": "",
+  "advisor_consensus": "",
+  "total_tokens": 0,
+  "total_duration": 701.870600938797,
+  "started_at": 1771736315.254334,
+  "completed_at": 1771737017.125003,
+  "step_count": 1,
+  "steps": [
+    {
+      "phase": "build",
+      "action": "execute_attempt_1",
+      "result": "completed",
+      "duration": 701.870600938797,
+      "error": ""
+    }
+  ]
+}

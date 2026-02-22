@@ -1,0 +1,15 @@
+{
+  "name": "claw-relay",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node src/server.js",
+    "start": "node src/server.js",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "@coinbase/x402": "^2.1.0",
+    "h3-js": "^4.1.0"
+  }
+}

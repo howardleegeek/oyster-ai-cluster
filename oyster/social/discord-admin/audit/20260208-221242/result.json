@@ -1,0 +1,131 @@
+{
+  "ok": true,
+  "startedFrom": "https://discord.com/channels/1404726112159793172/1416430799225337876",
+  "finalUrl": "https://discord.com/channels/1404726112159793172/1404726112789073932",
+  "isLoggedIn": true,
+  "ids": {
+    "guildId": "1404726112159793172",
+    "channelId": "1404726112789073932"
+  },
+  "extracted": {
+    "title": "(25) Discord | #👋welcome | Oyster Republic",
+    "guildName": "Oyster Republic",
+    "channelHeaderText": null,
+    "channelItemsCount": 20,
+    "channelItems": [
+      {
+        "id": "channels___1429137003890606150",
+        "name": "文字信息（受限）ticket-1邀请到频道编辑频道",
+        "aria": "ticket-1（文字频道）"
+      },
+      {
+        "id": "channels___1404726112789073931",
+        "name": "Welcome",
+        "aria": "Welcome （类别）"
+      },
+      {
+        "id": "channels___1404726112789073932",
+        "name": "文字信息👋welcome邀请到频道编辑频道",
+        "aria": "👋welcome（文字频道）"
+      },
+      {
+        "id": "channels___1404868856580931603",
+        "name": "文字信息verification邀请到频道编辑频道",
+        "aria": "verification（文字频道）"
+      },
+      {
+        "id": "channels___1416406050340475011",
+        "name": "文字信息（受限）rules邀请到频道编辑频道",
+        "aria": "rules（文字频道）"
+      },
+      {
+        "id": "channels___1416406372660023566",
+        "name": "文字信息（受限）announcements邀请到频道编辑频道",
+        "aria": "announcements（文字频道）"
+      },
+      {
+        "id": "channels___1416406800819032225",
+        "name": "文字信息（受限）faq邀请到频道编辑频道",
+        "aria": "faq（文字频道）"
+      },
+      {
+        "id": "channels___1404726112789073935",
+        "name": "Citizen-Only Chat",
+        "aria": "Citizen-Only Chat （类别）"
+      },
+      {
+        "id": "channels___1404870331759591575",
+        "name": "文字信息（受限）general-english邀请到频道编辑频道",
+        "aria": "general-english（文字频道）"
+      },
+      {
+        "id": "channels___1416430649832640582",
+        "name": "文字信息（受限）nigerian邀请到频道编辑频道",
+        "aria": "nigerian（文字频道）"
+      },
+      {
+        "id": "channels___1416430673652355112",
+        "name": "文字信息（受限）chinese邀请到频道编辑频道",
+        "aria": "chinese（文字频道）"
+      },
+      {
+        "id": "channels___1416430707835801672",
+        "name": "文字信息（受限）russian邀请到频道编辑频道",
+        "aria": "russian（文字频道）"
+      },
+      {
+        "id": "channels___1416430729801502811",
+        "name": "文字信息（受限）korean邀请到频道编辑频道",
+        "aria": "korean（文字频道）"
+      },
+      {
+        "id": "channels___1416430757228052521",
+        "name": "文字信息（受限）japanese邀请到频道编辑频道",
+        "aria": "japanese（文字频道）"
+      },
+      {
+        "id": "channels___1416430787699544095",
+        "name": "文字信息（受限）ukrainian邀请到频道编辑频道",
+        "aria": "ukrainian（文字频道）"
+      },
+      {
+        "id": "channels___1416431121339777086",
+        "name": "文字信息（受限）vietnamese邀请到频道编辑频道",
+        "aria": "未读，vietnamese（文字频道）"
+      },
+      {
+        "id": "channels___1416715250970923130",
+        "name": "文字信息（受限）french邀请到频道编辑频道",
+        "aria": "未读，french（文字频道）"
+      },
+      {
+        "id": "channels___1417828823009067090",
+        "name": "文字信息（受限）hungarian邀请到频道编辑频道",
+        "aria": "未读，hungarian（文字频道）"
+      },
+      {
+        "id": "channels___1418200948576096337",
+        "name": "文字信息（受限）portuguese邀请到频道编辑频道",
+        "aria": "portuguese（文字频道）"
+      },
+      {
+        "id": "channels___1418207717612326943",
+        "name": "文字信息（受限）thailand邀请到频道编辑频道",
+        "aria": "未读，thailand（文字频道）"
+      }
+    ],
+    "categoryCandidates": [
+      "Oyster Republic",
+      "Oyster Republic",
+      "频道",
+      "Welcome",
+      "Welcome",
+      "Citizen-Only Chat",
+      "Citizen-Only Chat"
+    ],
+    "memberListPresent": false,
+    "composerAria": "给 #👋welcome 发消息",
+    "locationHref": "https://discord.com/channels/1404726112159793172/1404726112789073932"
+  },
+  "outputDir": "/Users/howardli/Downloads/discord-admin/audit/20260208-221242"
+}

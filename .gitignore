@@ -13,6 +13,8 @@ __pycache__/
 # IDE
 .vscode/
 .idea/
+.gemini/
+.agent/
 *.swp
 *.swo
 
@@ -32,6 +34,9 @@ bridge.db
 *.pem
 .oyster-keys/
 *.csv
+oyster/infra/infra-configs/*.env
+oyster/social/discord-admin/user-data/
+oyster/social/discord-admin/user-data-test/
 
 # Reports (generated)
 *-report.md
@@ -39,6 +44,13 @@ bridge.db
 
 # PIDs
 *.pid
+
+# Virtual environments
+.venv/
+venv/
+
+# Backups
+*.bak
 
 # Temporary
 *.tmp

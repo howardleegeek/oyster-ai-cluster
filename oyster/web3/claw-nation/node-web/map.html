@@ -1,0 +1,534 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Claw Nation — World Cells</title>
+
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  />
+
+  <style>
+    :root {
+      --bg0: #070a0f;
+      --bg1: #0b0f16;
+      --panel: rgba(16, 22, 31, 0.72);
+      --text: #e8effa;
+      --muted: rgba(232, 239, 250, 0.70);
+      --border: rgba(255,255,255,0.12);
+      --accent: #44d19d;
+      --danger: #ff5b7a;
+      --shadow: rgba(0,0,0,0.45);
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+    }
+
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      background:
+        radial-gradient(1000px 650px at 15% 0%, rgba(68, 209, 157, 0.14), transparent 60%),
+        radial-gradient(900px 620px at 95% 15%, rgba(105, 162, 255, 0.14), transparent 60%),
+        linear-gradient(180deg, var(--bg0), var(--bg1));
+      color: var(--text);
+      font: 14px/1.4 var(--sans);
+    }
+
+    #map {
+      position: absolute;
+      inset: 0;
+    }
+
+    .panel {
+      position: absolute;
+      left: 12px;
+      top: 12px;
+      width: min(380px, calc(100vw - 24px));
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 12px;
+      box-shadow: 0 16px 38px var(--shadow);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+    }
+
+    .title {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .title h1 {
+      font-size: 14px;
+      letter-spacing: 0.2px;
+      margin: 0;
+      font-weight: 800;
+    }
+
+    .chip {
+      font: 12px/1 var(--mono);
+      color: rgba(232, 239, 250, 0.86);
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(0,0,0,0.26);
+      padding: 6px 8px;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+
+    label {
+      display: block;
+      color: var(--muted);
+      font-size: 11px;
+      margin: 10px 0 6px;
+    }
+
+    input, select {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 10px 10px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.12);
+      outline: none;
+      background: rgba(255,255,255,0.06);
+      color: var(--text);
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .btns {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+
+    button {
+      cursor: pointer;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(255,255,255,0.06);
+      color: var(--text);
+      padding: 10px 12px;
+      border-radius: 12px;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+    }
+
+    button.primary {
+      background: linear-gradient(135deg, rgba(68,209,157,0.22), rgba(68,209,157,0.06));
+      border-color: rgba(68,209,157,0.38);
+    }
+
+    button.danger {
+      background: linear-gradient(135deg, rgba(255,91,122,0.20), rgba(255,91,122,0.06));
+      border-color: rgba(255,91,122,0.38);
+    }
+
+    button:disabled { opacity: 0.55; cursor: not-allowed; }
+
+    .stats {
+      margin-top: 10px;
+      font: 12px/1.5 var(--mono);
+      color: rgba(232, 239, 250, 0.86);
+      background: rgba(0,0,0,0.25);
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 12px;
+      padding: 10px;
+      white-space: pre-wrap;
+      word-break: break-word;
+      min-height: 72px;
+    }
+
+    .legend {
+      margin-top: 10px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .bar {
+      height: 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: linear-gradient(90deg,
+        hsl(220 85% 55%),
+        hsl(170 85% 52%),
+        hsl(70 90% 55%),
+        hsl(20 90% 55%));
+    }
+
+    .legendLine {
+      display: flex;
+      justify-content: space-between;
+      font: 11px/1 var(--mono);
+      color: rgba(232, 239, 250, 0.78);
+    }
+
+    .hint {
+      margin-top: 10px;
+      font-size: 12px;
+      color: rgba(232, 239, 250, 0.62);
+    }
+
+    /* Leaflet tweaks */
+    .leaflet-control-attribution {
+      background: rgba(0,0,0,0.35) !important;
+      color: rgba(232, 239, 250, 0.70) !important;
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 10px;
+      padding: 4px 8px;
+      margin: 10px;
+      backdrop-filter: blur(12px);
+    }
+    .leaflet-container a { color: rgba(232, 239, 250, 0.86) !important; }
+
+    @media (max-width: 480px) {
+      .row { grid-template-columns: 1fr; }
+      .panel { padding: 10px; }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="map"></div>
+
+  <div class="panel">
+    <div class="title">
+      <h1>WORLD CELLS</h1>
+      <div id="asOf" class="chip">as-of: -</div>
+    </div>
+
+    <label>Relay Base URL</label>
+    <input id="relayUrl" placeholder="http://127.0.0.1:8787" />
+
+    <div class="row">
+      <div>
+        <label>H3 Resolution</label>
+        <select id="h3Res">
+          <option value="6">6 (region)</option>
+          <option value="7">7</option>
+          <option value="8">8 (neighborhood)</option>
+          <option value="9" selected>9 (default)</option>
+          <option value="10">10 (block)</option>
+        </select>
+      </div>
+      <div>
+        <label>Window</label>
+        <select id="hours">
+          <option value="">All time</option>
+          <option value="1">Last 1h</option>
+          <option value="6">Last 6h</option>
+          <option value="24" selected>Last 24h</option>
+          <option value="168">Last 7d</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="row">
+      <div>
+        <label>Scale</label>
+        <select id="scale">
+          <option value="log" selected>Log</option>
+          <option value="linear">Linear</option>
+        </select>
+      </div>
+      <div>
+        <label>Min Count</label>
+        <input id="minCount" type="number" min="1" step="1" value="1" />
+      </div>
+    </div>
+
+    <div class="row">
+      <div>
+        <label>Auto Refresh</label>
+        <select id="autoEvery">
+          <option value="0" selected>Off</option>
+          <option value="10">Every 10s</option>
+          <option value="30">Every 30s</option>
+          <option value="60">Every 60s</option>
+        </select>
+      </div>
+      <div>
+        <label>Fit To Data</label>
+        <select id="fitMode">
+          <option value="first" selected>On first load</option>
+          <option value="always">Always</option>
+          <option value="never">Never</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="btns">
+      <button id="btnLoad" class="primary">Load</button>
+      <button id="btnFit">Fit</button>
+      <button id="btnClear" class="danger">Clear</button>
+    </div>
+
+    <div id="stats" class="stats"></div>
+
+    <div class="legend">
+      <div class="bar"></div>
+      <div class="legendLine"><span id="minLabel">min</span><span id="maxLabel">max</span></div>
+    </div>
+
+    <div class="hint">
+      Tip: click a hex to open a preview query for that cell.
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/h3-js@4.1.0/dist/h3-js.umd.js"></script>
+
+  <script>
+    const els = {
+      relayUrl: document.getElementById('relayUrl'),
+      h3Res: document.getElementById('h3Res'),
+      hours: document.getElementById('hours'),
+      scale: document.getElementById('scale'),
+      minCount: document.getElementById('minCount'),
+      autoEvery: document.getElementById('autoEvery'),
+      fitMode: document.getElementById('fitMode'),
+      btnLoad: document.getElementById('btnLoad'),
+      btnFit: document.getElementById('btnFit'),
+      btnClear: document.getElementById('btnClear'),
+      stats: document.getElementById('stats'),
+      asOf: document.getElementById('asOf'),
+      minLabel: document.getElementById('minLabel'),
+      maxLabel: document.getElementById('maxLabel'),
+    };
+
+    const storageKey = 'claw_relay_url';
+    const defaultRelay = (() => {
+      const saved = localStorage.getItem(storageKey);
+      if (saved) return saved;
+      if (location.origin && location.origin !== 'null') return location.origin;
+      return 'http://127.0.0.1:8787';
+    })();
+
+    els.relayUrl.value = defaultRelay;
+    els.relayUrl.addEventListener('change', () => {
+      localStorage.setItem(storageKey, els.relayUrl.value.trim());
+    });
+
+    const map = L.map('map', {
+      zoomControl: true,
+      preferCanvas: true,
+      worldCopyJump: true,
+    }).setView([20, 0], 2);
+
+    const tiles = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; OpenStreetMap contributors'
+    });
+    tiles.addTo(map);
+
+    const canvasRenderer = L.canvas({ padding: 0.3 });
+    const hexLayer = L.layerGroup().addTo(map);
+
+    let lastBounds = null;
+    let autoTimer = null;
+    let loadedOnce = false;
+
+    function baseUrl() {
+      const u = (els.relayUrl.value || '').trim();
+      return u.replace(/\\/+$/, '');
+    }
+
+    function setStats(text) {
+      els.stats.textContent = text;
+    }
+
+    function clamp01(x) {
+      return Math.max(0, Math.min(1, x));
+    }
+
+    function normalize(val, min, max, mode) {
+      if (!Number.isFinite(val)) return 0;
+      if (max <= min) return 1;
+      if (mode === 'log') {
+        // Stable for big ranges: log10(1 + delta) / log10(1 + range)
+        const v = Math.log10(1 + Math.max(0, val - min));
+        const m = Math.log10(1 + Math.max(1e-9, max - min));
+        return clamp01(m ? (v / m) : 1);
+      }
+      return clamp01((val - min) / (max - min));
+    }
+
+    function rampColor(t) {
+      // Blue -> Teal -> Yellow -> Red (high)
+      const tt = clamp01(t);
+      const hue = 220 - tt * 200; // 220..20
+      const sat = 88;
+      const light = 56 - tt * 8;
+      return `hsl(${hue} ${sat}% ${light}%)`;
+    }
+
+    function updateLegend(min, max) {
+      els.minLabel.textContent = `${min}`;
+      els.maxLabel.textContent = `${max}`;
+    }
+
+    function fitToBounds() {
+      if (!lastBounds) return;
+      map.fitBounds(lastBounds, { padding: [40, 40], maxZoom: 14 });
+    }
+
+    async function loadCells() {
+      const started = performance.now();
+      const url = baseUrl();
+      if (!url) {
+        setStats('ERROR: missing relay base url');
+        return;
+      }
+
+      const res = Number(els.h3Res.value || '9');
+      const hours = String(els.hours.value || '');
+      const minCount = Math.max(1, Number(els.minCount.value || '1'));
+      const scale = String(els.scale.value || 'log');
+
+      const qs = new URLSearchParams({ res: String(res), limit: '50000' });
+      if (hours) qs.set('hours', hours);
+
+      els.btnLoad.disabled = true;
+      setStats(`Loading ${url}/v1/world/cells?...`);
+
+      let resp, data;
+      try {
+        resp = await fetch(`${url}/v1/world/cells?${qs.toString()}`);
+        data = await resp.json().catch(() => null);
+      } catch (e) {
+        els.btnLoad.disabled = false;
+        setStats(`ERROR: fetch failed: ${e?.message || e}`);
+        return;
+      }
+
+      if (!resp.ok || !data?.ok) {
+        els.btnLoad.disabled = false;
+        setStats(`ERROR: HTTP ${resp.status}: ${JSON.stringify(data)}`);
+        return;
+      }
+
+      const cellsRaw = Array.isArray(data.cells) ? data.cells : [];
+      const cells = cellsRaw
+        .map((c) => ({ cell: String(c.cell || ''), count: Number(c.count || 0) }))
+        .filter((c) => c.cell && Number.isFinite(c.count) && c.count >= minCount);
+
+      let min = Infinity;
+      let max = 0;
+      for (const c of cells) {
+        if (c.count < min) min = c.count;
+        if (c.count > max) max = c.count;
+      }
+      if (!Number.isFinite(min)) min = 0;
+      updateLegend(min, max);
+
+      // Render
+      hexLayer.clearLayers();
+
+      let minLat = 90, maxLat = -90, minLng = 180, maxLng = -180;
+      let rendered = 0;
+      for (const c of cells) {
+        let boundary;
+        try {
+          // h3-js returns [lat,lng] when formatAsGeoJson=false.
+          boundary = h3.cellToBoundary(c.cell, false);
+        } catch {
+          continue;
+        }
+
+        const latlngs = boundary.map(([lat, lng]) => [lat, lng]);
+        for (const [lat, lng] of latlngs) {
+          if (lat < minLat) minLat = lat;
+          if (lat > maxLat) maxLat = lat;
+          if (lng < minLng) minLng = lng;
+          if (lng > maxLng) maxLng = lng;
+        }
+
+        const t = normalize(c.count, min, max, scale);
+        const fill = rampColor(t);
+
+        const poly = L.polygon(latlngs, {
+          renderer: canvasRenderer,
+          weight: 0.7,
+          color: 'rgba(0,0,0,0.35)',
+          fillColor: fill,
+          fillOpacity: 0.68,
+        });
+
+        poly.on('click', () => {
+          const eventsUrl = `${url}/v1/world/events?cell=${encodeURIComponent(c.cell)}&limit=25&res=${encodeURIComponent(String(res))}`;
+          const html = [
+            `<div style="font:12px/1.35 ${getComputedStyle(document.body).fontFamily};">`,
+            `<div style="font:12px/1.2 ${getComputedStyle(document.body).fontFamily}; font-weight:800; margin-bottom:6px;">H3 ${c.cell}</div>`,
+            `<div style="font:12px/1.5 ${getComputedStyle(document.body).fontFamily}; color:#333;">count: <b>${c.count}</b></div>`,
+            `<div style="margin-top:8px;"><a href="${eventsUrl}" target="_blank" rel="noreferrer">open /v1/world/events</a></div>`,
+            `</div>`,
+          ].join('');
+          poly.bindPopup(html, { maxWidth: 360 }).openPopup();
+        });
+
+        hexLayer.addLayer(poly);
+        rendered++;
+      }
+
+      lastBounds = (rendered > 0 && minLat <= maxLat && minLng <= maxLng)
+        ? L.latLngBounds([[minLat, minLng], [maxLat, maxLng]])
+        : null;
+
+      const mode = String(els.fitMode.value || 'first');
+      const shouldFit = mode === 'always' || (mode === 'first' && !loadedOnce);
+      loadedOnce = true;
+      if (shouldFit && lastBounds) fitToBounds();
+
+      const ms = Math.round(performance.now() - started);
+      const sinceLine = data.since ? `since: ${data.since}` : 'since: -';
+      els.asOf.textContent = `as-of: ${new Date().toISOString()}`;
+      setStats(
+        [
+          `ok: true (${ms}ms)`,
+          `res: ${data.res}  window: ${hours ? `${hours}h` : 'all'}  scale: ${scale}`,
+          `cells: ${rendered} (raw=${cellsRaw.length}, minCount>=${minCount})  unique: ${data.unique_cells}  truncated: ${data.truncated}`,
+          `events_counted: ${data.total_events}  skipped_lines: ${data.skipped_lines}`,
+          sinceLine,
+          `max_count: ${data.max_count}`,
+        ].join('\\n')
+      );
+
+      els.btnLoad.disabled = false;
+    }
+
+    function clearMap() {
+      hexLayer.clearLayers();
+      lastBounds = null;
+      setStats('cleared');
+    }
+
+    function setAutoRefresh() {
+      const every = Number(els.autoEvery.value || '0');
+      if (autoTimer) {
+        clearInterval(autoTimer);
+        autoTimer = null;
+      }
+      if (every > 0) {
+        autoTimer = setInterval(loadCells, every * 1000);
+      }
+    }
+
+    els.btnLoad.addEventListener('click', loadCells);
+    els.btnFit.addEventListener('click', fitToBounds);
+    els.btnClear.addEventListener('click', clearMap);
+    els.autoEvery.addEventListener('change', setAutoRefresh);
+
+    // Kick off once.
+    setAutoRefresh();
+    loadCells();
+  </script>
+</body>
+</html>

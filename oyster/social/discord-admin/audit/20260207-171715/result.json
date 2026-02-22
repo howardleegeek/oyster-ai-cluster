@@ -1,0 +1,22 @@
+{
+  "ok": true,
+  "startedFrom": "https://discord.com/channels/1404726112159793172/1404726112789073932",
+  "finalUrl": "https://discord.com/channels/1404726112159793172/1404726112789073932",
+  "isLoggedIn": true,
+  "ids": {
+    "guildId": "1404726112159793172",
+    "channelId": "1404726112789073932"
+  },
+  "extracted": {
+    "title": "Discord",
+    "guildName": null,
+    "channelHeaderText": null,
+    "channelItemsCount": 0,
+    "channelItems": [],
+    "categoryCandidates": [],
+    "memberListPresent": false,
+    "composerAria": null,
+    "locationHref": "https://discord.com/channels/1404726112159793172/1404726112789073932"
+  },
+  "outputDir": "/Users/howardli/Downloads/discord-admin/audit/20260207-171715"
+}
