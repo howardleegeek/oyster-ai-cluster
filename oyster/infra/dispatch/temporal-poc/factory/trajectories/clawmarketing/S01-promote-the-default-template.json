@@ -1,0 +1,30 @@
+{
+  "task_id": "S01-promote-the-default-template",
+  "project": "clawmarketing",
+  "spec_content": "---\ntask_id: S01-promote-the-default-template\nproject: clawmarketing\npriority: 2\nestimated_minutes: 30\ndepends_on: []\n---\n## Goal\npromote the `default` template to the canonical path behind a feature flag: make\n\n\n## Identified Risks\n- If discovery continues without hardening, iteration speed will drop as regressions increase from codebase sprawl.\n- 0KB or placeholder infra/config files can create false confidence and environment-specific failures during deployment.\n- Locking to one template too ",
+  "template_id": "default",
+  "outcome": "stuck",
+  "failure_reason": "size_diff_early_kill: 2x loc_added=0",
+  "advisor_consensus": "",
+  "total_tokens": 0,
+  "total_duration": 1341.194355726242,
+  "started_at": 1771775069.718407,
+  "completed_at": 1771776410.9179132,
+  "step_count": 2,
+  "steps": [
+    {
+      "phase": "build",
+      "action": "execute_attempt_1",
+      "result": "failed",
+      "duration": 1277.9684307575226,
+      "error": "Exit code 1"
+    },
+    {
+      "phase": "build",
+      "action": "execute_attempt_2",
+      "result": "failed",
+      "duration": 63.22592496871948,
+      "error": "Exit code 1"
+    }
+  ]
+}

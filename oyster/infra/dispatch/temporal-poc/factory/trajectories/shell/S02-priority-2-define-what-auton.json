@@ -1,0 +1,23 @@
+{
+  "task_id": "S02-priority-2-define-what-auton",
+  "project": "shell",
+  "spec_content": "---\ntask_id: S02-priority-2-define-what-auton\nproject: shell\npriority: 2\nestimated_minutes: 30\ndepends_on: []\n---\n## Goal\npriority 2: define what 'autonomous discovery' actually delivers - a spec? a pat\n\n\n## Identified Risks\n- Optimistic bias: 1 success = 0 failures is meaningless sample size. Real failures start at task #5-10\n- Template tunnel vision: 'default is best' might just mean 'others are worse' - all templates could be mediocre\n- Discovery drift: 'autonomous discovery' without constrai",
+  "template_id": "default",
+  "outcome": "success",
+  "failure_reason": "",
+  "advisor_consensus": "",
+  "total_tokens": 0,
+  "total_duration": 2670.4550449848175,
+  "started_at": 1771737368.31318,
+  "completed_at": 1771740038.7688901,
+  "step_count": 1,
+  "steps": [
+    {
+      "phase": "build",
+      "action": "execute_attempt_1",
+      "result": "completed",
+      "duration": 2670.4550449848175,
+      "error": ""
+    }
+  ]
+}

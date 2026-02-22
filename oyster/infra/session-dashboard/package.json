@@ -1,0 +1,11 @@
+{
+  "name": "session-dashboard",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Local Session Control Panel dashboard (no external deps).",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  }
+}
+

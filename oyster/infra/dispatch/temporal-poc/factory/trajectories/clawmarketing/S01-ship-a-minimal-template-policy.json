@@ -1,0 +1,37 @@
+{
+  "task_id": "S01-ship-a-minimal-template-policy",
+  "project": "clawmarketing",
+  "spec_content": "---\ntask_id: S01-ship-a-minimal-template-policy\nproject: clawmarketing\npriority: 2\nestimated_minutes: 30\ndepends_on: []\n---\n## Goal\nship a minimal template policy v1: promote `default` as baseline, add explicit e\n\n\n## Identified Risks\n- Template policy may overfit to a small sample size (19 observations), causing underperformance on new segments.\n- Without strict integration gates, recent cross-channel additions (e.g., adapter-related work) can introduce silent regressions despite green local ch",
+  "template_id": "default",
+  "outcome": "stuck",
+  "failure_reason": "stuck:repeating_action_error",
+  "advisor_consensus": "",
+  "total_tokens": 0,
+  "total_duration": 2547.3642342090607,
+  "started_at": 1771741118.3946319,
+  "completed_at": 1771743665.8605492,
+  "step_count": 3,
+  "steps": [
+    {
+      "phase": "build",
+      "action": "execute_attempt_1",
+      "result": "failed",
+      "duration": 911.695100069046,
+      "error": "Exit code 1"
+    },
+    {
+      "phase": "build",
+      "action": "execute_attempt_2",
+      "result": "failed",
+      "duration": 811.1310560703278,
+      "error": "Exit code 1"
+    },
+    {
+      "phase": "build",
+      "action": "execute_attempt_3",
+      "result": "failed",
+      "duration": 824.5380780696869,
+      "error": "Exit code 1"
+    }
+  ]
+}

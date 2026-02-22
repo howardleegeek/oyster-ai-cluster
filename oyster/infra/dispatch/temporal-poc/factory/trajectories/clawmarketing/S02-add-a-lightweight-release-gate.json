@@ -1,0 +1,30 @@
+{
+  "task_id": "S02-add-a-lightweight-release-gate",
+  "project": "clawmarketing",
+  "spec_content": "---\ntask_id: S02-add-a-lightweight-release-gate\nproject: clawmarketing\npriority: 2\nestimated_minutes: 30\ndepends_on: []\n---\n## Goal\nadd a lightweight release gate now: required `typecheck + lint + targeted smoke \n\n\n## Identified Risks\n- If discovery continues without hardening, iteration speed will drop as regressions increase from codebase sprawl.\n- 0KB or placeholder infra/config files can create false confidence and environment-specific failures during deployment.\n- Locking to one template to",
+  "template_id": "default",
+  "outcome": "stuck",
+  "failure_reason": "size_diff_early_kill: 2x loc_added=0",
+  "advisor_consensus": "",
+  "total_tokens": 0,
+  "total_duration": 1573.3819019794464,
+  "started_at": 1771776410.95076,
+  "completed_at": 1771777984.333556,
+  "step_count": 2,
+  "steps": [
+    {
+      "phase": "build",
+      "action": "execute_attempt_1",
+      "result": "failed",
+      "duration": 1290.6800129413605,
+      "error": "Exit code 1"
+    },
+    {
+      "phase": "build",
+      "action": "execute_attempt_2",
+      "result": "failed",
+      "duration": 282.70188903808594,
+      "error": "Exit code 1"
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "task_id": "S01-priority-1-action-com",
+  "project": "shell",
+  "spec_content": "---\ntask_id: S01-priority-1-action-com\nproject: shell\npriority: 2\nestimated_minutes: 30\ndepends_on: []\n---\n## Goal\n{'priority': 1, 'action': 'complete aggressive cleanup of web-ui and mcp-server \n\n\n## Identified Risks\n- {'risk': 'Over-aggressive cleanup may break Web3 integrations', 'mitigation': 'Run full test suite after each cleanup phase, maintain rollback capability'}\n- {'risk': 'Large file counts slow down agent analysis', 'mitigation': 'Prioritize cleanup before adding new features'}\n- {'",
+  "template_id": "default",
+  "outcome": "success",
+  "failure_reason": "",
+  "advisor_consensus": "",
+  "total_tokens": 0,
+  "total_duration": 2075.3118221759796,
+  "started_at": 1771735848.8762681,
+  "completed_at": 1771737924.18896,
+  "step_count": 1,
+  "steps": [
+    {
+      "phase": "build",
+      "action": "execute_attempt_1",
+      "result": "completed",
+      "duration": 2075.3118221759796,
+      "error": ""
+    }
+  ]
+}

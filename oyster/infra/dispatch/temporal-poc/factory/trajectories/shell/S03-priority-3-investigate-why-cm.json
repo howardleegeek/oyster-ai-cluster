@@ -1,0 +1,37 @@
+{
+  "task_id": "S03-priority-3-investigate-why-cm",
+  "project": "shell",
+  "spec_content": "---\ntask_id: S03-priority-3-investigate-why-cm\nproject: shell\npriority: 2\nestimated_minutes: 30\ndepends_on: []\n---\n## Goal\npriority 3: investigate why cmp is only 0.75 - what's causing that 25% failure? \n\n\n## Identified Risks\n- Optimistic bias: 1 success = 0 failures is meaningless sample size. Real failures start at task #5-10\n- Template tunnel vision: 'default is best' might just mean 'others are worse' - all templates could be mediocre\n- Discovery drift: 'autonomous discovery' without constra",
+  "template_id": "default",
+  "outcome": "stuck",
+  "failure_reason": "stuck:repeating_action_error",
+  "advisor_consensus": "",
+  "total_tokens": 0,
+  "total_duration": 5401.382736206055,
+  "started_at": 1771740038.772811,
+  "completed_at": 1771745440.174484,
+  "step_count": 3,
+  "steps": [
+    {
+      "phase": "build",
+      "action": "execute_attempt_1",
+      "result": "failed",
+      "duration": 3296.6357340812683,
+      "error": "Exit code 1"
+    },
+    {
+      "phase": "build",
+      "action": "execute_attempt_2",
+      "result": "failed",
+      "duration": 2104.69850897789,
+      "error": "Exit code 1"
+    },
+    {
+      "phase": "build",
+      "action": "execute_attempt_3",
+      "result": "failed",
+      "duration": 0.048493146896362305,
+      "error": "Exit code 2"
+    }
+  ]
+}

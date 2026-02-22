@@ -1,0 +1,61 @@
+{
+  "replied": [],
+  "failed": [
+    {
+      "author": "Mykhail",
+      "targetMessageUrl": "https://discord.com/channels/1404726112159793172/1404870331759591575/1451424861426679885",
+      "targetChannelId": "1404870331759591575",
+      "targetMessageId": "1451424861426679885",
+      "error": "timeout(openReplyBox): 60000ms",
+      "at": "2026-02-08T23:11:52.642Z"
+    },
+    {
+      "author": "venson",
+      "targetMessageUrl": "https://discord.com/channels/1404726112159793172/1404870331759591575/1456200335591870574",
+      "targetChannelId": "1404870331759591575",
+      "targetMessageId": "1456200335591870574",
+      "error": "timeout(openReplyBox): 60000ms",
+      "at": "2026-02-08T23:12:55.377Z"
+    },
+    {
+      "author": "MoonShards |",
+      "targetMessageUrl": "https://discord.com/channels/1404726112159793172/1404870331759591575/1448360589297582281",
+      "targetChannelId": "1404870331759591575",
+      "targetMessageId": "1448360589297582281",
+      "error": "timeout(openReplyBox): 60000ms",
+      "at": "2026-02-08T23:13:58.093Z"
+    },
+    {
+      "author": "Kaycee M",
+      "targetMessageUrl": "https://discord.com/channels/1404726112159793172/1404870331759591575/1461567538474516542",
+      "targetChannelId": "1404870331759591575",
+      "targetMessageId": "1461567538474516542",
+      "error": "timeout(openReplyBox): 60000ms",
+      "at": "2026-02-08T23:15:00.805Z"
+    },
+    {
+      "author": "jovanni",
+      "targetMessageUrl": "https://discord.com/channels/1404726112159793172/1404870331759591575/1446267175399592006",
+      "targetChannelId": "1404870331759591575",
+      "targetMessageId": "1446267175399592006",
+      "error": "timeout(openReplyBox): 60000ms",
+      "at": "2026-02-08T23:16:03.570Z"
+    },
+    {
+      "author": "Csádám.Skai",
+      "targetMessageUrl": "https://discord.com/channels/1404726112159793172/1404870331759591575/1461831100191080492",
+      "targetChannelId": "1404870331759591575",
+      "targetMessageId": "1461831100191080492",
+      "error": "timeout(openReplyBox): 60000ms",
+      "at": "2026-02-08T23:17:06.360Z"
+    },
+    {
+      "author": "!xela™",
+      "targetMessageUrl": "https://discord.com/channels/1404726112159793172/1404870331759591575/1450805213446537377",
+      "targetChannelId": "1404870331759591575",
+      "targetMessageId": "1450805213446537377",
+      "error": "page.goto: net::ERR_ABORTED at https://discord.com/channels/1404726112159793172/1404870331759591575/1450805213446537377\nCall log:\n\u001b[2m  - navigating to \"https://discord.com/channels/1404726112159793172/1404870331759591575/1450805213446537377\", waiting until \"domcontentloaded\"\u001b[22m\n",
+      "at": "2026-02-08T23:17:07.240Z"
+    }
+  ]
+}

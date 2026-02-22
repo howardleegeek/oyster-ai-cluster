@@ -1,0 +1,1591 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ClawGlasses → Relay | Live Uploader Demo</title>
+  <style>
+    :root {
+      --bg0: #07080c;
+      --bg1: #0b0e14;
+      --panel: rgba(16, 20, 29, 0.72);
+      --panel2: rgba(12, 15, 22, 0.86);
+      --text: #e9f0ff;
+      --muted: rgba(233, 240, 255, 0.66);
+      --faint: rgba(233, 240, 255, 0.22);
+      --accent: #3cffb0;
+      --accent2: #58a6ff;
+      --warn: #ffcc66;
+      --danger: #ff3d6e;
+      --ok: #2af0a0;
+      --border: rgba(255,255,255,0.10);
+      --shadow: 0 24px 80px rgba(0,0,0,0.45);
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+    }
+
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      color: var(--text);
+      font-family: var(--sans);
+      background:
+        radial-gradient(1400px 900px at 14% 10%, rgba(60, 255, 176, 0.13), transparent 55%),
+        radial-gradient(1100px 800px at 86% 12%, rgba(88, 166, 255, 0.12), transparent 60%),
+        radial-gradient(1000px 700px at 60% 90%, rgba(255, 61, 110, 0.06), transparent 62%),
+        linear-gradient(180deg, var(--bg0), var(--bg1));
+      overflow: hidden;
+    }
+
+    /* Subtle grid overlay */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background:
+        linear-gradient(rgba(255,255,255,0.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px);
+      background-size: 44px 44px;
+      opacity: 0.20;
+      mix-blend-mode: overlay;
+      mask-image: radial-gradient(900px 700px at 50% 20%, rgba(0,0,0,1), transparent 72%);
+    }
+
+    /* Big-screen layout */
+    .shell {
+      height: 100%;
+      display: grid;
+      grid-template-rows: auto 1fr;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      padding: 18px 22px 14px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      background: linear-gradient(180deg, rgba(0,0,0,0.24), rgba(0,0,0,0.05));
+      backdrop-filter: blur(10px);
+    }
+
+    .title {
+      display: grid;
+      gap: 6px;
+    }
+
+    .title h1 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 750;
+      letter-spacing: 0.3px;
+    }
+
+    .title .sub {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .pills {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: flex-end;
+    }
+
+    .pill {
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(0,0,0,0.24);
+      border: 1px solid rgba(255,255,255,0.12);
+      font-size: 12px;
+      color: rgba(233,240,255,0.88);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.30);
+    }
+
+    .dot { width: 9px; height: 9px; border-radius: 999px; background: rgba(255,255,255,0.30); }
+    .dot.ok { background: var(--ok); box-shadow: 0 0 14px rgba(42,240,160,0.40); }
+    .dot.bad { background: var(--danger); box-shadow: 0 0 14px rgba(255,61,110,0.45); }
+    .dot.warn { background: var(--warn); box-shadow: 0 0 14px rgba(255,204,102,0.45); }
+
+    .main {
+      padding: 18px 22px 22px;
+      height: 100%;
+      box-sizing: border-box;
+      display: grid;
+      grid-template-columns: 1.75fr 1fr;
+      gap: 16px;
+    }
+
+    .card {
+      background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 14px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+      min-height: 0; /* allow children to overflow scroll */
+    }
+
+    .stack { display: grid; gap: 14px; min-height: 0; }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+    .kpiGrid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .kpi {
+      background: rgba(0,0,0,0.22);
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 14px;
+      padding: 12px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .kpi::before {
+      content: "";
+      position: absolute;
+      inset: -2px;
+      background: radial-gradient(420px 160px at 20% 10%, rgba(60,255,176,0.18), transparent 60%),
+                  radial-gradient(420px 160px at 80% 20%, rgba(88,166,255,0.14), transparent 60%);
+      opacity: 0.55;
+      pointer-events: none;
+      filter: blur(6px);
+    }
+
+    .kpi > * { position: relative; z-index: 1; }
+
+    .kpi .label {
+      color: var(--muted);
+      font-size: 11px;
+      letter-spacing: 0.4px;
+      text-transform: uppercase;
+    }
+
+    .kpi .value {
+      margin-top: 6px;
+      font-family: var(--mono);
+      font-size: 36px;
+      font-weight: 800;
+      letter-spacing: 0.3px;
+      line-height: 1.05;
+    }
+
+    .kpi .subvalue {
+      margin-top: 6px;
+      color: rgba(233,240,255,0.80);
+      font-size: 12px;
+      font-family: var(--mono);
+    }
+
+    .kpi .accent {
+      color: var(--accent);
+      text-shadow: 0 0 18px rgba(60,255,176,0.25);
+    }
+
+    .kpi .accent2 {
+      color: var(--accent2);
+      text-shadow: 0 0 18px rgba(88,166,255,0.25);
+    }
+
+    .videoWrap {
+      position: relative;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(0,0,0,0.35);
+      min-height: 0;
+      box-shadow: 0 14px 60px rgba(0,0,0,0.35);
+    }
+
+    .videoWrap video, .videoWrap canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-fit: cover;
+      background: rgba(0,0,0,0.25);
+    }
+
+    /* HUD overlay */
+    .hud {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+    .hud .corner {
+      position: absolute;
+      padding: 14px;
+      font-family: var(--mono);
+      font-size: 12px;
+      color: rgba(233,240,255,0.82);
+      text-shadow: 0 0 18px rgba(0,0,0,0.60);
+    }
+    .hud .tl { top: 0; left: 0; }
+    .hud .tr { top: 0; right: 0; text-align: right; }
+    .hud .bl { bottom: 0; left: 0; }
+    .hud .br { bottom: 0; right: 0; text-align: right; }
+
+    .hud .big {
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: 0.2px;
+    }
+
+    .scanline {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 2px;
+      top: -2px;
+      background: linear-gradient(90deg, transparent, rgba(60,255,176,0.65), transparent);
+      filter: blur(0.4px);
+      opacity: 0.9;
+      animation: scan 3.6s linear infinite;
+      pointer-events: none;
+      mix-blend-mode: screen;
+    }
+    @keyframes scan {
+      0% { transform: translateY(-4px); opacity: 0.0; }
+      8% { opacity: 0.9; }
+      92% { opacity: 0.9; }
+      100% { transform: translateY(calc(100% + 4px)); opacity: 0.0; }
+    }
+
+    .bufferRow {
+      display: grid;
+      gap: 10px;
+    }
+
+    .bufferHeader {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 10px;
+    }
+    .bufferHeader .h {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.45px;
+      color: rgba(233,240,255,0.72);
+    }
+    .bufferHeader .meta {
+      font-family: var(--mono);
+      color: rgba(233,240,255,0.65);
+      font-size: 12px;
+    }
+
+    .buffer {
+      display: grid;
+      grid-auto-flow: column;
+      grid-auto-columns: 160px;
+      gap: 10px;
+      overflow-x: auto;
+      padding-bottom: 6px;
+      scroll-snap-type: x mandatory;
+    }
+
+    .frame {
+      scroll-snap-align: start;
+      background: rgba(0,0,0,0.28);
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 14px 50px rgba(0,0,0,0.30);
+    }
+
+    .frame img {
+      width: 100%;
+      height: 96px;
+      object-fit: cover;
+      display: block;
+      background: rgba(255,255,255,0.06);
+    }
+
+    .frame .meta {
+      padding: 10px 10px 9px;
+      display: grid;
+      gap: 6px;
+      font-family: var(--mono);
+      font-size: 11px;
+      color: rgba(233,240,255,0.78);
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border-radius: 999px;
+      padding: 4px 8px;
+      font-size: 10px;
+      letter-spacing: 0.3px;
+      text-transform: uppercase;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(0,0,0,0.24);
+      width: fit-content;
+    }
+    .badge.ok { border-color: rgba(42,240,160,0.35); color: rgba(42,240,160,0.95); }
+    .badge.bad { border-color: rgba(255,61,110,0.38); color: rgba(255,61,110,0.95); }
+    .badge.warn { border-color: rgba(255,204,102,0.38); color: rgba(255,204,102,0.95); }
+    .badge.neutral { border-color: rgba(255,255,255,0.18); color: rgba(233,240,255,0.80); }
+
+    .form label {
+      display: block;
+      margin: 10px 0 6px;
+      font-size: 11px;
+      color: rgba(233,240,255,0.70);
+      letter-spacing: 0.35px;
+      text-transform: uppercase;
+    }
+
+    input, select {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 10px 10px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(0,0,0,0.28);
+      color: var(--text);
+      outline: none;
+      font-family: var(--mono);
+      font-size: 12px;
+    }
+
+    input::placeholder { color: rgba(233,240,255,0.30); }
+
+    .btns {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    button {
+      cursor: pointer;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(255,255,255,0.06);
+      color: var(--text);
+      padding: 10px 12px;
+      border-radius: 12px;
+      font-weight: 750;
+      letter-spacing: 0.3px;
+      font-family: var(--sans);
+    }
+    button.primary {
+      background: linear-gradient(135deg, rgba(60,255,176,0.18), rgba(60,255,176,0.06));
+      border-color: rgba(60,255,176,0.34);
+    }
+    button.secondary {
+      background: linear-gradient(135deg, rgba(88,166,255,0.18), rgba(88,166,255,0.06));
+      border-color: rgba(88,166,255,0.32);
+    }
+    button.danger {
+      background: linear-gradient(135deg, rgba(255,61,110,0.18), rgba(255,61,110,0.06));
+      border-color: rgba(255,61,110,0.34);
+    }
+    button.ghost {
+      background: rgba(255,255,255,0.04);
+      border-color: rgba(255,255,255,0.10);
+      color: rgba(233,240,255,0.86);
+    }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .smallNote {
+      margin-top: 10px;
+      color: rgba(233,240,255,0.65);
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    .log {
+      background: rgba(0,0,0,0.34);
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 14px;
+      padding: 12px;
+      font-family: var(--mono);
+      font-size: 11px;
+      color: rgba(233,240,255,0.82);
+      white-space: pre-wrap;
+      word-break: break-word;
+      max-height: 190px;
+      overflow: auto;
+    }
+
+    .banner {
+      display: none;
+      margin-top: 10px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,204,102,0.30);
+      background: rgba(255,204,102,0.08);
+      color: rgba(255,230,190,0.95);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+    .banner.show { display: block; }
+
+    canvas.spark {
+      width: 100%;
+      height: 56px;
+      border-radius: 12px;
+      background: rgba(0,0,0,0.26);
+      border: 1px solid rgba(255,255,255,0.08);
+      display: block;
+      margin-top: 10px;
+    }
+
+    @media (max-width: 1100px) {
+      body { overflow: auto; }
+      .main { grid-template-columns: 1fr; }
+      .videoWrap { aspect-ratio: 16 / 9; height: auto; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="title">
+        <h1>ClawGlasses → Relay · Live Uploader Demo</h1>
+        <div class="sub">1 FPS keyframes · GPS → H3 cell · real-time metrics & buffer visualization</div>
+      </div>
+      <div class="pills">
+        <span class="pill"><span id="dotRelay" class="dot"></span>Relay</span>
+        <span class="pill"><span id="dotCam" class="dot"></span>Camera</span>
+        <span class="pill"><span id="dotGps" class="dot"></span>GPS</span>
+        <span class="pill"><span id="dotUpl" class="dot"></span>Uploader</span>
+      </div>
+    </div>
+
+    <div class="main">
+      <!-- LEFT: camera + buffer + log -->
+      <div class="card" style="display:grid; grid-template-rows: 1fr auto auto; gap: 12px; min-height: 0;">
+        <div class="videoWrap" id="videoWrap">
+          <video id="video" playsinline autoplay muted></video>
+          <canvas id="demoCanvas" style="display:none"></canvas>
+          <div class="hud">
+            <div class="scanline"></div>
+            <div class="corner tl">
+              <div style="color: rgba(233,240,255,0.72); font-size: 11px;">CELL</div>
+              <div id="hudCell" class="big" style="color: var(--accent);">—</div>
+              <div id="hudNode" style="margin-top: 6px; color: rgba(233,240,255,0.70);">node: —</div>
+            </div>
+            <div class="corner tr">
+              <div style="color: rgba(233,240,255,0.72); font-size: 11px;">GPS</div>
+              <div id="hudGps" class="big" style="color: var(--accent2);">—</div>
+              <div id="hudAcc" style="margin-top: 6px; color: rgba(233,240,255,0.70);">acc: —</div>
+            </div>
+            <div class="corner bl">
+              <div id="hudMode" style="color: rgba(233,240,255,0.70);">mode: —</div>
+              <div id="hudTick" style="margin-top: 6px; color: rgba(233,240,255,0.70);">tick: —</div>
+            </div>
+            <div class="corner br">
+              <div style="color: rgba(233,240,255,0.72); font-size: 11px;">LAST UPLOAD</div>
+              <div id="hudLast" class="big">—</div>
+              <div id="hudLatency" style="margin-top: 6px; color: rgba(233,240,255,0.70);">lat: —</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="bufferRow">
+          <div class="bufferHeader">
+            <div class="h">UPLOAD BUFFER (recent keyframes)</div>
+            <div class="meta"><span id="bufMeta">queue: 0 · buffer: 0</span></div>
+          </div>
+          <div id="buffer" class="buffer"></div>
+        </div>
+
+        <div id="log" class="log"></div>
+      </div>
+
+      <!-- RIGHT: KPIs + controls -->
+      <div class="stack">
+        <div class="card">
+          <div class="kpiGrid">
+            <div class="kpi">
+              <div class="label">Uploaded Frames</div>
+              <div id="kpiUploaded" class="value accent">0</div>
+              <div id="kpiRate" class="subvalue">rate: 0.00 fps</div>
+            </div>
+            <div class="kpi">
+              <div class="label">Success Rate</div>
+              <div id="kpiSuccess" class="value accent2">0%</div>
+              <div id="kpiFail" class="subvalue">fail: 0</div>
+            </div>
+            <div class="kpi">
+              <div class="label">Latency (ms)</div>
+              <div id="kpiLatency" class="value">—</div>
+              <div id="kpiLatencyAvg" class="subvalue">avg: —</div>
+            </div>
+            <div class="kpi">
+              <div class="label">Current Cell</div>
+              <div id="kpiCell" class="value" style="font-size: 18px; line-height: 1.2;">—</div>
+              <div id="kpiCells" class="subvalue">unique cells: 0</div>
+            </div>
+          </div>
+
+          <canvas id="chartLatency" class="spark" width="520" height="120"></canvas>
+          <canvas id="chartRate" class="spark" width="520" height="120"></canvas>
+          <canvas id="chartSuccess" class="spark" width="520" height="120"></canvas>
+        </div>
+
+        <div class="card form" style="overflow:auto">
+          <div class="row">
+            <div>
+              <label>Relay Base URL</label>
+              <input id="relayUrl" placeholder="http://127.0.0.1:8787" />
+            </div>
+            <div>
+              <label>Register Secret (optional)</label>
+              <input id="registerSecret" placeholder="(leave empty for dev)" />
+            </div>
+          </div>
+
+          <div class="row">
+            <div>
+              <label>Node Name</label>
+              <input id="nodeName" placeholder="clawglasses-demo-001" />
+            </div>
+            <div>
+              <label>H3 Resolution</label>
+              <select id="h3Res">
+                <option value="8">8</option>
+                <option value="9" selected>9 (default)</option>
+                <option value="10">10</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="row">
+            <div>
+              <label>Keyframe FPS</label>
+              <select id="fps">
+                <option value="0.5">0.5 (every 2s)</option>
+                <option value="1" selected>1 (demo)</option>
+                <option value="2">2</option>
+                <option value="5">5</option>
+              </select>
+            </div>
+            <div>
+              <label>JPEG Quality</label>
+              <input id="jpegQuality" type="number" min="0.1" max="0.95" step="0.05" value="0.60" />
+            </div>
+          </div>
+
+          <div class="row">
+            <div>
+              <label>Buffer Size (frames)</label>
+              <input id="bufferSize" type="number" min="6" max="40" step="1" value="14" />
+            </div>
+            <div>
+              <label>Mode</label>
+              <select id="mode">
+                <option value="auto" selected>Auto (fallback to demo)</option>
+                <option value="real">Real sensors (camera + GPS)</option>
+                <option value="demo">Demo sensors (synthetic cam + sim GPS)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="row">
+            <div>
+              <label>Sim GPS Center (lat,lon)</label>
+              <input id="simCenter" placeholder="37.7749,-122.4194" value="37.7749,-122.4194" />
+            </div>
+            <div>
+              <label>Upload</label>
+              <select id="uploadMode">
+                <option value="on" selected>On (to Relay)</option>
+                <option value="off">Off (local only)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="btns">
+            <button id="btnTest" class="secondary">Test Relay</button>
+            <button id="btnRegister" class="primary">Register Node</button>
+            <button id="btnStart" class="primary" disabled>Start Continuous Capture</button>
+            <button id="btnStop" class="danger" disabled>Stop</button>
+            <button id="btnReset" class="ghost">Reset Stats</button>
+            <button id="btnForget" class="ghost">Forget Token</button>
+          </div>
+
+          <div id="banner" class="banner"></div>
+          <div class="smallNote">
+            Tip: open via <span style="font-family:var(--mono)">http://localhost</span> (secure context) for real camera/GPS. This page auto-falls back to demo sensors if permissions fail.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Offscreen capture surface -->
+  <canvas id="captureCanvas" width="640" height="400" style="display:none"></canvas>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const els = {
+      // dots
+      dotRelay: $('dotRelay'),
+      dotCam: $('dotCam'),
+      dotGps: $('dotGps'),
+      dotUpl: $('dotUpl'),
+
+      // hud
+      hudCell: $('hudCell'),
+      hudGps: $('hudGps'),
+      hudAcc: $('hudAcc'),
+      hudNode: $('hudNode'),
+      hudMode: $('hudMode'),
+      hudTick: $('hudTick'),
+      hudLast: $('hudLast'),
+      hudLatency: $('hudLatency'),
+
+      // left
+      videoWrap: $('videoWrap'),
+      video: $('video'),
+      demoCanvas: $('demoCanvas'),
+      captureCanvas: $('captureCanvas'),
+      buffer: $('buffer'),
+      bufMeta: $('bufMeta'),
+      log: $('log'),
+
+      // kpis
+      kpiUploaded: $('kpiUploaded'),
+      kpiRate: $('kpiRate'),
+      kpiSuccess: $('kpiSuccess'),
+      kpiFail: $('kpiFail'),
+      kpiLatency: $('kpiLatency'),
+      kpiLatencyAvg: $('kpiLatencyAvg'),
+      kpiCell: $('kpiCell'),
+      kpiCells: $('kpiCells'),
+
+      chartLatency: $('chartLatency'),
+      chartRate: $('chartRate'),
+      chartSuccess: $('chartSuccess'),
+
+      // controls
+      relayUrl: $('relayUrl'),
+      registerSecret: $('registerSecret'),
+      nodeName: $('nodeName'),
+      h3Res: $('h3Res'),
+      fps: $('fps'),
+      jpegQuality: $('jpegQuality'),
+      bufferSize: $('bufferSize'),
+      mode: $('mode'),
+      simCenter: $('simCenter'),
+      uploadMode: $('uploadMode'),
+
+      btnTest: $('btnTest'),
+      btnRegister: $('btnRegister'),
+      btnStart: $('btnStart'),
+      btnStop: $('btnStop'),
+      btnReset: $('btnReset'),
+      btnForget: $('btnForget'),
+
+      banner: $('banner')
+    };
+
+    const storageKeyAuth = 'claw_node_auth_v1';
+    const storageKeyRelay = 'claw_relay_url';
+
+    let auth = null; // { node_id, token }
+    let stream = null;
+    let geoWatchId = null;
+    let lastPos = null; // { lat, lon, acc, heading, ts }
+
+    // Demo sim
+    let sim = { lat: 37.7749, lon: -122.4194, t: 0, heading: 90 };
+    let demoDrawTimer = null;
+
+    // Continuous capture
+    let captureTimer = null;
+    let inFlight = false;
+    let seq = 0;
+
+    const buffer = [];
+    const queue = [];
+    const visitedCells = new Set();
+
+    const stats = {
+      startedAtMs: null,
+      captured: 0,
+      uploaded: 0,
+      failed: 0,
+      lastCell: null,
+      lastEventId: null,
+      lastLatencyMs: null,
+      lastUploadTsMs: null,
+      latencyMs: [],
+      rateFps: [],
+      successPct: []
+    };
+
+    function setDot(dot, state) {
+      dot.classList.remove('ok', 'bad', 'warn');
+      if (state === 'ok') dot.classList.add('ok');
+      if (state === 'bad') dot.classList.add('bad');
+      if (state === 'warn') dot.classList.add('warn');
+    }
+
+    function banner(kind, msg) {
+      els.banner.textContent = msg;
+      els.banner.classList.toggle('show', !!msg);
+      // kind kept for future styling
+      void(kind);
+    }
+
+    function ts() {
+      return new Date().toISOString().replace('T', ' ').replace('Z', '');
+    }
+
+    function log(line) {
+      els.log.textContent = `[${ts()}] ${line}\n` + els.log.textContent;
+    }
+
+    function baseUrl() {
+      return String(els.relayUrl.value || '').trim().replace(/\\/$/, '');
+    }
+
+    function clamp(n, min, max) {
+      n = Number(n);
+      if (!Number.isFinite(n)) return null;
+      if (n < min) return min;
+      if (n > max) return max;
+      return n;
+    }
+
+    function loadAuth() {
+      try {
+        const raw = localStorage.getItem(storageKeyAuth);
+        if (!raw) return null;
+        return JSON.parse(raw);
+      } catch { return null; }
+    }
+
+    function saveAuth(a) {
+      auth = a;
+      localStorage.setItem(storageKeyAuth, JSON.stringify(a));
+      els.btnStart.disabled = !auth;
+      renderHud();
+    }
+
+    function forgetAuth() {
+      auth = null;
+      localStorage.removeItem(storageKeyAuth);
+      els.btnStart.disabled = true;
+      renderHud();
+      log('Auth cleared');
+    }
+
+    function parseSimCenter() {
+      const raw = String(els.simCenter.value || '').trim();
+      const parts = raw.split(',').map((s) => s.trim());
+      if (parts.length !== 2) return null;
+      const lat = clamp(parts[0], -90, 90);
+      const lon = clamp(parts[1], -180, 180);
+      if (lat == null || lon == null) return null;
+      return { lat, lon };
+    }
+
+    async function testRelay() {
+      const url = baseUrl();
+      if (!url) {
+        log('ERROR: missing relay base url');
+        return false;
+      }
+      try {
+        const t0 = performance.now();
+        const r = await fetch(`${url}/health`, { method: 'GET' });
+        const j = await r.json().catch(() => null);
+        const dt = Math.round(performance.now() - t0);
+        if (!r.ok || !j?.ok) {
+          setDot(els.dotRelay, 'bad');
+          log(`Relay health failed HTTP ${r.status}: ${JSON.stringify(j)}`);
+          return false;
+        }
+        setDot(els.dotRelay, 'ok');
+        log(`Relay OK (${dt}ms)`);
+        return true;
+      } catch (e) {
+        setDot(els.dotRelay, 'bad');
+        log(`Relay ERROR: ${e?.message || e}`);
+        return false;
+      }
+    }
+
+    async function registerNode() {
+      const url = baseUrl();
+      if (!url) {
+        log('ERROR: missing relay base url');
+        return;
+      }
+      const name = String(els.nodeName.value || 'clawglasses-demo').trim();
+      const secret = String(els.registerSecret.value || '').trim();
+
+      const headers = { 'content-type': 'application/json' };
+      if (secret) headers['x-register-secret'] = secret;
+
+      log('Registering node...');
+      const r = await fetch(`${url}/v1/nodes/register`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ name, capabilities: ['frame', 'gps'] })
+      });
+      const j = await r.json().catch(() => null);
+      if (!r.ok || !j?.ok) {
+        log(`ERROR: register failed HTTP ${r.status} ${JSON.stringify(j)}`);
+        return;
+      }
+      saveAuth({ node_id: j.node_id, token: j.token });
+      log(`Registered node_id=${j.node_id}`);
+    }
+
+    function stopCamera() {
+      if (stream) {
+        for (const t of stream.getTracks()) t.stop();
+      }
+      stream = null;
+      els.video.srcObject = null;
+      setDot(els.dotCam, null);
+    }
+
+    async function startCameraReal() {
+      if (!navigator.mediaDevices?.getUserMedia) throw new Error('mediaDevices.getUserMedia not available');
+      stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 } },
+        audio: false
+      });
+      els.video.srcObject = stream;
+      await els.video.play();
+      setDot(els.dotCam, 'ok');
+      log('Camera OK (real)');
+    }
+
+    function stopGPS() {
+      if (geoWatchId != null) {
+        navigator.geolocation.clearWatch(geoWatchId);
+        geoWatchId = null;
+      }
+      lastPos = null;
+      setDot(els.dotGps, null);
+    }
+
+    async function startGPSReal() {
+      if (!('geolocation' in navigator)) throw new Error('geolocation not available');
+      return new Promise((resolve, reject) => {
+        geoWatchId = navigator.geolocation.watchPosition(
+          (pos) => {
+            lastPos = {
+              lat: pos.coords.latitude,
+              lon: pos.coords.longitude,
+              acc: pos.coords.accuracy,
+              heading: pos.coords.heading,
+              ts: pos.timestamp
+            };
+            setDot(els.dotGps, 'ok');
+            resolve(true);
+          },
+          (err) => {
+            setDot(els.dotGps, 'bad');
+            reject(new Error(err?.message || 'geolocation error'));
+          },
+          { enableHighAccuracy: true, maximumAge: 1500, timeout: 8000 }
+        );
+      });
+    }
+
+    function startDemoSensors() {
+      setDot(els.dotCam, 'ok');
+      setDot(els.dotGps, 'ok');
+      log('Demo sensors enabled (synthetic cam + sim GPS)');
+
+      // Seed sim center from input
+      const c = parseSimCenter();
+      if (c) {
+        sim.lat = c.lat;
+        sim.lon = c.lon;
+      }
+
+      // Render synthetic frames continuously so the video panel feels "alive"
+      if (demoDrawTimer) clearInterval(demoDrawTimer);
+      demoDrawTimer = setInterval(() => drawDemoFrame(), 1000 / 18);
+    }
+
+    function stopDemoSensors() {
+      if (demoDrawTimer) clearInterval(demoDrawTimer);
+      demoDrawTimer = null;
+    }
+
+    function drawDemoFrame() {
+      // Draw into demoCanvas, then show it (hide the <video>).
+      const can = els.demoCanvas;
+      const ctx = can.getContext('2d');
+      const w = 1280;
+      const h = 720;
+      if (can.width !== w) can.width = w;
+      if (can.height !== h) can.height = h;
+
+      // Background gradient
+      const g = ctx.createLinearGradient(0, 0, w, h);
+      g.addColorStop(0, '#08101a');
+      g.addColorStop(1, '#04060a');
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, w, h);
+
+      // Animated grid
+      sim.t += 0.016;
+      const grid = 54;
+      ctx.globalAlpha = 0.18;
+      ctx.strokeStyle = '#58a6ff';
+      ctx.lineWidth = 1;
+      for (let x = -grid; x < w + grid; x += grid) {
+        ctx.beginPath();
+        ctx.moveTo(x + (sim.t * 60) % grid, 0);
+        ctx.lineTo(x + (sim.t * 60) % grid, h);
+        ctx.stroke();
+      }
+      for (let y = -grid; y < h + grid; y += grid) {
+        ctx.beginPath();
+        ctx.moveTo(0, y + (sim.t * 40) % grid);
+        ctx.lineTo(w, y + (sim.t * 40) % grid);
+        ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
+
+      // Noise streaks
+      ctx.globalAlpha = 0.10;
+      for (let i = 0; i < 40; i++) {
+        const x = Math.random() * w;
+        const y = Math.random() * h;
+        const len = 40 + Math.random() * 140;
+        ctx.strokeStyle = Math.random() > 0.5 ? '#3cffb0' : '#ffffff';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(x + len, y + Math.random() * 10);
+        ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
+
+      // Title / overlays
+      ctx.fillStyle = 'rgba(233,240,255,0.95)';
+      ctx.font = '800 44px ' + getComputedStyle(document.documentElement).getPropertyValue('--mono');
+      ctx.fillText('CLAWGLASSES', 54, 84);
+      ctx.fillStyle = 'rgba(233,240,255,0.65)';
+      ctx.font = '600 18px ' + getComputedStyle(document.documentElement).getPropertyValue('--mono');
+      ctx.fillText('LIVE KEYFRAME PIPELINE · 1 FPS', 56, 116);
+
+      // Faux bounding boxes
+      ctx.strokeStyle = 'rgba(60,255,176,0.55)';
+      ctx.lineWidth = 2;
+      for (let i = 0; i < 5; i++) {
+        const bx = 80 + (i * 220) + Math.sin(sim.t * 1.2 + i) * 12;
+        const by = 170 + Math.cos(sim.t * 1.1 + i) * 10;
+        const bw = 160;
+        const bh = 120;
+        ctx.strokeRect(bx, by, bw, bh);
+        ctx.fillStyle = 'rgba(60,255,176,0.16)';
+        ctx.fillRect(bx, by, bw, 26);
+        ctx.fillStyle = 'rgba(233,240,255,0.92)';
+        ctx.font = '700 12px ' + getComputedStyle(document.documentElement).getPropertyValue('--mono');
+        ctx.fillText('keyframe #' + (stats.captured + i), bx + 10, by + 17);
+      }
+
+      // Make sure canvas is visible
+      els.demoCanvas.style.display = 'block';
+      els.video.style.display = 'none';
+      els.videoWrap.style.aspectRatio = '16 / 9';
+      els.videoWrap.querySelector('canvas#demoCanvas').style.width = '100%';
+      els.videoWrap.querySelector('canvas#demoCanvas').style.height = '100%';
+
+      // Update sim GPS slowly so the HUD changes.
+      const drift = 0.00008;
+      sim.lat += drift * Math.cos(sim.t * 0.6);
+      sim.lon += drift * Math.sin(sim.t * 0.65);
+      sim.heading = (sim.heading + 0.8) % 360;
+      lastPos = { lat: sim.lat, lon: sim.lon, acc: 6 + (Math.sin(sim.t) * 2), heading: sim.heading, ts: Date.now() };
+    }
+
+    function captureJpegBase64() {
+      const can = els.captureCanvas;
+      const ctx = can.getContext('2d');
+      const q = clamp(els.jpegQuality.value || '0.6', 0.1, 0.95) ?? 0.6;
+
+      if (els.mode.value === 'demo' || (els.mode.value === 'auto' && els.video.style.display === 'none')) {
+        // Capture from demoCanvas (1280x720 -> fit to 640 width).
+        const src = els.demoCanvas;
+        const w = 640;
+        const ar = src.height / src.width;
+        const h = Math.max(240, Math.round(w * ar));
+        can.width = w;
+        can.height = h;
+        ctx.drawImage(src, 0, 0, w, h);
+      } else {
+        const v = els.video;
+        const w = 640;
+        const ar = (v.videoWidth && v.videoHeight) ? (v.videoHeight / v.videoWidth) : (9/16);
+        const h = Math.max(240, Math.round(w * ar));
+        can.width = w;
+        can.height = h;
+        ctx.drawImage(v, 0, 0, w, h);
+      }
+
+      const dataUrl = can.toDataURL('image/jpeg', q);
+      const idx = dataUrl.indexOf('base64,');
+      return idx >= 0 ? dataUrl.slice(idx + 7) : null;
+    }
+
+    function makeThumbDataUrl(jpeg_base64) {
+      // Thumbs are used only for UI; keeping as data URL keeps the demo dependency-free.
+      return `data:image/jpeg;base64,${jpeg_base64}`;
+    }
+
+    function pushBufferItem(item) {
+      buffer.push(item);
+      queue.push(item);
+
+      // Enforce buffer size by removing oldest non-uploading items.
+      const max = Math.min(40, Math.max(6, Number(els.bufferSize.value || '14')));
+      while (buffer.length > max) {
+        const idx = buffer.findIndex((x) => x.status !== 'uploading');
+        if (idx < 0) break;
+        const removed = buffer.splice(idx, 1)[0];
+        const qi = queue.indexOf(removed);
+        if (qi >= 0) queue.splice(qi, 1);
+      }
+    }
+
+    function fmtGps(pos) {
+      if (!pos) return '—';
+      return `${pos.lat.toFixed(5)}, ${pos.lon.toFixed(5)}`;
+    }
+
+    function fmtAcc(pos) {
+      if (!pos || pos.acc == null) return '—';
+      return `${Math.round(pos.acc)}m`;
+    }
+
+    function fmtLatency(ms) {
+      if (ms == null) return '—';
+      if (ms < 1000) return String(Math.round(ms));
+      return (ms / 1000).toFixed(2) + 's';
+    }
+
+    function percentile(arr, p) {
+      if (!arr.length) return null;
+      const xs = Array.from(arr).slice().sort((a, b) => a - b);
+      const idx = Math.max(0, Math.min(xs.length - 1, Math.floor(p * (xs.length - 1))));
+      return xs[idx];
+    }
+
+    function avg(arr) {
+      if (!arr.length) return null;
+      let s = 0;
+      for (const x of arr) s += x;
+      return s / arr.length;
+    }
+
+    function computeRateFps(windowSec = 12) {
+      if (!stats.startedAtMs) return 0;
+      const now = Date.now();
+      const cut = now - windowSec * 1000;
+      const uploads = stats.latencyMs
+        .map((_, i) => stats.successPct[i] != null ? i : null)
+        .filter((x) => x != null);
+      void(uploads);
+      // We separately track lastUploadTsMs + history by storing timestamps in rateFps as {t,count} isn't worth it.
+      // Instead, infer from buffer items.
+      const okTs = [];
+      for (const it of buffer) {
+        if (it.status === 'uploaded' && typeof it.uploadedAtMs === 'number') okTs.push(it.uploadedAtMs);
+      }
+      const recent = okTs.filter((t) => t >= cut);
+      return recent.length / windowSec;
+    }
+
+    function updateCharts() {
+      sparkline(els.chartLatency, stats.latencyMs.slice(-48), {
+        color: '#3cffb0',
+        label: 'LATENCY ms',
+        unit: 'ms'
+      });
+      sparkline(els.chartRate, stats.rateFps.slice(-48), {
+        color: '#58a6ff',
+        label: 'UPLOAD RATE fps',
+        unit: 'fps',
+        min: 0
+      });
+      sparkline(els.chartSuccess, stats.successPct.slice(-48), {
+        color: '#ffcc66',
+        label: 'SUCCESS %',
+        unit: '%',
+        min: 0,
+        max: 100
+      });
+    }
+
+    function sparkline(canvas, values, opts) {
+      const ctx = canvas.getContext('2d');
+      const w = canvas.width;
+      const h = canvas.height;
+      ctx.clearRect(0, 0, w, h);
+
+      // Background
+      ctx.fillStyle = 'rgba(0,0,0,0.22)';
+      ctx.fillRect(0, 0, w, h);
+
+      // Header text
+      ctx.fillStyle = 'rgba(233,240,255,0.72)';
+      ctx.font = '700 12px ' + getComputedStyle(document.documentElement).getPropertyValue('--mono');
+      ctx.fillText(opts.label || '', 12, 18);
+
+      if (!values.length) {
+        ctx.fillStyle = 'rgba(233,240,255,0.40)';
+        ctx.fillText('waiting…', 12, 42);
+        return;
+      }
+
+      const pad = { l: 12, r: 12, t: 26, b: 10 };
+      const innerW = w - pad.l - pad.r;
+      const innerH = h - pad.t - pad.b;
+
+      let min = opts.min != null ? opts.min : Math.min(...values);
+      let max = opts.max != null ? opts.max : Math.max(...values);
+      if (min === max) { min -= 1; max += 1; }
+
+      // Grid lines
+      ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+      ctx.lineWidth = 1;
+      for (let i = 0; i <= 3; i++) {
+        const y = pad.t + (innerH * i) / 3;
+        ctx.beginPath();
+        ctx.moveTo(pad.l, y);
+        ctx.lineTo(pad.l + innerW, y);
+        ctx.stroke();
+      }
+
+      function xy(i, v) {
+        const x = pad.l + (innerW * (i / (values.length - 1 || 1)));
+        const t = (v - min) / (max - min);
+        const y = pad.t + innerH - t * innerH;
+        return { x, y };
+      }
+
+      // Line
+      ctx.strokeStyle = opts.color || '#ffffff';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      for (let i = 0; i < values.length; i++) {
+        const p = xy(i, values[i]);
+        if (i === 0) ctx.moveTo(p.x, p.y);
+        else ctx.lineTo(p.x, p.y);
+      }
+      ctx.stroke();
+
+      // Fill
+      ctx.globalAlpha = 0.18;
+      const grad = ctx.createLinearGradient(0, pad.t, 0, pad.t + innerH);
+      grad.addColorStop(0, (opts.color || '#ffffff'));
+      grad.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      for (let i = 0; i < values.length; i++) {
+        const p = xy(i, values[i]);
+        if (i === 0) ctx.moveTo(p.x, p.y);
+        else ctx.lineTo(p.x, p.y);
+      }
+      ctx.lineTo(pad.l + innerW, pad.t + innerH);
+      ctx.lineTo(pad.l, pad.t + innerH);
+      ctx.closePath();
+      ctx.fill();
+      ctx.globalAlpha = 1;
+
+      // Last value
+      const last = values[values.length - 1];
+      ctx.fillStyle = 'rgba(233,240,255,0.92)';
+      ctx.font = '800 12px ' + getComputedStyle(document.documentElement).getPropertyValue('--mono');
+      ctx.fillText(`${(last ?? 0).toFixed(2)} ${opts.unit || ''}`.trim(), w - 160, 18);
+    }
+
+    function renderBuffer() {
+      const frag = document.createDocumentFragment();
+      for (let i = buffer.length - 1; i >= 0; i--) {
+        const it = buffer[i];
+        const el = document.createElement('div');
+        el.className = 'frame';
+        const img = document.createElement('img');
+        img.src = it.thumbUrl;
+        img.alt = `keyframe ${it.seq}`;
+        el.appendChild(img);
+
+        const meta = document.createElement('div');
+        meta.className = 'meta';
+
+        const badge = document.createElement('div');
+        badge.className = 'badge ' + (it.status === 'uploaded' ? 'ok' : it.status === 'failed' ? 'bad' : it.status === 'uploading' ? 'warn' : 'neutral');
+        badge.textContent = it.status;
+        meta.appendChild(badge);
+
+        const line1 = document.createElement('div');
+        line1.textContent = `#${it.seq} · ${(it.sizeBytes / 1024).toFixed(1)} KB`;
+        meta.appendChild(line1);
+
+        const line2 = document.createElement('div');
+        line2.style.color = 'rgba(233,240,255,0.65)';
+        const ageMs = Date.now() - it.createdAtMs;
+        const age = ageMs < 1000 ? `${Math.round(ageMs)}ms` : `${(ageMs / 1000).toFixed(1)}s`;
+        line2.textContent = `${fmtGps(it.pos)} · age ${age}`;
+        meta.appendChild(line2);
+
+        el.appendChild(meta);
+        frag.appendChild(el);
+      }
+      els.buffer.innerHTML = '';
+      els.buffer.appendChild(frag);
+      els.bufMeta.textContent = `queue: ${queue.filter((x) => x.status === 'queued').length}${inFlight ? ' · inflight: 1' : ''} · buffer: ${buffer.length}`;
+    }
+
+    function renderHud() {
+      els.hudCell.textContent = stats.lastCell || '—';
+      els.hudGps.textContent = fmtGps(lastPos);
+      els.hudAcc.textContent = 'acc: ' + fmtAcc(lastPos);
+      els.hudNode.textContent = auth?.node_id ? `node: ${auth.node_id}` : 'node: —';
+      els.hudMode.textContent = `mode: ${els.mode.value} · upload: ${els.uploadMode.value}`;
+      els.hudTick.textContent = `tick: ${stats.captured} captured · ${stats.uploaded} uploaded`;
+      els.hudLast.textContent = stats.lastEventId ? String(stats.lastEventId).slice(0, 12) : '—';
+      els.hudLatency.textContent = 'lat: ' + fmtLatency(stats.lastLatencyMs);
+    }
+
+    function renderKpis() {
+      els.kpiUploaded.textContent = String(stats.uploaded);
+
+      const rate = computeRateFps(12);
+      els.kpiRate.textContent = `rate: ${rate.toFixed(2)} fps`;
+
+      const total = stats.uploaded + stats.failed;
+      const pct = total > 0 ? Math.round((stats.uploaded / total) * 100) : 0;
+      els.kpiSuccess.textContent = `${pct}%`;
+      els.kpiFail.textContent = `fail: ${stats.failed}`;
+
+      els.kpiLatency.textContent = stats.lastLatencyMs == null ? '—' : String(Math.round(stats.lastLatencyMs));
+      const avgLat = avg(stats.latencyMs.slice(-40));
+      const p95 = percentile(stats.latencyMs.slice(-80), 0.95);
+      els.kpiLatencyAvg.textContent = `avg: ${avgLat == null ? '—' : Math.round(avgLat)} · p95: ${p95 == null ? '—' : Math.round(p95)}`;
+
+      els.kpiCell.textContent = stats.lastCell || '—';
+      els.kpiCells.textContent = `unique cells: ${visitedCells.size}`;
+    }
+
+    function renderAll() {
+      renderBuffer();
+      renderHud();
+      renderKpis();
+      updateCharts();
+    }
+
+    async function uploadOne(item) {
+      const url = baseUrl();
+      if (!url) throw new Error('missing relay url');
+      if (!auth?.token) throw new Error('missing token');
+      const pos = item.pos;
+      if (!pos) throw new Error('missing gps');
+
+      const body = {
+        ts: new Date(item.createdAtMs).toISOString(),
+        lat: pos.lat,
+        lon: pos.lon,
+        heading: pos.heading ?? null,
+        h3_res: Number(els.h3Res.value || '9'),
+        jpeg_base64: item.jpegBase64
+      };
+
+      const t0 = performance.now();
+      const r = await fetch(`${url}/v1/events/frame`, {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          'authorization': `Bearer ${auth.token}`
+        },
+        body: JSON.stringify(body)
+      });
+      const dt = performance.now() - t0;
+      const j = await r.json().catch(() => null);
+      if (!r.ok || !j?.ok) {
+        throw new Error(`upload HTTP ${r.status}: ${JSON.stringify(j)}`);
+      }
+      return { resp: j, latencyMs: dt };
+    }
+
+    function scheduleUploader() {
+      // Single-flight uploader.
+      if (inFlight) return;
+      if (els.uploadMode.value !== 'on') return;
+
+      const next = queue.find((x) => x.status === 'queued');
+      if (!next) return;
+
+      inFlight = true;
+      setDot(els.dotUpl, 'warn');
+      next.status = 'uploading';
+      renderAll();
+
+      uploadOne(next).then(({ resp, latencyMs }) => {
+        next.status = 'uploaded';
+        next.uploadedAtMs = Date.now();
+        next.eventId = resp.id;
+        next.cell = resp.cell;
+        next.previewUrl = resp.preview_url ? (baseUrl() + resp.preview_url) : null;
+
+        stats.uploaded++;
+        stats.lastCell = resp.cell || stats.lastCell;
+        stats.lastEventId = resp.id || stats.lastEventId;
+        stats.lastLatencyMs = latencyMs;
+        stats.lastUploadTsMs = Date.now();
+        stats.latencyMs.push(latencyMs);
+        visitedCells.add(resp.cell);
+
+        stats.rateFps.push(computeRateFps(12));
+        const total = stats.uploaded + stats.failed;
+        stats.successPct.push(total > 0 ? (stats.uploaded / total) * 100 : 0);
+
+        setDot(els.dotUpl, 'ok');
+        log(`Uploaded id=${resp.id} cell=${resp.cell} lat=${latencyMs.toFixed(0)}ms`);
+      }).catch((e) => {
+        next.retries = (next.retries || 0) + 1;
+        stats.failed++;
+        stats.lastLatencyMs = null;
+        setDot(els.dotUpl, 'bad');
+        next.status = (next.retries <= 1) ? 'queued' : 'failed';
+
+        stats.rateFps.push(computeRateFps(12));
+        const total = stats.uploaded + stats.failed;
+        stats.successPct.push(total > 0 ? (stats.uploaded / total) * 100 : 0);
+
+        log(`ERROR: upload failed: ${e?.message || e}${next.status === 'queued' ? ' (retrying once)' : ''}`);
+      }).finally(() => {
+        // Remove uploaded/failed items from queue list, keep them in buffer for display.
+        for (let i = queue.length - 1; i >= 0; i--) {
+          if (queue[i].status === 'uploaded' || queue[i].status === 'failed') queue.splice(i, 1);
+        }
+        inFlight = false;
+        renderAll();
+        // Run again quickly if backlog exists.
+        setTimeout(scheduleUploader, 10);
+      });
+    }
+
+    function captureTick() {
+      // Ensure we have a GPS value in demo mode.
+      if ((els.mode.value === 'demo') && !lastPos) {
+        lastPos = { lat: sim.lat, lon: sim.lon, acc: 7, heading: sim.heading, ts: Date.now() };
+      }
+
+      const jpegBase64 = captureJpegBase64();
+      if (!jpegBase64) {
+        log('ERROR: capture failed');
+        return;
+      }
+
+      stats.captured++;
+      const sizeBytes = Math.round((jpegBase64.length * 3) / 4); // approx
+      const item = {
+        seq: ++seq,
+        createdAtMs: Date.now(),
+        pos: lastPos ? { ...lastPos } : null,
+        jpegBase64,
+        thumbUrl: makeThumbDataUrl(jpegBase64),
+        status: (els.uploadMode.value === 'on') ? 'queued' : 'captured',
+        sizeBytes
+      };
+      pushBufferItem(item);
+
+      // Update charts with "flat" points so the sparklines animate even before first upload.
+      if (stats.rateFps.length < stats.latencyMs.length) stats.rateFps.push(computeRateFps(12));
+      if (stats.successPct.length < stats.latencyMs.length) {
+        const total = stats.uploaded + stats.failed;
+        stats.successPct.push(total > 0 ? (stats.uploaded / total) * 100 : 0);
+      }
+
+      renderAll();
+      scheduleUploader();
+    }
+
+    function resetStats() {
+      buffer.length = 0;
+      queue.length = 0;
+      visitedCells.clear();
+      stats.startedAtMs = null;
+      stats.captured = 0;
+      stats.uploaded = 0;
+      stats.failed = 0;
+      stats.lastCell = null;
+      stats.lastEventId = null;
+      stats.lastLatencyMs = null;
+      stats.lastUploadTsMs = null;
+      stats.latencyMs.length = 0;
+      stats.rateFps.length = 0;
+      stats.successPct.length = 0;
+      renderAll();
+      log('Stats reset');
+    }
+
+    async function startContinuous() {
+      if (captureTimer) return;
+      if (els.uploadMode.value === 'on' && !auth?.token) {
+        log('ERROR: missing token; register first (or set Upload=Off)');
+        return;
+      }
+
+      els.btnStart.disabled = true;
+      els.btnStop.disabled = false;
+      els.btnRegister.disabled = true;
+
+      // Always test relay if uploading.
+      if (els.uploadMode.value === 'on') await testRelay();
+
+      // Resolve mode.
+      const wantMode = els.mode.value;
+      const forcedDemo = new URLSearchParams(location.search).get('demo') === '1';
+      let mode = forcedDemo ? 'demo' : wantMode;
+      if (mode === 'auto') mode = 'real';
+
+      let usingDemo = false;
+      const secureOk = !!window.isSecureContext;
+      if (!secureOk && mode === 'real') {
+        usingDemo = true;
+        mode = 'demo';
+        banner('warn', 'Not a secure context (file://). Real camera/GPS are blocked; using DEMO sensors.');
+      } else {
+        banner('warn', '');
+      }
+
+      // Start sensors.
+      stopDemoSensors();
+      stopCamera();
+      stopGPS();
+
+      if (mode === 'demo') {
+        usingDemo = true;
+        startDemoSensors();
+      } else {
+        try {
+          await startCameraReal();
+        } catch (e) {
+          usingDemo = true;
+          setDot(els.dotCam, 'bad');
+          log(`Camera failed: ${e?.message || e}`);
+          log('Falling back to DEMO sensors...');
+          startDemoSensors();
+        }
+
+        try {
+          await startGPSReal();
+        } catch (e) {
+          usingDemo = true;
+          setDot(els.dotGps, 'bad');
+          log(`GPS failed: ${e?.message || e}`);
+          log('Falling back to simulated GPS...');
+          // Keep camera if it started, but create simulated GPS updates via demoDrawFrame.
+          if (!demoDrawTimer) demoDrawTimer = setInterval(() => {
+            sim.t += 0.016;
+            sim.lat += 0.00007 * Math.cos(sim.t * 0.7);
+            sim.lon += 0.00007 * Math.sin(sim.t * 0.6);
+            sim.heading = (sim.heading + 0.7) % 360;
+            lastPos = { lat: sim.lat, lon: sim.lon, acc: 10, heading: sim.heading, ts: Date.now() };
+          }, 1000 / 12);
+          setDot(els.dotGps, 'ok');
+        }
+      }
+
+      // Ensure video sizing.
+      if (!usingDemo) {
+        els.video.style.display = 'block';
+        els.demoCanvas.style.display = 'none';
+      }
+
+      // Start capture loop.
+      const fps = clamp(els.fps.value || '1', 0.1, 20) ?? 1;
+      const intervalMs = Math.round(1000 / fps);
+
+      stats.startedAtMs = Date.now();
+      log(`Continuous capture started (${fps} fps keyframes; interval=${intervalMs}ms)`);
+      renderAll();
+
+      captureTick();
+      captureTimer = setInterval(captureTick, intervalMs);
+      setDot(els.dotUpl, els.uploadMode.value === 'on' ? 'warn' : null);
+    }
+
+    function stopContinuous() {
+      if (captureTimer) clearInterval(captureTimer);
+      captureTimer = null;
+      inFlight = false;
+      els.btnStop.disabled = true;
+      els.btnRegister.disabled = false;
+      els.btnStart.disabled = !auth && els.uploadMode.value === 'on';
+
+      stopGPS();
+      stopCamera();
+      stopDemoSensors();
+
+      setDot(els.dotUpl, null);
+      log('Stopped');
+      renderAll();
+    }
+
+    // Init defaults
+    els.relayUrl.value = localStorage.getItem(storageKeyRelay) || 'http://127.0.0.1:8787';
+    auth = loadAuth();
+    els.btnStart.disabled = !auth && els.uploadMode.value === 'on';
+    if (auth?.node_id) log(`Loaded node_id=${auth.node_id}`);
+
+    // Respect query params for hackathon demo.
+    const qs = new URLSearchParams(location.search);
+    if (qs.get('upload') === '0') els.uploadMode.value = 'off';
+    if (qs.get('mode') === 'demo') els.mode.value = 'demo';
+    if (qs.get('mode') === 'real') els.mode.value = 'real';
+
+    // If opened as file://, be explicit.
+    if (!window.isSecureContext) banner('warn', 'Not a secure context (file://). For real camera/GPS: serve via http://localhost. Demo mode will still work.');
+
+    // Wire events
+    els.relayUrl.addEventListener('change', () => {
+      localStorage.setItem(storageKeyRelay, String(els.relayUrl.value || '').trim());
+    });
+
+    els.uploadMode.addEventListener('change', () => {
+      els.btnStart.disabled = (!auth && els.uploadMode.value === 'on') || !!captureTimer;
+      renderAll();
+    });
+
+    els.btnTest.addEventListener('click', () => testRelay());
+    els.btnRegister.addEventListener('click', () => registerNode().catch((e) => log(`ERROR: ${e?.message || e}`)));
+    els.btnStart.addEventListener('click', () => startContinuous().catch((e) => log(`ERROR: ${e?.message || e}`)));
+    els.btnStop.addEventListener('click', stopContinuous);
+    els.btnForget.addEventListener('click', forgetAuth);
+    els.btnReset.addEventListener('click', resetStats);
+
+    // Initial render and relay ping loop
+    renderAll();
+    testRelay();
+    setInterval(() => { if (!captureTimer) testRelay(); }, 5000);
+
+    // Autostart for on-stage demos.
+    if (qs.get('autostart') === '1') {
+      (async () => {
+        if (els.mode.value === 'auto') els.mode.value = qs.get('demo') === '1' ? 'demo' : 'auto';
+        if (els.uploadMode.value === 'on' && !auth?.token) await registerNode();
+        await startContinuous();
+      })().catch((e) => log(`ERROR: autostart failed: ${e?.message || e}`));
+    }
+  </script>
+</body>
+</html>
+

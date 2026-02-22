@@ -1,0 +1,61 @@
+# Bluesky 多账号配置
+# 注册完成后，把 App Password 填入对应位置
+
+ACCOUNTS = {
+    "oysterecosystem": {
+        "handle": "oysterecosystem.bsky.social",
+        "app_password": "yjs3-a2gf-3j5s-guu7",  # 已配置
+        "persona": "Nation Founder",
+        "bio": "Oyster Republic: AI + Web3 Hardware Nation 🦪\nPhysical Intelligence + DePIN + UBI + AI Hardware\n\nProducts: ClawGlasses | OpenClaw | UBS Phone | Puffy AI\nJoin us → oysterrepublic.xyz\n\n#DePIN #PhysicalIntelligence #AIHardware",
+        "enabled": True,
+    },
+    "clawglasses": {
+        "handle": "clawglasses.bsky.social",
+        "app_password": "",  # TODO: 填入
+        "persona": "Claw Operator + Hardware Tinkerer",
+        "bio": "Building the future of AI glasses 🧿\nClawGlasses daily ops & OTA updates\n\nReal usage, real feedback, real hardware vibes\n\n→ oysterrepublic.xyz/clawglasses\n\n#AIWearables #PhysicalIntelligence",
+        "enabled": False,
+    },
+    "oyster_ubi_citizen": {
+        "handle": "oyster_ubi_citizen.bsky.social",
+        "app_password": "",  # TODO: 填入
+        "persona": "UBI Citizen",
+        "bio": "Living in Oyster Republic 🦪\nUBI recipient & crypto curious\n\nSharing the journey of being a UBI citizen in the AI age\n\n#UBI #OysterRepublic #DePIN",
+        "enabled": False,
+    },
+    "depin_scout_oyster": {
+        "handle": "depin_scout_oyster.bsky.social",
+        "app_password": "",  # TODO: 填入
+        "persona": "DePIN Scout",
+        "bio": "Scouting the DePIN frontier 🔭\nOyster Republic ecosystem observer\n\nTracking: AI Hardware, Physical Intelligence, Decentralized Infrastructure\n\n#DePIN #AIagents #Web3",
+        "enabled": False,
+    },
+    "openclaw_dev": {
+        "handle": "openclaw_dev.bsky.social",
+        "app_password": "",  # TODO: 填入
+        "persona": "Hardware Dev",
+        "bio": "OpenClaw developer 🛠️\nBuilding in public\n\nCode, hacks, bugs, OTA deploys\n\n→ github.com/oysterlabs\n\n#OpenSource #HardwareDev #AIagents",
+        "enabled": False,
+    },
+    "puffy_ai_daily": {
+        "handle": "puffy_ai_daily.bsky.social",
+        "app_password": "",  # TODO: 填入
+        "persona": "Puffy AI Operator",
+        "bio": "Puffy AI daily vibes 🤖\nAI agent in action\n\nScreenshots, workflows, agent adventures\n\n#AIAgents #PuffyAI #OysterRepublic",
+        "enabled": False,
+    },
+    "oyster_nation_memes": {
+        "handle": "oyster_nation_memes.bsky.social",
+        "app_password": "",  # TODO: 填入
+        "persona": "Meme Account",
+        "bio": "Oyster Republic Meme Lord 🎭\nPure memes, no substance\n\n🦪⚡\n\n#OysterRepublic #Memes #Crypto",
+        "enabled": False,
+    },
+}
+
+# 每日发帖排期
+SCHEDULE = {
+    "peak_hours": ["10:00", "14:00", "20:00"],  # 北京时间
+    "posts_per_day": 3,
+    "account_rotation": "random",  # 随机账号
+}

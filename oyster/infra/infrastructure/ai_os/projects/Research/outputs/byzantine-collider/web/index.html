@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>拜占庭对撞器 | Byzantine Collider</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #10b981;
+            --danger: #ef4444;
+            --bg: #0f172a;
+            --bg-light: #1e293b;
+            --text: #f8fafc;
+            --text-dim: #94a3b8;
+            --border: #334155;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 1rem; }
+
+        header { text-align: center; margin-bottom: 1.5rem; }
+        
+        h1 { font-size: 1.5rem; margin-bottom: 0.25rem; 
+            background: linear-gradient(135deg, var(--primary), #a855f7);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        
+        .subtitle { color: var(--text-dim); font-size: 0.875rem; }
+
+        .main-grid { display: grid; grid-template-columns: 1fr; gap: 1rem; }
+        
+        @media (min-width: 769px) {
+            .main-grid { grid-template-columns: 1fr 1fr; }
+            h1 { font-size: 2rem; }
+            .container { padding: 2rem; }
+        }
+
+        .card {
+            background: var(--bg-light);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            border: 1px solid var(--border);
+        }
+
+        @media (max-width: 480px) {
+            .card { padding: 0.75rem; border-radius: 0.5rem; }
+        }
+
+        .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem; }
+        .card-title { font-size: 1rem; font-weight: 600; }
+
+        .badge {
+            padding: 0.125rem 0.5rem;
+            border-radius: 9999px;
+            font-size: 0.625rem;
+            font-weight: 500;
+        }
+
+        .badge-success { background: rgba(16, 185, 129, 0.2); color: var(--secondary); }
+        .badge-warning { background: rgba(245, 158, 11, 0.2); color: #f59e0b; }
+        .badge-error { background: rgba(239, 68, 68, 0.2); color: var(--danger); }
+
+        .form-group { margin-bottom: 0.75rem; }
+        
+        label { display: block; margin-bottom: 0.25rem; color: var(--text-dim); font-size: 0.75rem; }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 0.625rem;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            color: var(--text);
+            font-size: 0.9375rem;
+        }
+
+        @media (max-width: 480px) {
+            input, textarea, select { font-size: 16px; padding: 0.5rem; }
+        }
+
+        input:focus, textarea:focus, select:focus { outline: none; border-color: var(--primary); }
+        textarea { min-height: 100px; resize: vertical; }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.375rem;
+            padding: 0.625rem 1rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            width: 100%;
+        }
+
+        @media (min-width: 481px) { .btn { width: auto; } }
+
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-dark); }
+        .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-secondary { background: var(--border); color: var(--text); }
+
+        .result-area {
+            margin-top: 0.75rem;
+            padding: 0.75rem;
+            background: var(--bg);
+            border-radius: 0.5rem;
+            min-height: 150px;
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            font-family: monospace;
+            font-size: 0.75rem;
+        }
+
+        .result-area:empty::before { content: '碰撞结果将显示在这里...'; color: var(--text-dim); }
+
+        .tabs { display: flex; gap: 0.375rem; margin-bottom: 0.75rem; }
+        .tab {
+            padding: 0.375rem 0.75rem;
+            background: transparent;
+            border: none;
+            color: var(--text-dim);
+            cursor: pointer;
+            border-radius: 0.375rem;
+            font-size: 0.75rem;
+        }
+        .tab.active { background: var(--primary); color: white; }
+
+        .history-item {
+            padding: 0.5rem;
+            background: var(--bg);
+            border-radius: 0.375rem;
+            margin-bottom: 0.375rem;
+            cursor: pointer;
+        }
+        .history-item:hover { background: var(--border); }
+        .history-meta { display: flex; justify-content: space-between; font-size: 0.625rem; color: var(--text-dim); margin-top: 0.25rem; }
+
+        .spinner {
+            width: 0.75rem; height: 0.75rem;
+            border: 2px solid transparent;
+            border-top-color: currentColor;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .status-indicator {
+            display: inline-block;
+            width: 0.375rem; height: 0.375rem;
+            border-radius: 50%;
+            margin-right: 0.375rem;
+        }
+        .status-idle { background: var(--text-dim); }
+        .status-running { background: #f59e0b; animation: pulse 1s infinite; }
+        .status-done { background: var(--secondary); }
+
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+        footer { text-align: center; margin-top: 1.5rem; color: var(--text-dim); font-size: 0.75rem; }
+        
+        .shortcut {
+            display: inline-block;
+            padding: 0.125rem 0.375rem;
+            background: var(--border);
+            border-radius: 0.25rem;
+            font-size: 0.625rem;
+            margin: 0 0.25rem;
+        }
+
+        /* 主题切换 */
+        .theme-toggle {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            padding: 0.5rem;
+            background: var(--bg-light);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        [data-theme="light"] {
+            --bg: #f8fafc;
+            --bg-light: #ffffff;
+            --text: #0f172a;
+            --text-dim: #64748b;
+            --border: #e2e8f0;
+        }
+    </style>
+</head>
+<body>
+    <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
+
+    <div class="container">
+        <header>
+            <h1>⚔️ 拜占庭对撞器</h1>
+            <p class="subtitle">AI-to-AI 产品碰撞系统</p>
+        </header>
+
+        <div class="main-grid">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">发起碰撞</h2>
+                    <span id="status" class="badge badge-success">
+                        <span class="status-indicator status-idle"></span>
+                        就绪
+                    </span>
+                </div>
+
+                <div class="form-group">
+                    <label>碰撞主题</label>
+                    <input type="text" id="topic" placeholder="例如：是否应该做小程序？">
+                </div>
+
+                <div class="form-group">
+                    <label>碰撞轮次</label>
+                    <select id="rounds">
+                        <option value="1">1 轮 (快速)</option>
+                        <option value="3" selected>3 轮 (标准)</option>
+                        <option value="5">5 轮 (深度)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Prompt 模板</label>
+                    <select id="template">
+                        <option value="default">商业化挑战</option>
+                        <option value="tech">技术评审</option>
+                        <option value="code">代码审查</option>
+                        <option value="competitor">竞品分析</option>
+                        <option value="investor">投资评审</option>
+                        <option value="pmf">PMF 验证</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>LLM 模型</label>
+                    <select id="llm">
+                        <option value="zhipu">智谱 GLM</option>
+                        <option value="openai">OpenAI GPT</option>
+                        <option value="claude">Anthropic Claude</option>
+                        <option value="local">LocalAI</option>
+                    </select>
+                </div>
+
+                <button class="btn btn-primary" id="startBtn" onclick="startCollision()">
+                    ⚔️ 开始对撞
+                </button>
+
+                <div id="result" class="result-area"></div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">碰撞历史</h2>
+                    <button class="btn btn-secondary" onclick="clearHistory()" style="padding: 0.375rem; font-size: 0.75rem;">
+                        清空
+                    </button>
+                </div>
+
+                <div class="tabs">
+                    <button class="tab active" onclick="filterHistory('all')">全部</button>
+                    <button class="tab" onclick="filterHistory('today')">今日</button>
+                </div>
+
+                <div id="historyList">
+                    <div style="color: var(--text-dim); text-align: center; padding: 1rem; font-size: 0.75rem;">
+                        暂无碰撞记录
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>快捷键: <span class="shortcut">Ctrl</span> + <span class="shortcut">Enter</span> 开始</p>
+            <p>Backend: <span id="apiStatus">检查中...</span></p>
+        </footer>
+    </div>
+
+    <script>
+        let isRunning = false;
+        let history = JSON.parse(localStorage.getItem('byzantine_history') || '[]');
+
+        function toggleTheme() {
+            const html = document.documentElement;
+            const btn = document.querySelector('.theme-toggle');
+            if (html.getAttribute('data-theme') === 'light') {
+                html.removeAttribute('data-theme');
+                btn.textContent = '🌙';
+                localStorage.setItem('theme', 'dark');
+            } else {
+                html.setAttribute('data-theme', 'light');
+                btn.textContent = '☀️';
+                localStorage.setItem('theme', 'light');
+            }
+        }
+
+        // 加载主题
+        (function() {
+            const theme = localStorage.getItem('theme');
+            if (theme === 'light') {
+                document.documentElement.setAttribute('data-theme', 'light');
+                document.querySelector('.theme-toggle').textContent = '☀️';
+            }
+        })();
+
+        async function checkBackend() {
+            try {
+                const res = await fetch('/health');
+                const data = await res.json();
+                document.getElementById('apiStatus').textContent = '已连接 ✓';
+                document.getElementById('apiStatus').style.color = '#10b981';
+            } catch (e) {
+                document.getElementById('apiStatus').textContent = '未连接 (本地)';
+                document.getElementById('apiStatus').style.color = '#f59e0b';
+            }
+        }
+
+        async function startCollision() {
+            if (isRunning) return;
+
+            const topic = document.getElementById('topic').value.trim();
+            if (!topic) { alert('请输入碰撞主题'); return; }
+
+            const rounds = parseInt(document.getElementById('rounds').value);
+            const template = document.getElementById('template').value;
+            const llm = document.getElementById('llm').value;
+
+            isRunning = true;
+            updateStatus('running', '碰撞中...');
+            document.getElementById('startBtn').disabled = true;
+            document.getElementById('result').textContent = '';
+
+            try {
+                const res = await fetch('/api/collision', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ topic, rounds, template, llm })
+                });
+
+                const data = await res.json();
+
+                if (data.error) {
+                    document.getElementById('result').textContent = '错误: ' + data.error;
+                    updateStatus('error', '失败');
+                } else {
+                    document.getElementById('result').textContent = formatResult(data.result);
+                    addToHistory(topic, rounds, data.result);
+                    updateStatus('done', '完成');
+                }
+            } catch (e) {
+                document.getElementById('result').textContent = `模拟碰撞:\n\n主题: ${topic}\n轮次: ${rounds}\n\n[配置后端 API]\npython3 api.py`;
+                updateStatus('idle', '就绪');
+            }
+
+            isRunning = false;
+            document.getElementById('startBtn').disabled = false;
+        }
+
+        function formatResult(result) {
+            if (!result) return '';
+            let output = '';
+            if (result.history) {
+                result.history.forEach((round, i) => {
+                    output += `\n=== 第 ${i + 1} 轮 ===\n\n【挑战者】\n${round.challenger || ''}\n\n【辩护者】\n${round.defender || ''}\n\n`;
+                });
+            }
+            if (result.convergence?.summary) {
+                output += `\n=== 收敛结论 ===\n\n${result.convergence.summary}`;
+            }
+            return output;
+        }
+
+        function updateStatus(status, text) {
+            const statusEl = document.getElementById('status');
+            statusEl.className = 'badge ' + { 'idle': 'badge-success', 'running': 'badge-warning', 'done': 'badge-success', 'error': 'badge-error' }[status];
+            statusEl.innerHTML = `<span class="status-indicator status-${status}"></span>${text}`;
+        }
+
+        function addToHistory(topic, rounds, result) {
+            const item = { topic, rounds, timestamp: new Date().toISOString(), summary: result?.convergence?.summary?.substring(0, 100) || '无' };
+            history.unshift(item);
+            if (history.length > 50) history.pop();
+            localStorage.setItem('byzantine_history', JSON.stringify(history));
+            renderHistory();
+        }
+
+        function renderHistory(filter = 'all') {
+            const list = document.getElementById('historyList');
+            let filtered = history;
+            if (filter === 'today') {
+                const today = new Date().toDateString();
+                filtered = history.filter(h => new Date(h.timestamp).toDateString() === today);
+            }
+            if (filtered.length === 0) {
+                list.innerHTML = '<div style="color: var(--text-dim); text-align: center; padding: 1rem; font-size: 0.75rem;">暂无记录</div>';
+                return;
+            }
+            list.innerHTML = filtered.map(h => `
+                <div class="history-item" onclick="document.getElementById('topic').value='${h.topic}'">
+                    <div style="font-size: 0.8125rem;">${h.topic}</div>
+                    <div class="history-meta">
+                        <span>${h.rounds} 轮</span>
+                        <span>${new Date(h.timestamp).toLocaleString()}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function filterHistory(type) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            renderHistory(type);
+        }
+
+        function clearHistory() {
+            if (confirm('确定清空所有历史记录?')) {
+                history = [];
+                localStorage.setItem('byzantine_history', '[]');
+                renderHistory();
+            }
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.key === 'Enter') startCollision();
+        });
+
+        checkBackend();
+        renderHistory();
+    </script>
+</body>
+</html>

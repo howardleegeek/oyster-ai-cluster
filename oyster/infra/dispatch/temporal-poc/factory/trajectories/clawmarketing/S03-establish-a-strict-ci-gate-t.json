@@ -1,0 +1,37 @@
+{
+  "task_id": "S03-establish-a-strict-ci-gate-t",
+  "project": "clawmarketing",
+  "spec_content": "---\ntask_id: S03-establish-a-strict-ci-gate-t\nproject: clawmarketing\npriority: 2\nestimated_minutes: 30\ndepends_on: []\n---\n## Goal\nestablish a strict ci gate (`typecheck + lint + targeted tests + smoke`) and rep\n\n\n## Identified Risks\n- Current 'best template' may be a local optimum due to evaluation bias or metric drift if instrumentation is inconsistent.\n- De-duplication can break hidden path dependencies in scripts and dispatch tooling if not staged carefully.\n- Without CI hard gates, autonomou",
+  "template_id": "default",
+  "outcome": "stuck",
+  "failure_reason": "stuck:repeating_action_error",
+  "advisor_consensus": "",
+  "total_tokens": 0,
+  "total_duration": 0.020281076431274414,
+  "started_at": 1771745563.1573749,
+  "completed_at": 1771745563.177962,
+  "step_count": 3,
+  "steps": [
+    {
+      "phase": "build",
+      "action": "execute_attempt_1",
+      "result": "failed",
+      "duration": 0.0076580047607421875,
+      "error": "Exit code 2"
+    },
+    {
+      "phase": "build",
+      "action": "execute_attempt_2",
+      "result": "failed",
+      "duration": 0.006176948547363281,
+      "error": "Exit code 2"
+    },
+    {
+      "phase": "build",
+      "action": "execute_attempt_3",
+      "result": "failed",
+      "duration": 0.006446123123168945,
+      "error": "Exit code 2"
+    }
+  ]
+}

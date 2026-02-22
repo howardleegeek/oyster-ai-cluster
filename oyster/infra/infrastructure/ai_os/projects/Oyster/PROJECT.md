@@ -1,0 +1,31 @@
+# PROJECT.md — Oyster
+
+> Oyster 项目定义
+
+## 项目范围
+
+**Oyster Labs**: Oyster 研究实验项目
+
+## 产出类型
+
+| 类型 | 路径 |
+|------|------|
+| content | outputs/content/ |
+| bd | outputs/bd/ |
+| ops | outputs/ops/ |
+| research | outputs/research/ |
+
+## 路由说明
+
+- 所有产出必须写入 `ai_os/projects/Oyster/outputs/`
+- 临时文件放入 `inbox/`
+- 归档移到 `archive/`
+
+## 项目边界
+
+- 与 Puffy: 共享技术栈，但 Puffy 是产品，Oyster 是实验
+- 与 Research: Oyster 偏向实验性研究
+
+## 关键联系人
+
+（待补充）

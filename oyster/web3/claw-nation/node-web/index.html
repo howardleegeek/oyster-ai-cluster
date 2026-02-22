@@ -1,0 +1,457 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Claw Nation Node (Web)</title>
+  <style>
+    :root {
+      --bg: #0b0d10;
+      --panel: #11151b;
+      --text: #e7eef8;
+      --muted: #9fb1c8;
+      --accent: #44d19d;
+      --danger: #ff5b7a;
+      --border: rgba(255,255,255,0.10);
+    }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      background: radial-gradient(1200px 700px at 20% 0%, rgba(68,209,157,0.12), transparent 55%),
+                  radial-gradient(900px 600px at 90% 15%, rgba(105, 162, 255, 0.10), transparent 60%),
+                  var(--bg);
+      color: var(--text);
+      font: 14px/1.4 ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+    }
+    .wrap { max-width: 920px; margin: 0 auto; padding: 18px; }
+    h1 { font-size: 18px; margin: 0 0 10px; letter-spacing: 0.2px; }
+    .grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
+    @media (min-width: 900px) { .grid { grid-template-columns: 1.1fr 0.9fr; } }
+    .card {
+      background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.28);
+    }
+    label { display: block; color: var(--muted); font-size: 12px; margin: 10px 0 6px; }
+    input, select {
+      width: 100%;
+      padding: 10px 10px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.10);
+      color: var(--text);
+      border-radius: 10px;
+      outline: none;
+    }
+    input::placeholder { color: rgba(231,238,248,0.35); }
+    .row { display: grid; grid-template-columns: 1fr; gap: 10px; }
+    @media (min-width: 720px) { .row { grid-template-columns: 1fr 1fr; } }
+    .btns { display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
+    button {
+      cursor: pointer;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(255,255,255,0.06);
+      color: var(--text);
+      padding: 10px 12px;
+      border-radius: 10px;
+      font-weight: 600;
+      letter-spacing: 0.2px;
+    }
+    button.primary {
+      background: linear-gradient(135deg, rgba(68,209,157,0.18), rgba(68,209,157,0.06));
+      border-color: rgba(68,209,157,0.35);
+    }
+    button.danger {
+      background: linear-gradient(135deg, rgba(255,91,122,0.16), rgba(255,91,122,0.06));
+      border-color: rgba(255,91,122,0.35);
+    }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .status {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 12px;
+      color: rgba(231,238,248,0.9);
+      background: rgba(0,0,0,0.35);
+      border: 1px solid rgba(255,255,255,0.10);
+      padding: 10px;
+      border-radius: 10px;
+      white-space: pre-wrap;
+      word-break: break-word;
+      min-height: 120px;
+    }
+
+    .video {
+      width: 100%;
+      aspect-ratio: 16 / 10;
+      background: rgba(0,0,0,0.4);
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 12px;
+      overflow: hidden;
+      display: grid;
+      place-items: center;
+    }
+    video { width: 100%; height: 100%; object-fit: cover; }
+
+    .pill {
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(0,0,0,0.25);
+      color: rgba(231,238,248,0.9);
+      font-size: 12px;
+      margin-right: 8px;
+      margin-bottom: 8px;
+    }
+    .dot { width: 8px; height: 8px; border-radius: 999px; background: #777; }
+    .dot.ok { background: var(--accent); }
+    .dot.bad { background: var(--danger); }
+    .muted { color: var(--muted); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Claw Nation Node (Web)</h1>
+    <div class="muted" style="margin-bottom: 12px;">
+      Turn any phone into a mapping node: capture camera frames + GPS and publish into H3 cells.
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <div style="margin-bottom: 8px;">
+          <span class="pill"><span id="camDot" class="dot"></span>Camera</span>
+          <span class="pill"><span id="gpsDot" class="dot"></span>GPS</span>
+          <span class="pill"><span id="uplDot" class="dot"></span>Upload</span>
+        </div>
+
+        <div class="row">
+          <div>
+            <label>Relay Base URL</label>
+            <input id="relayUrl" placeholder="https://relay.example.com" />
+          </div>
+          <div>
+            <label>Register Secret (optional)</label>
+            <input id="registerSecret" placeholder="(leave empty for dev)" />
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <label>Node Name</label>
+            <input id="nodeName" placeholder="oyster-phone-001" />
+          </div>
+          <div>
+            <label>H3 Resolution</label>
+            <select id="h3Res">
+              <option value="8">8 (neighborhood)</option>
+              <option value="9" selected>9 (default, ~100-200m)</option>
+              <option value="10">10 (block)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <label>Frame Interval (ms)</label>
+            <input id="intervalMs" type="number" min="250" step="50" value="1000" />
+          </div>
+          <div>
+            <label>JPEG Quality (0.1 - 0.95)</label>
+            <input id="jpegQuality" type="number" min="0.1" max="0.95" step="0.05" value="0.6" />
+          </div>
+        </div>
+
+        <div class="btns">
+          <button id="btnRegister" class="primary">Register Node</button>
+          <button id="btnStart" class="primary" disabled>Start Mapping</button>
+          <button id="btnStop" class="danger" disabled>Stop</button>
+          <button id="btnForget">Forget Token</button>
+        </div>
+
+        <label>Status</label>
+        <div id="status" class="status"></div>
+      </div>
+
+      <div class="card">
+        <div class="video">
+          <video id="video" playsinline autoplay muted></video>
+        </div>
+        <div class="muted" style="margin-top: 10px;">
+          Tip: Use the back camera (environment) and keep moving for coverage.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <canvas id="canvas" width="640" height="400" style="display:none"></canvas>
+
+  <script>
+    const els = {
+      relayUrl: document.getElementById('relayUrl'),
+      registerSecret: document.getElementById('registerSecret'),
+      nodeName: document.getElementById('nodeName'),
+      h3Res: document.getElementById('h3Res'),
+      intervalMs: document.getElementById('intervalMs'),
+      jpegQuality: document.getElementById('jpegQuality'),
+      btnRegister: document.getElementById('btnRegister'),
+      btnStart: document.getElementById('btnStart'),
+      btnStop: document.getElementById('btnStop'),
+      btnForget: document.getElementById('btnForget'),
+      status: document.getElementById('status'),
+      video: document.getElementById('video'),
+      canvas: document.getElementById('canvas'),
+      camDot: document.getElementById('camDot'),
+      gpsDot: document.getElementById('gpsDot'),
+      uplDot: document.getElementById('uplDot')
+    };
+
+    const storageKey = 'claw_node_auth_v1';
+
+    let auth = null; // { node_id, token }
+    let stream = null;
+    let geoWatchId = null;
+    let lastPos = null; // { lat, lon, acc, ts }
+    let loopTimer = null;
+
+    function log(line) {
+      const ts = new Date().toISOString().replace('T',' ').replace('Z','');
+      els.status.textContent = `[${ts}] ${line}\n` + els.status.textContent;
+    }
+
+    function setDot(dot, state) {
+      dot.classList.remove('ok', 'bad');
+      if (state === 'ok') dot.classList.add('ok');
+      if (state === 'bad') dot.classList.add('bad');
+    }
+
+    function baseUrl() {
+      const u = (els.relayUrl.value || '').trim().replace(/\/$/, '');
+      return u;
+    }
+
+    function saveAuth(a) {
+      auth = a;
+      localStorage.setItem(storageKey, JSON.stringify(a));
+      els.btnStart.disabled = !auth;
+    }
+
+    function loadAuth() {
+      try {
+        const raw = localStorage.getItem(storageKey);
+        if (!raw) return null;
+        return JSON.parse(raw);
+      } catch { return null; }
+    }
+
+    function forgetAuth() {
+      auth = null;
+      localStorage.removeItem(storageKey);
+      els.btnStart.disabled = true;
+      log('Auth cleared');
+    }
+
+    async function registerNode() {
+      const url = baseUrl();
+      if (!url) {
+        log('ERROR: missing relay base url');
+        return;
+      }
+      const name = (els.nodeName.value || 'web-node').trim();
+      const secret = (els.registerSecret.value || '').trim();
+
+      const headers = { 'content-type': 'application/json' };
+      if (secret) headers['x-register-secret'] = secret;
+
+      log('Registering node...');
+      const r = await fetch(`${url}/v1/nodes/register`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ name, capabilities: ['frame', 'gps'] })
+      });
+      const j = await r.json().catch(() => null);
+      if (!r.ok) {
+        log(`ERROR: register failed HTTP ${r.status} ${JSON.stringify(j)}`);
+        return;
+      }
+      saveAuth({ node_id: j.node_id, token: j.token });
+      log(`Registered node_id=${j.node_id}`);
+    }
+
+    async function startCamera() {
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: { ideal: 'environment' } },
+          audio: false
+        });
+        els.video.srcObject = stream;
+        await els.video.play();
+        setDot(els.camDot, 'ok');
+        log('Camera OK');
+      } catch (e) {
+        setDot(els.camDot, 'bad');
+        log(`ERROR: camera failed: ${e?.message || e}`);
+        throw e;
+      }
+    }
+
+    async function startGPS() {
+      if (!('geolocation' in navigator)) {
+        setDot(els.gpsDot, 'bad');
+        log('ERROR: geolocation not available');
+        return;
+      }
+
+      return new Promise((resolve) => {
+        geoWatchId = navigator.geolocation.watchPosition(
+          (pos) => {
+            lastPos = {
+              lat: pos.coords.latitude,
+              lon: pos.coords.longitude,
+              acc: pos.coords.accuracy,
+              ts: pos.timestamp
+            };
+            setDot(els.gpsDot, 'ok');
+            resolve(true);
+          },
+          (err) => {
+            setDot(els.gpsDot, 'bad');
+            log(`ERROR: geolocation: ${err.message}`);
+            resolve(false);
+          },
+          { enableHighAccuracy: true, maximumAge: 2000, timeout: 8000 }
+        );
+      });
+    }
+
+    function stopGPS() {
+      if (geoWatchId != null) {
+        navigator.geolocation.clearWatch(geoWatchId);
+        geoWatchId = null;
+      }
+      lastPos = null;
+      setDot(els.gpsDot, null);
+    }
+
+    function stopCamera() {
+      if (stream) {
+        for (const track of stream.getTracks()) track.stop();
+        stream = null;
+      }
+      els.video.srcObject = null;
+      setDot(els.camDot, null);
+    }
+
+    function captureJpegBase64() {
+      const video = els.video;
+      const canvas = els.canvas;
+      const ctx = canvas.getContext('2d');
+
+      // Fit to 640px width while preserving aspect ratio.
+      const w = 640;
+      const ar = video.videoWidth && video.videoHeight ? (video.videoHeight / video.videoWidth) : (10/16);
+      const h = Math.max(240, Math.round(w * ar));
+      canvas.width = w;
+      canvas.height = h;
+
+      ctx.drawImage(video, 0, 0, w, h);
+      const q = Math.min(0.95, Math.max(0.1, Number(els.jpegQuality.value || '0.6')));
+      const dataUrl = canvas.toDataURL('image/jpeg', q);
+      const idx = dataUrl.indexOf('base64,');
+      return idx >= 0 ? dataUrl.slice(idx + 7) : null;
+    }
+
+    async function uploadFrame() {
+      const url = baseUrl();
+      if (!url) throw new Error('missing relay url');
+      if (!auth?.token) throw new Error('missing token');
+      if (!lastPos) throw new Error('no gps fix yet');
+
+      const jpeg_base64 = captureJpegBase64();
+      if (!jpeg_base64) throw new Error('failed to capture jpeg');
+
+      const body = {
+        ts: new Date().toISOString(),
+        lat: lastPos.lat,
+        lon: lastPos.lon,
+        h3_res: Number(els.h3Res.value || '9'),
+        jpeg_base64
+      };
+
+      const r = await fetch(`${url}/v1/events/frame`, {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          'authorization': `Bearer ${auth.token}`
+        },
+        body: JSON.stringify(body)
+      });
+      const j = await r.json().catch(() => null);
+      if (!r.ok) {
+        setDot(els.uplDot, 'bad');
+        throw new Error(`upload HTTP ${r.status}: ${JSON.stringify(j)}`);
+      }
+      setDot(els.uplDot, 'ok');
+      return j;
+    }
+
+    async function startMapping() {
+      if (!auth?.token) {
+        log('ERROR: missing token; register first');
+        return;
+      }
+      els.btnStart.disabled = true;
+      els.btnStop.disabled = false;
+      els.btnRegister.disabled = true;
+
+      await startCamera();
+      await startGPS();
+
+      const interval = Math.max(250, Number(els.intervalMs.value || '1000'));
+      log(`Mapping started (interval=${interval}ms)`);
+
+      const tick = async () => {
+        try {
+          const resp = await uploadFrame();
+          log(`Uploaded id=${resp.id} cell=${resp.cell}`);
+        } catch (e) {
+          log(`ERROR: ${e?.message || e}`);
+        }
+      };
+
+      await tick();
+      loopTimer = setInterval(tick, interval);
+    }
+
+    function stopMapping() {
+      if (loopTimer) {
+        clearInterval(loopTimer);
+        loopTimer = null;
+      }
+      stopGPS();
+      stopCamera();
+      els.btnStop.disabled = true;
+      els.btnRegister.disabled = false;
+      els.btnStart.disabled = !auth;
+      log('Mapping stopped');
+    }
+
+    // init defaults
+    els.relayUrl.value = localStorage.getItem('claw_relay_url') || 'http://127.0.0.1:8787';
+    auth = loadAuth();
+    els.btnStart.disabled = !auth;
+    if (auth?.node_id) log(`Loaded node_id=${auth.node_id}`);
+
+    els.relayUrl.addEventListener('change', () => {
+      localStorage.setItem('claw_relay_url', els.relayUrl.value.trim());
+    });
+
+    els.btnRegister.addEventListener('click', () => registerNode().catch((e) => log(`ERROR: ${e?.message || e}`)));
+    els.btnStart.addEventListener('click', () => startMapping().catch((e) => log(`ERROR: ${e?.message || e}`)));
+    els.btnStop.addEventListener('click', stopMapping);
+    els.btnForget.addEventListener('click', forgetAuth);
+  </script>
+</body>
+</html>

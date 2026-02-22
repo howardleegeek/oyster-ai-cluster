@@ -1,0 +1,37 @@
+{
+  "task_id": "S02-create-or-update-readme-with-s",
+  "project": "clawmarketing",
+  "spec_content": "---\ntask_id: S02-create-or-update-readme-with-s\nproject: clawmarketing\npriority: 2\nestimated_minutes: 30\ndepends_on: []\n---\n## Goal\nCreate or update README with setup instructions\n\n\n## Identified Risks\n- No advisors available \u2014 using codebase heuristics only\n\n\n## Constraints\n- Work within the existing codebase structure\n- Write meaningful tests for new functionality\n- Do not refactor unrelated code\n- Do not change UI/CSS unless explicitly required\n\n## Acceptance Criteria\n- [ ] Core functionality",
+  "template_id": "default",
+  "outcome": "stuck",
+  "failure_reason": "stuck:repeating_action_error",
+  "advisor_consensus": "",
+  "total_tokens": 0,
+  "total_duration": 0.0008087158203125,
+  "started_at": 1771745125.035203,
+  "completed_at": 1771745125.0361228,
+  "step_count": 3,
+  "steps": [
+    {
+      "phase": "build",
+      "action": "execute_attempt_1",
+      "result": "failed",
+      "duration": 0.0007328987121582031,
+      "error": "task-wrapper.sh not found at /Users/howardli/Downloads/oyster/infra/dispatch/task-wrapper.sh"
+    },
+    {
+      "phase": "build",
+      "action": "execute_attempt_2",
+      "result": "failed",
+      "duration": 4.887580871582031e-05,
+      "error": "task-wrapper.sh not found at /Users/howardli/Downloads/oyster/infra/dispatch/task-wrapper.sh"
+    },
+    {
+      "phase": "build",
+      "action": "execute_attempt_3",
+      "result": "failed",
+      "duration": 2.6941299438476562e-05,
+      "error": "task-wrapper.sh not found at /Users/howardli/Downloads/oyster/infra/dispatch/task-wrapper.sh"
+    }
+  ]
+}

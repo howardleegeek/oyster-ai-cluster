@@ -1,0 +1,109 @@
+# Oyster Labs Infrastructure - Docker Compose
+# Run with: docker-compose up -d
+
+services:
+  # n8n - Workflow Automation
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: oyster-n8n
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:5678:5678"
+    environment:
+      - N8N_HOST=0.0.0.0
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=http
+      - WEBHOOK_URL=http://localhost:5678
+      # Authentication enabled
+      - N8N_BASIC_AUTH_ACTIVE=true
+      - N8N_BASIC_AUTH_USER=admin
+      - N8N_BASIC_AUTH_PASSWORD=MoS0ppTyur0y3kWYgLd335iphos
+    volumes:
+      - n8n_data:/home/node/.n8n
+    networks:
+      - oyster-net
+
+  # LocalAI - Local LLM Inference
+  localai:
+    image: localai/localai:latest-aio-cpu
+    container_name: oyster-localai
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8080:8080"
+    environment:
+      - THREADS=4
+      - CONTEXT_SIZE=2048
+      - MODELS_PATH=/models
+    volumes:
+      - localai_models:/models
+    networks:
+      - oyster-net
+
+  # Netdata - Monitoring
+  netdata:
+    image: netdata/netdata:latest
+    container_name: oyster-netdata
+    restart: unless-stopped
+    hostname: oyster-labs
+    ports:
+      - "127.0.0.1:19999:19999"
+    cap_add:
+      - SYS_PTRACE
+    security_opt:
+      - apparmor:unconfined
+    volumes:
+      - netdata_lib:/var/netdata
+      - netdata_cache:/var/cache
+      - netdata_log:/var/log
+      - /etc/passwd:/host/etc/passwd:ro
+      - /etc/group:/host/etc/group:ro
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+    environment:
+      - NETDATA_CLAIM_TOKEN=
+      - NETDATA_CLAIM_URL=
+    networks:
+      - oyster-net
+
+  # Qdrant - Vector Database for RAG
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: oyster-qdrant
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:6333:6333"
+      - "127.0.0.1:6334:6334"
+    volumes:
+      - qdrant_data:/qdrant/storage
+    networks:
+      - oyster-net
+
+  # LiteLLM - Unified LLM Gateway with GLM
+  litellm:
+    image: ghcr.io/berriai/litellm:main-latest
+    container_name: oyster-litellm
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:4000:4000"
+    environment:
+      - LITELLM_MASTER_KEY=sk-oyster-123456
+      - MINIMAX_API_KEY=sk-cp-T_Nj3VHn3G7Eyi3r50YumUyh-9cxvyV5xBd2RInrLvWKNHJsK-rCeMToiCy0rgWk2F1ZtOsZciTLjHxGYXipI2swY0ihhGfFY0K88q5XNJnLmBzqRbQLL_g
+      - MINIMAX_BASE_URL=https://api.minimax.io/v1/text/chatcompletion_v2
+      - "MODEL_LIST=[{\"litellm_params\": {\"api_key\": \"os.environ/MINIMAX_API_KEY\", \"base_url\": \"os.environ/MINIMAX_BASE_URL\", \"model\": \"MiniMax/MiniMax-M2.5\"}, \"model_list\": [{\"model_name\": \"MiniMax-M2.5\", \"litellm_params\": {\"model\": \"MiniMax/MiniMax-M2.5\"}}]}]"
+    volumes:
+      - litellm_data:/data
+    networks:
+      - oyster-net
+
+networks:
+  oyster-net:
+    driver: bridge
+
+volumes:
+  n8n_data:
+  localai_models:
+  netdata_lib:
+  netdata_cache:
+  netdata_log:
+  qdrant_data:
+  litellm_data:

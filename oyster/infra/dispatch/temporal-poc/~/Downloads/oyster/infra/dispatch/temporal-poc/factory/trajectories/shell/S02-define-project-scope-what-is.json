@@ -1,0 +1,37 @@
+{
+  "task_id": "S02-define-project-scope-what-is",
+  "project": "shell",
+  "spec_content": "---\ntask_id: S02-define-project-scope-what-is\nproject: shell\npriority: 2\nestimated_minutes: 30\ndepends_on: []\n---\n## Goal\ndefine project scope: what is 'shell'? (cli tool, shell scripts, shell integrati\n\n\n## Identified Risks\n- Path mismatch - project may exist elsewhere under different name\n- Template mismatch suggests dispatch system has no prior context for this project type\n- Starting without clear spec leads to wasted cycles\n\n\n## Constraints\n- Work within the existing codebase structure\n- Wr",
+  "template_id": "default",
+  "outcome": "stuck",
+  "failure_reason": "stuck:repeating_action_error",
+  "advisor_consensus": "",
+  "total_tokens": 0,
+  "total_duration": 0.008944272994995117,
+  "started_at": 1771732786.4132748,
+  "completed_at": 1771732786.422936,
+  "step_count": 3,
+  "steps": [
+    {
+      "phase": "build",
+      "action": "execute_attempt_1",
+      "result": "failed",
+      "duration": 0.0048220157623291016,
+      "error": "[Errno 2] No such file or directory: '~/Downloads/shell'"
+    },
+    {
+      "phase": "build",
+      "action": "execute_attempt_2",
+      "result": "failed",
+      "duration": 0.002362966537475586,
+      "error": "[Errno 2] No such file or directory: '~/Downloads/shell'"
+    },
+    {
+      "phase": "build",
+      "action": "execute_attempt_3",
+      "result": "failed",
+      "duration": 0.0017592906951904297,
+      "error": "[Errno 2] No such file or directory: '~/Downloads/shell'"
+    }
+  ]
+}

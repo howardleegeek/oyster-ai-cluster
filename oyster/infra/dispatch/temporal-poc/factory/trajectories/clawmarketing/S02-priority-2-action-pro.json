@@ -1,0 +1,23 @@
+{
+  "task_id": "S02-priority-2-action-pro",
+  "project": "clawmarketing",
+  "spec_content": "---\ntask_id: S02-priority-2-action-pro\nproject: clawmarketing\npriority: 2\nestimated_minutes: 30\ndepends_on: []\n---\n## Goal\n{'priority': 2, 'action': 'production deployment dry-run', 'rationale': 'docker-\n\n\n## Identified Risks\n- Spec debt: 48 specs without clear done/pending status could hide unfinished work\n- Integration surface: Bluesky + Threads + existing platforms = exponential test matrix\n- Technical debt: Empty docker-compose.prod.yml blocks production path\n\n\n## Constraints\n- Work within t",
+  "template_id": "default",
+  "outcome": "success",
+  "failure_reason": "",
+  "advisor_consensus": "",
+  "total_tokens": 0,
+  "total_duration": 149.87599730491638,
+  "started_at": 1771734634.775732,
+  "completed_at": 1771734784.65185,
+  "step_count": 1,
+  "steps": [
+    {
+      "phase": "build",
+      "action": "execute_attempt_1",
+      "result": "completed",
+      "duration": 149.87599730491638,
+      "error": ""
+    }
+  ]
+}

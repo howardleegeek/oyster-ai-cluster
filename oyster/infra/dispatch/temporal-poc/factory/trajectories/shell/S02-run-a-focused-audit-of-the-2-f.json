@@ -1,0 +1,37 @@
+{
+  "task_id": "S02-run-a-focused-audit-of-the-2-f",
+  "project": "shell",
+  "spec_content": "---\ntask_id: S02-run-a-focused-audit-of-the-2-f\nproject: shell\npriority: 2\nestimated_minutes: 30\ndepends_on: []\n---\n## Goal\nrun a focused audit of the 2 failed default-template trajectories and convert fi\n\n\n## Identified Risks\n- Current green status may be a false positive if tests are too shallow; cleanup-related breakage in Web3 integrations may go undetected until later.\n- Advisor instability (timeouts/auto-approve) can steer autonomous discovery toward low-quality or repetitive tasks despite",
+  "template_id": "default",
+  "outcome": "stuck",
+  "failure_reason": "stuck:repeating_action_error",
+  "advisor_consensus": "",
+  "total_tokens": 0,
+  "total_duration": 900.2536590099335,
+  "started_at": 1771741026.108779,
+  "completed_at": 1771741926.392308,
+  "step_count": 3,
+  "steps": [
+    {
+      "phase": "build",
+      "action": "execute_attempt_1",
+      "result": "failed",
+      "duration": 389.17698788642883,
+      "error": "Exit code 1"
+    },
+    {
+      "phase": "build",
+      "action": "execute_attempt_2",
+      "result": "failed",
+      "duration": 277.61656498908997,
+      "error": "Exit code 1"
+    },
+    {
+      "phase": "build",
+      "action": "execute_attempt_3",
+      "result": "failed",
+      "duration": 233.46010613441467,
+      "error": "Exit code 1"
+    }
+  ]
+}

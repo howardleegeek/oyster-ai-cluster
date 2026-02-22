@@ -1,0 +1,17 @@
+[Unit]
+Description=Task Watcher - Hybrid Mode Node Executor
+After=network.target
+
+[Service]
+Type=simple
+User=howardli
+WorkingDirectory=/home/howardli
+Environment=DISPATCH_DIR=/home/howardli/dispatch
+ExecStart=/usr/bin/python3 /home/howardli/dispatch/task-watcher.py glm-node-3 8
+Restart=always
+RestartSec=10
+StandardOutput=/tmp/watcher.log
+StandardError=/tmp/watcher.log
+
+[Install]
+WantedBy=multi-user.target

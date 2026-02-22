@@ -1,0 +1,83 @@
+{
+  "name": "aios-context-sensor",
+  "displayName": "AI OS Context Sensor",
+  "description": "Reports VS Code context to AI OS Context Hub",
+  "version": "0.1.0",
+  "publisher": "howardli",
+  "engines": { "vscode": "^1.75.0" },
+  "categories": ["Other"],
+  "activationEvents": ["onStartupFinished"],
+  "main": "./extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "aios.setIntentBD",
+        "title": "AI OS: Set Intent BD"
+      },
+      {
+        "command": "aios.setIntentResearch",
+        "title": "AI OS: Set Intent Research"
+      },
+      {
+        "command": "aios.setIntentContent",
+        "title": "AI OS: Set Intent Content"
+      },
+      {
+        "command": "aios.setIntentInfra",
+        "title": "AI OS: Set Intent Infra"
+      },
+      {
+        "command": "aios.setIntentNone",
+        "title": "AI OS: Clear Intent"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "aios.setIntentBD",
+        "key": "alt+cmd+b",
+        "mac": "alt+cmd+b",
+        "when": "editorTextFocus"
+      },
+      {
+        "command": "aios.setIntentResearch",
+        "key": "alt+cmd+r",
+        "mac": "alt+cmd+r",
+        "when": "editorTextFocus"
+      },
+      {
+        "command": "aios.setIntentContent",
+        "key": "alt+cmd+c",
+        "mac": "alt+cmd+c",
+        "when": "editorTextFocus"
+      },
+      {
+        "command": "aios.setIntentInfra",
+        "key": "alt+cmd+i",
+        "mac": "alt+cmd+i",
+        "when": "editorTextFocus"
+      },
+      {
+        "command": "aios.setIntentNone",
+        "key": "alt+cmd+0",
+        "mac": "alt+cmd+0",
+        "when": "editorTextFocus"
+      }
+    ],
+    "configuration": {
+      "type": "object",
+      "title": "AI OS Context Sensor",
+      "properties": {
+        "aios.hubUrl": {
+          "type": "string",
+          "default": "http://127.0.0.1:8787/report",
+          "description": "Context Hub URL"
+        },
+        "aios.token": {
+          "type": "string",
+          "default": "",
+          "description": "AI OS Hub Token"
+        }
+      }
+    }
+  }
+}

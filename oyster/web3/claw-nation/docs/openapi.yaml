@@ -1,0 +1,112 @@
+openapi: 3.0.3
+info:
+  title: Claw Nation Relay API
+  version: 0.0.1
+paths:
+  /health:
+    get:
+      responses:
+        '200': { description: OK }
+  /v1/nodes/register:
+    post:
+      summary: Register a camera node
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: { type: string }
+                capabilities:
+                  type: array
+                  items: { type: string }
+      responses:
+        '200': { description: OK }
+  /v1/events/frame:
+    post:
+      summary: Ingest a frame event
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [lat, lon, jpeg_base64]
+              properties:
+                ts: { type: string, description: ISO8601 }
+                lat: { type: number }
+                lon: { type: number }
+                heading: { type: number }
+                h3_res: { type: integer, default: 9 }
+                transcript: { type: string }
+                jpeg_base64: { type: string }
+      responses:
+        '200': { description: OK }
+  /v1/blobs/{name}:
+    get:
+      summary: Fetch a stored JPEG blob (MVP local only)
+      parameters:
+        - in: path
+          name: name
+          required: true
+          schema: { type: string, example: "evt_abc123.jpg" }
+      responses:
+        '200': { description: OK }
+  /v1/world/events:
+    get:
+      summary: Query events by H3 cell
+      parameters:
+        - in: query
+          name: cell
+          required: true
+          schema: { type: string }
+        - in: query
+          name: limit
+          required: false
+          schema: { type: integer, default: 50, maximum: 200 }
+        - in: query
+          name: res
+          required: false
+          schema: { type: integer, description: "If provided, match events by computing lat/lon -> cell at this H3 resolution." }
+      responses:
+        '200': { description: OK }
+  /v1/world/cells:
+    get:
+      summary: Aggregate coverage counts by H3 cell
+      parameters:
+        - in: query
+          name: res
+          required: false
+          schema: { type: integer, default: 9, minimum: 0, maximum: 15 }
+        - in: query
+          name: limit
+          required: false
+          schema: { type: integer, default: 5000, maximum: 50000 }
+        - in: query
+          name: hours
+          required: false
+          schema: { type: number, description: "Optional lookback window in hours." }
+      responses:
+        '200': { description: OK }
+  /v1/world/stats:
+    get:
+      summary: World ingest stats
+      parameters:
+        - in: query
+          name: res
+          required: false
+          schema: { type: integer, default: 9, minimum: 0, maximum: 15 }
+        - in: query
+          name: hours
+          required: false
+          schema: { type: number, description: "Optional lookback window in hours." }
+      responses:
+        '200': { description: OK }
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer

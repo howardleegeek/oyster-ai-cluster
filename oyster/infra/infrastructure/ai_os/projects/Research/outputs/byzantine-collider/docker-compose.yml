@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  byzantine-collider:
+    build: .
+    container_name: byzantine-collider
+    ports:
+      - "5000:5000"
+    environment:
+      - PORT=5000
+      - FLASK_ENV=production
+      # LLM 配置
+      - ZHIPU_API_KEY=${ZHIPU_API_KEY:-}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # 可选：LocalAI
+  # localai:
+  #   image: quay.io/go-skynet/local-ai:latest
+  #   container_name: localai
+  #   ports:
+  #     - "8080:8080"
+  #   volumes:
+  #     - ./models:/models
+  #   environment:
+  #     - THREADS=4
+
+networks:
+  default:
+    name: byzantine-network

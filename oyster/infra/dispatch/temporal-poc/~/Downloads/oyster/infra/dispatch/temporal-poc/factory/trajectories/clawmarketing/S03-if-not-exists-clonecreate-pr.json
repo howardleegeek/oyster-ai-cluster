@@ -1,0 +1,37 @@
+{
+  "task_id": "S03-if-not-exists-clonecreate-pr",
+  "project": "clawmarketing",
+  "spec_content": "---\ntask_id: S03-if-not-exists-clonecreate-pr\nproject: clawmarketing\npriority: 2\nestimated_minutes: 30\ndepends_on: []\n---\n## Goal\nif not exists, clone/create project before dispatching tasks\n\n\n## Identified Risks\n- Dispatch may be pointing to non-existent directory causing silent failures\n- Autonomous discovery on missing codebase will produce no useful output\n- Time waste if tasks dispatched to phantom project\n\n\n## Constraints\n- Work within the existing codebase structure\n- Write meaningful tes",
+  "template_id": "default",
+  "outcome": "stuck",
+  "failure_reason": "stuck:repeating_action_error",
+  "advisor_consensus": "",
+  "total_tokens": 0,
+  "total_duration": 0.002757549285888672,
+  "started_at": 1771731742.044043,
+  "completed_at": 1771731742.04708,
+  "step_count": 3,
+  "steps": [
+    {
+      "phase": "build",
+      "action": "execute_attempt_1",
+      "result": "failed",
+      "duration": 0.0009493827819824219,
+      "error": "[Errno 2] No such file or directory: '~/Downloads/oyster/products/clawmarketing'"
+    },
+    {
+      "phase": "build",
+      "action": "execute_attempt_2",
+      "result": "failed",
+      "duration": 0.0009388923645019531,
+      "error": "[Errno 2] No such file or directory: '~/Downloads/oyster/products/clawmarketing'"
+    },
+    {
+      "phase": "build",
+      "action": "execute_attempt_3",
+      "result": "failed",
+      "duration": 0.0008692741394042969,
+      "error": "[Errno 2] No such file or directory: '~/Downloads/oyster/products/clawmarketing'"
+    }
+  ]
+}

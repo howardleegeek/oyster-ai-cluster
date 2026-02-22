@@ -1,0 +1,37 @@
+{
+  "task_id": "S03-if-existing-project-provide-c",
+  "project": "shell",
+  "spec_content": "---\ntask_id: S03-if-existing-project-provide-c\nproject: shell\npriority: 2\nestimated_minutes: 30\ndepends_on: []\n---\n## Goal\nif existing project: provide correct path from known projects (clawmarketing, ge\n\n\n## Identified Risks\n- Proceeding without clear project definition will create wasted effort\n- Autonomous discovery on non-existent codebase will generate hallucinated priorities\n\n\n## Constraints\n- Work within the existing codebase structure\n- Write meaningful tests for new functionality\n- Do n",
+  "template_id": "default",
+  "outcome": "stuck",
+  "failure_reason": "stuck:repeating_action_error",
+  "advisor_consensus": "",
+  "total_tokens": 0,
+  "total_duration": 0.004242420196533203,
+  "started_at": 1771733147.510123,
+  "completed_at": 1771733147.5147321,
+  "step_count": 3,
+  "steps": [
+    {
+      "phase": "build",
+      "action": "execute_attempt_1",
+      "result": "failed",
+      "duration": 0.0016090869903564453,
+      "error": "[Errno 2] No such file or directory: '~/Downloads/shell'"
+    },
+    {
+      "phase": "build",
+      "action": "execute_attempt_2",
+      "result": "failed",
+      "duration": 0.001474142074584961,
+      "error": "[Errno 2] No such file or directory: '~/Downloads/shell'"
+    },
+    {
+      "phase": "build",
+      "action": "execute_attempt_3",
+      "result": "failed",
+      "duration": 0.0011591911315917969,
+      "error": "[Errno 2] No such file or directory: '~/Downloads/shell'"
+    }
+  ]
+}

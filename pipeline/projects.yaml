@@ -1,0 +1,75 @@
+projects:
+  clawvision:
+    path: ~/Downloads/clawvision-org/
+    stack: static-html
+    deploy: vercel
+    frontend:
+      type: static
+      path: "."
+      serve: "npx serve ."
+      port: 3000
+    test_urls: ["/", "/api.html", "/blog.html", "/map.html", "/whitepaper.html"]
+
+  gem-platform:
+    path: ~/Downloads/gem-platform/
+    stack: fastapi-react
+    deploy: vercel+fly
+    backend:
+      path: backend/
+      cmd: "python3 -m uvicorn main:app --host 0.0.0.0"
+      port: 8000
+      health: "/health"
+    frontend:
+      type: react-vite
+      path: lumina/
+      build: "npm run build"
+      dev: "npm run dev"
+      port: 5173
+    env_required: [DATABASE_URL, REDIS_URL, STRIPE_KEY, SOLANA_RPC]
+    test_flows:
+      - name: "register-login-browse"
+        steps: ["POST /auth/register", "POST /auth/login", "GET /packs"]
+
+  clawmarketing:
+    path: ~/Downloads/clawmarketing/
+    stack: fastapi-react
+    deploy: docker-compose
+    backend:
+      path: backend/
+      cmd: "env PYTHONPATH=. backend/.venv/bin/python -m uvicorn backend.main:app --host 0.0.0.0"
+      port: 8000
+      health: "/health"
+    frontend:
+      type: react-vite
+      path: frontend/
+      build: "npm run build"
+      dev: "npm run dev"
+      port: 5173
+    env_required: [DATABASE_URL, REDIS_URL, MINIMAX_API_KEY]
+    llm_provider: minimax
+
+  clawphones:
+    path: ~/.openclaw/workspace/
+    stack: fastapi-mobile
+    deploy: fly
+    backend:
+      path: proxy/
+      cmd: "python server.py"
+      port: 8080
+      health: "/health"
+    env_required: [DEEPSEEK_KEY, KIMI_KEY, CLAUDE_KEY]
+
+  oysterworld:
+    path: ~/Downloads/oysterworld/
+    stack: node-prototype
+    deploy: fly+vercel
+    backend:
+      path: prototype/relay/
+      cmd: "node server.js"
+      port: 8787
+      health: "/health"
+    frontend:
+      type: static
+      path: prototype/node-web/
+      serve: "npx serve ."
+      port: 3000

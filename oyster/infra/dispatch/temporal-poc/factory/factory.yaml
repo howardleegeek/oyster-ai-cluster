@@ -1,0 +1,81 @@
+# Deep Think Factory — Default Configuration
+# Pilot: ClawMarketing + Shell
+#
+# Usage:
+#   python -m factory --config factory.yaml
+#   python -m factory  # uses this default
+
+# ── Projects ──
+projects:
+  - name: clawmarketing
+    repo_url: https://github.com/nicekid1/clawmarketing.git
+    repo_local: ~/Downloads/oyster/products/clawmarketing
+    specs_dir: ~/Downloads/oyster/specs/clawmarketing
+    main_branch: main
+    max_reflections: 3
+    max_concurrent_tasks: 8
+    cost_limit_per_task: 0.50
+    estimated_minutes_default: 30
+
+  - name: shell
+    repo_url: https://github.com/howardleegeek/shell.git
+    repo_local: ~/Downloads/shell
+    specs_dir: ~/Downloads/oyster/specs/shell
+    main_branch: main
+    max_reflections: 3
+    max_concurrent_tasks: 8
+    cost_limit_per_task: 0.50
+    estimated_minutes_default: 30
+
+# ── Advisors (multi-advisor consensus) ──
+advisors:
+  - name: opus
+    type: opus
+    model: claude-opus-4-6
+    api_key_env: ANTHROPIC_API_KEY
+    timeout_seconds: 120
+    enabled: true
+
+  - name: codex
+    type: codex
+    model: o3
+    api_key_env: OPENAI_API_KEY
+    timeout_seconds: 120
+    enabled: true
+
+  - name: antigravity
+    type: antigravity
+    endpoint: ""  # set via ANTIGRAVITY_ENDPOINT env var
+    api_key_env: ANTIGRAVITY_API_KEY
+    timeout_seconds: 120
+    enabled: true
+
+# ── Temporal ──
+temporal_host: localhost:7233
+task_queue: factory-tasks
+
+# ── Cycle Timing ──
+cycle_interval_seconds: 60   # seconds between cycles
+think_timeout_minutes: 30    # max time for Think phase
+build_timeout_minutes: 120   # max time for Build phase (per spec)
+review_timeout_minutes: 30   # max time for Review phase
+
+# ── Circuit Breaker (Ralph pattern) ──
+circuit_breaker:
+  no_progress_threshold: 3   # consecutive no-progress cycles → OPEN
+  same_error_threshold: 5    # same error repeated → OPEN
+  cooldown_minutes: 30       # OPEN → HALF_OPEN after this
+  auto_reset: false          # set true for dev/testing
+
+# ── Learning (GEPA + Thompson Sampling) ──
+learn:
+  enabled: true
+  trajectory_dir: ~/Downloads/oyster/infra/dispatch/temporal-poc/factory/trajectories
+  evolve_every_n_cycles: 10  # run GEPA evolution every N cycles
+  thompson_enabled: true
+  versioned_prompts_dir: ~/Downloads/oyster/infra/dispatch/temporal-poc/factory/prompts
+
+# ── Limits ──
+max_cycles_per_day: 200
+max_specs_per_cycle: 10
+max_total_cost_per_day: 50.0  # USD

@@ -1,0 +1,60 @@
+{
+  "guildId": "1404726112159793172",
+  "guildName": "Oyster Republic (服务器)",
+  "channelsRawCount": 0,
+  "channelsSample": [],
+  "channelsProcessedCount": 0,
+  "channelsProcessedSample": [],
+  "picked": [
+    {
+      "name": "👋welcome",
+      "channelId": "1404726112789073932",
+      "aria": null
+    },
+    {
+      "name": "announcements",
+      "channelId": "1416406372660023566",
+      "aria": null
+    },
+    {
+      "name": "general-english",
+      "channelId": "1404870331759591575",
+      "aria": null
+    },
+    {
+      "name": "chinese",
+      "channelId": "1416430673652355112",
+      "aria": null
+    },
+    {
+      "name": "russian",
+      "channelId": "1416430799225337876",
+      "aria": null
+    },
+    {
+      "name": "japanese",
+      "channelId": "1416431181934604420",
+      "aria": null
+    },
+    {
+      "name": "korean",
+      "channelId": "1416430948936943667",
+      "aria": null
+    },
+    {
+      "name": "french",
+      "channelId": "1416431205309456424",
+      "aria": null
+    },
+    {
+      "name": "portuguese",
+      "channelId": "1416431248921823284",
+      "aria": null
+    },
+    {
+      "name": "thailand",
+      "channelId": "1416431293997887590",
+      "aria": null
+    }
+  ]
+}

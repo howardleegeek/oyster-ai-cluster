@@ -1,0 +1,61 @@
+# Dependencies
+node_modules/
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+
+# Environment
+.env
+.env.local
+*.pem
+
+# IDE
+.vscode/
+.idea/
+.gemini/
+.agent/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs & DB
+*.log
+dispatch.db
+pipeline.db
+*.sqlite
+bridge.db
+
+# Secrets
+*.key
+*.pem
+.oyster-keys/
+*.csv
+oyster/infra/infra-configs/*.env
+oyster/social/discord-admin/user-data/
+oyster/social/discord-admin/user-data-test/
+
+# Reports (generated)
+*-report.md
+*_merge_report.json
+
+# PIDs
+*.pid
+
+# Virtual environments
+.venv/
+venv/
+
+# Backups
+*.bak
+
+# Temporary
+*.tmp
+.temp/
+stop_flags/
+output/
+git-sync-output/
+guardian_alerts/
